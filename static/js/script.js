@@ -63,6 +63,7 @@ function handleFormSubmission(event) {
     // Show loading state with animation
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
     submitBtn.disabled = true;
+    submitBtn.style.transition = 'all 1s ease';
     submitBtn.style.transform = 'scale(0.98)';
     
     // Send AJAX request to Django
@@ -101,39 +102,84 @@ function handleFormSubmission(event) {
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
             submitBtn.style.transform = 'scale(1)';
-        }, 300);
+        }, 1000);
     });
 }
 
-// Show success message with better styling
-function showSuccessMessage(message = '¡Gracias! Nos pondremos en contacto con usted pronto.') {
-    const notification = document.createElement('div');
-    notification.className = 'scg-notification scg-notification-success';
-    notification.innerHTML = `
-        <div class="scg-notification-content">
-            <i class="fas fa-check-circle scg-notification-icon"></i>
-            <div class="scg-notification-text">
-                <strong>¡Perfecto!</strong>
-                <p>${message}</p>
-            </div>
-            <button type="button" class="scg-notification-close" onclick="this.closest('.scg-notification').remove()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-    `;
-    
-    document.body.appendChild(notification);
-    
-    // Show with animation
-    setTimeout(() => notification.classList.add('scg-notification-show'), 10);
-    
-    // Auto remove after 6 seconds
+// Show success message positioned above the form (like screenshot 2)
+function showSuccessMessage(message = '¡Gracias! Hemos recibido su solicitud. Nos pondremos en contacto con usted pronto.') {
+    // Wait 1 second for button animation to finish
     setTimeout(() => {
-        if (notification.parentElement) {
-            notification.classList.remove('scg-notification-show');
-            setTimeout(() => notification.remove(), 300);
+        const contactForm = document.getElementById('contactForm-1');
+        const notification = document.createElement('div');
+        notification.className = 'scg-notification scg-notification-success';
+        notification.innerHTML = `
+            <div class="scg-notification-content">
+                <i class="fas fa-check-circle scg-notification-icon"></i>
+                <div class="scg-notification-text">
+                    <strong>¡Perfecto!</strong>
+                    <p>${message}</p>
+                </div>
+                <button type="button" class="scg-notification-close" onclick="this.closest('.scg-notification').remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+        
+        // Insert notification BEFORE the form (above it)
+        if (contactForm) {
+            contactForm.appendChild(notification);
         }
-    }, 6000);
+        
+        // Show with animation
+        setTimeout(() => notification.classList.add('scg-notification-show'), 10);
+        
+        // Auto remove after 6 seconds
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.classList.remove('scg-notification-show');
+                setTimeout(() => notification.remove(), 400);
+            }
+        }, 6000);
+    }, 1000); // Wait 1 second
+}
+
+// Show error message positioned above the form
+function showErrorMessage(message = 'Ocurrió un error. Por favor intente nuevamente.') {
+    // Wait 1 second for button animation to finish
+    setTimeout(() => {
+        const contactForm = document.getElementById('contactForm-1');
+        const notification = document.createElement('div');
+        notification.className = 'scg-notification scg-notification-error';
+        notification.innerHTML = `
+            <div class="scg-notification-content">
+                <i class="fas fa-exclamation-circle scg-notification-icon"></i>
+                <div class="scg-notification-text">
+                    <strong>¡Ups!</strong>
+                    <p>${message}</p>
+                </div>
+                <button type="button" class="scg-notification-close" onclick="this.closest('.scg-notification').remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+        
+        // Insert notification BEFORE the form (above it)
+        if (contactForm) {
+            contactForm.parentNode.insertBefore(notification, contactForm);
+        }
+        
+        // Show with animation
+        setTimeout(() => notification.classList.add('scg-notification-show'), 10);
+        
+        // Auto remove after 6 seconds
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.classList.remove('scg-notification-show');
+                setTimeout(() => notification.remove(), 400);
+            }
+        }, 6000);
+    }, 1000); // Wait 1 second
 }
 
 // Show error message with better styling
