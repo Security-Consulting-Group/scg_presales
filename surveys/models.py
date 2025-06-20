@@ -1,265 +1,392 @@
 """
-Prospects models for SCG Presales system.
+Surveys models for SCG Presales system.
 """
 from django.db import models
-from django.core.validators import EmailValidator
-from django.utils import timezone
+from django.core.validators import MinValueValidator, MaxValueValidator
+import datetime
 
 
-class ProspectStatus(models.TextChoices):
-    """Status choices for prospects in the sales pipeline."""
-    LEAD = 'LEAD', 'Lead'
-    QUALIFIED = 'QUALIFIED', 'Qualified'
-    IN_PROCESS = 'IN_PROCESS', 'In Process'
-    CLOSED_WON = 'CLOSED_WON', 'Closed Won'
-    CLOSED_LOST = 'CLOSED_LOST', 'Closed Lost'
-
-
-class IndustryChoices(models.TextChoices):
-    """Industry choices based on the survey question."""
-    FINANCIAL_SERVICES = 'FINANCIAL_SERVICES', 'Servicios financieros'
-    RETAIL_ECOMMERCE = 'RETAIL_ECOMMERCE', 'Retail/E-commerce'
-    MANUFACTURING = 'MANUFACTURING', 'Manufactura'
-    HEALTHCARE = 'HEALTHCARE', 'Servicios de salud'
-    LOGISTICS_TRANSPORT = 'LOGISTICS_TRANSPORT', 'Logística y transporte'
-    TECHNOLOGY = 'TECHNOLOGY', 'Tecnología'
-    OTHER = 'OTHER', 'Otros'
-
-
-class CompanySizeChoices(models.TextChoices):
-    """Company size choices based on the survey question."""
-    SMALL = '10-50', '10-50 empleados'
-    MEDIUM = '51-200', '51-200 empleados'
-    LARGE = '201-500', '201-500 empleados'
-    ENTERPRISE = '500+', 'Más de 500 empleados'
-
-
-class Prospect(models.Model):
+class Survey(models.Model):
     """
-    Main prospect model - represents a potential customer.
+    Main survey definition.
     
-    Key business rule: Email is the unique identifier.
-    If someone fills multiple forms with the same email, we update the existing record.
+    Allows for multiple surveys over time (current + future versions).
     """
-    # Core identification
-    email = models.EmailField(
+    # NUEVO: Código único para URLs (YYYYMMDDHHMMSS)
+    code = models.CharField(
+        max_length=14,
         unique=True,
-        validators=[EmailValidator()],
-        help_text="Email is the unique identifier for prospects"
-    )
-    name = models.CharField(
-        max_length=100,
-        help_text="Prospect's full name"
-    )
-    
-    # Company information (may be filled progressively)
-    company_name = models.CharField(
-        max_length=200,
-        blank=True,
-        null=True,
-        help_text="Company name - may be filled later"
-    )
-    company_industry = models.CharField(
-        max_length=50,
-        choices=IndustryChoices.choices,
-        blank=True,
-        null=True,
-        help_text="Industry sector from survey"
-    )
-    company_size = models.CharField(
-        max_length=20,
-        choices=CompanySizeChoices.choices,
-        blank=True,
-        null=True,
-        help_text="Company size from survey"
-    )
-    
-    # Sales pipeline
-    status = models.CharField(
-        max_length=20,
-        choices=ProspectStatus.choices,
-        default=ProspectStatus.LEAD,
-        help_text="Current status in sales pipeline"
-    )
-    
-    # Source tracking
-    initial_source = models.CharField(
-        max_length=50,
-        choices=[
-            ('CONTACT_FORM', 'Contact Form'),
-            ('SURVEY', 'Diagnostic Survey'),
-            ('REFERRAL', 'Referral'),
-            ('OTHER', 'Other'),
-        ],
-        help_text="How this prospect first contacted us"
-    )
-    
-    # Timestamps
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    last_contact_at = models.DateTimeField(
-        null=True,
-        blank=True,
-        help_text="Last time we contacted this prospect"
-    )
-    
-    class Meta:
-        ordering = ['-created_at']
-        verbose_name = 'Prospect'
-        verbose_name_plural = 'Prospects'
-    
-    def __str__(self):
-        return f"{self.name} ({self.email}) - {self.status}"
-    
-    def get_latest_score(self):
-        """Get the most recent survey score for this prospect."""
-        from scoring.models import SurveySubmission
-        latest_submission = self.survey_submissions.filter(
-            status='ACTIVE'
-        ).order_by('-created_at').first()
-        
-        if latest_submission and hasattr(latest_submission, 'score_result'):
-            return latest_submission.score_result
-        return None
-    
-    def has_completed_survey(self):
-        """Check if prospect has completed at least one survey."""
-        return self.survey_submissions.filter(status='ACTIVE').exists()
-    
-    def update_status_to_qualified(self):
-        """Auto-update status when prospect completes survey."""
-        if self.status == ProspectStatus.LEAD and self.has_completed_survey():
-            self.status = ProspectStatus.QUALIFIED
-            self.save(update_fields=['status', 'updated_at'])
-
-
-class ProspectInquiry(models.Model):
-    """
-    Multiple inquiries/questions from the same prospect.
-    
-    Business rule: A prospect can submit multiple contact forms over time.
-    Each submission creates a new inquiry record.
-    """
-    prospect = models.ForeignKey(
-        Prospect,
-        on_delete=models.CASCADE,
-        related_name='inquiries',
-        help_text="The prospect who made this inquiry"
-    )
-    
-    message = models.TextField(
-        help_text="The prospect's question or message"
-    )
-    
-    source = models.CharField(
-        max_length=50,
-        choices=[
-            ('CONTACT_FORM', 'Contact Form'),
-            ('PHONE_CALL', 'Phone Call'),
-            ('EMAIL', 'Email'),
-            ('MEETING', 'Meeting'),
-            ('OTHER', 'Other'),
-        ],
-        default='CONTACT_FORM',
-        help_text="How this inquiry was received"
-    )
-    
-    # Response tracking
-    is_responded = models.BooleanField(
-        default=False,
-        help_text="Has this inquiry been responded to?"
-    )
-    responded_at = models.DateTimeField(
-        null=True,
-        blank=True,
-        help_text="When this inquiry was responded to"
-    )
-    responded_by = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True,
-        help_text="Who responded to this inquiry"
-    )
-    
-    created_at = models.DateTimeField(auto_now_add=True)
-    
-    class Meta:
-        ordering = ['-created_at']
-        verbose_name = 'Prospect Inquiry'
-        verbose_name_plural = 'Prospect Inquiries'
-    
-    def __str__(self):
-        return f"{self.prospect.name} - {self.source} ({self.created_at.strftime('%Y-%m-%d')})"
-    
-    def mark_as_responded(self, responded_by=None):
-        """Mark this inquiry as responded."""
-        self.is_responded = True
-        self.responded_at = timezone.now()
-        if responded_by:
-            self.responded_by = responded_by
-        self.save(update_fields=['is_responded', 'responded_at', 'responded_by'])
-
-
-class InteractionNote(models.Model):
-    """
-    Notes about interactions with prospects - meetings, calls, etc.
-    
-    This is where sales team tracks their conversations and next steps.
-    """
-    prospect = models.ForeignKey(
-        Prospect,
-        on_delete=models.CASCADE,
-        related_name='interaction_notes',
-        help_text="The prospect this note is about"
-    )
-    
-    note_type = models.CharField(
-        max_length=50,
-        choices=[
-            ('PHONE_CALL', 'Phone Call'),
-            ('MEETING', 'Meeting'),
-            ('EMAIL', 'Email'),
-            ('DEMO', 'Demo'),
-            ('PROPOSAL', 'Proposal'),
-            ('FOLLOW_UP', 'Follow-up'),
-            ('OTHER', 'Other'),
-        ],
-        help_text="Type of interaction"
+        help_text="Unique code for survey URL (YYYYMMDDHHMMSS format)"
     )
     
     title = models.CharField(
         max_length=200,
-        help_text="Brief title for this interaction"
+        help_text="Survey title (e.g., 'Diagnóstico Ejecutivo de Ciberseguridad v1.0')"
     )
     
-    content = models.TextField(
-        help_text="Detailed notes about the interaction"
-    )
-    
-    next_steps = models.TextField(
+    description = models.TextField(
         blank=True,
         null=True,
-        help_text="What are the next steps?"
+        help_text="Description of what this survey measures"
     )
     
-    follow_up_date = models.DateField(
-        null=True,
-        blank=True,
-        help_text="When to follow up next"
+    version = models.CharField(
+        max_length=20,
+        default="1.0",
+        help_text="Survey version (e.g., '1.0', '2.0')"
     )
     
-    created_by = models.CharField(
-        max_length=100,
-        help_text="Who created this note"
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Is this survey currently active for new submissions?"
     )
     
+    max_score = models.PositiveIntegerField(
+        default=100,
+        help_text="Maximum possible score for this survey"
+    )
+    
+    # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.CharField(
+        max_length=100,
+        help_text="Who created this survey"
+    )
     
     class Meta:
         ordering = ['-created_at']
-        verbose_name = 'Interaction Note'
-        verbose_name_plural = 'Interaction Notes'
+        verbose_name = 'Survey'
+        verbose_name_plural = 'Surveys'
+        # CAMBIADO: Ahora unique_together incluye code
+        unique_together = ['title', 'version']
     
     def __str__(self):
-        return f"{self.prospect.name} - {self.title} ({self.created_at.strftime('%Y-%m-%d')})"
+        return f"{self.title} v{self.version} ({self.code})"
+    
+    def get_active_questions(self):
+        """Get all active questions for this survey, ordered by section and order."""
+        return self.questions.filter(is_active=True).order_by('section__order', 'order')
+    
+    def get_absolute_url(self):
+        """Get the URL for this survey."""
+        from django.urls import reverse
+        return reverse('surveys:survey_detail', kwargs={'code': self.code})
+    
+    @classmethod
+    def generate_code(cls):
+        """Generate a new unique code in YYYYMMDDHHMMSS format."""
+        now = datetime.datetime.now()
+        return now.strftime("%Y%m%d%H%M%S")
+
+
+class SurveySection(models.Model):
+    """
+    Sections within a survey (A, B, C, D, E from the questionnaire).
+    """
+    survey = models.ForeignKey(
+        Survey,
+        on_delete=models.CASCADE,
+        related_name='sections'
+    )
+    
+    title = models.CharField(
+        max_length=200,
+        help_text="Section title (e.g., 'Contexto de Negocio')"
+    )
+    
+    description = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Section description"
+    )
+    
+    order = models.PositiveIntegerField(
+        help_text="Order of this section in the survey"
+    )
+    
+    # Scoring weight for this section
+    max_points = models.PositiveIntegerField(
+        help_text="Maximum points possible for this section"
+    )
+    
+    class Meta:
+        ordering = ['order']
+        verbose_name = 'Survey Section'
+        verbose_name_plural = 'Survey Sections'
+        unique_together = ['survey', 'order']
+    
+    def __str__(self):
+        return f"{self.survey.title} - Section {self.order}: {self.title}"
+
+
+class QuestionType(models.TextChoices):
+    """Types of questions supported."""
+    SINGLE_CHOICE = 'SINGLE_CHOICE', 'Single Choice (Radio)'
+    MULTIPLE_CHOICE = 'MULTIPLE_CHOICE', 'Multiple Choice (Checkbox)'
+    TEXT = 'TEXT', 'Text Input'
+    EMAIL = 'EMAIL', 'Email Input'
+
+
+class Question(models.Model):
+    """
+    Individual questions within a survey.
+    """
+    survey = models.ForeignKey(
+        Survey,
+        on_delete=models.CASCADE,
+        related_name='questions'
+    )
+    
+    section = models.ForeignKey(
+        SurveySection,
+        on_delete=models.CASCADE,
+        related_name='questions'
+    )
+    
+    question_text = models.TextField(
+        help_text="The actual question text"
+    )
+    
+    question_type = models.CharField(
+        max_length=20,
+        choices=QuestionType.choices,
+        default=QuestionType.SINGLE_CHOICE
+    )
+    
+    order = models.PositiveIntegerField(
+        help_text="Order of this question within the section"
+    )
+    
+    is_required = models.BooleanField(
+        default=True,
+        help_text="Is this question required?"
+    )
+    
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Is this question currently active?"
+    )
+    
+    # Scoring
+    max_points = models.PositiveIntegerField(
+        help_text="Maximum points possible for this question"
+    )
+    
+    # Help text for the question
+    help_text = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Additional help text for this question"
+    )
+    
+    class Meta:
+        ordering = ['section__order', 'order']
+        verbose_name = 'Question'
+        verbose_name_plural = 'Questions'
+        unique_together = ['section', 'order']
+    
+    def __str__(self):
+        return f"Q{self.section.order}.{self.order}: {self.question_text[:50]}..."
+
+
+class QuestionOption(models.Model):
+    """
+    Answer options for single/multiple choice questions.
+    """
+    question = models.ForeignKey(
+        Question,
+        on_delete=models.CASCADE,
+        related_name='options'
+    )
+    
+    option_text = models.CharField(
+        max_length=500,
+        help_text="The text for this answer option"
+    )
+    
+    order = models.PositiveIntegerField(
+        help_text="Order of this option within the question"
+    )
+    
+    # Scoring for this option
+    points = models.PositiveIntegerField(
+        default=0,
+        help_text="Points awarded for selecting this option"
+    )
+    
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Is this option currently active?"
+    )
+    
+    class Meta:
+        ordering = ['order']
+        verbose_name = 'Question Option'
+        verbose_name_plural = 'Question Options'
+        unique_together = ['question', 'order']
+    
+    def __str__(self):
+        return f"{self.question.question_text[:30]}... - {self.option_text[:30]}..."
+
+
+class SurveySubmissionStatus(models.TextChoices):
+    """Status of survey submissions."""
+    ACTIVE = 'ACTIVE', 'Active (counts for statistics)'
+    DISABLED = 'DISABLED', 'Disabled (hidden from statistics)'
+    DELETED = 'DELETED', 'Deleted'
+
+
+class SurveySubmission(models.Model):
+    """
+    A completed survey by a prospect.
+    
+    Business rules:
+    - One prospect can have multiple submissions
+    - Only ACTIVE submissions count for statistics
+    - DISABLED submissions are kept for audit but hidden
+    """
+    prospect = models.ForeignKey(
+        'prospects.Prospect',
+        on_delete=models.CASCADE,
+        related_name='survey_submissions'
+    )
+    
+    survey = models.ForeignKey(
+        Survey,
+        on_delete=models.CASCADE,
+        related_name='submissions'
+    )
+    
+    # Submission status for data quality management
+    status = models.CharField(
+        max_length=20,
+        choices=SurveySubmissionStatus.choices,
+        default=SurveySubmissionStatus.ACTIVE,
+        help_text="Status for managing data quality"
+    )
+    
+    # Optional notes about why submission was disabled/deleted
+    admin_notes = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Admin notes about status changes"
+    )
+    
+    # Timestamps
+    started_at = models.DateTimeField(
+        auto_now_add=True,
+        help_text="When the prospect started the survey"
+    )
+    completed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When the prospect completed the survey"
+    )
+    
+    # IP address for detecting suspicious patterns
+    ip_address = models.GenericIPAddressField(
+        null=True,
+        blank=True,
+        help_text="IP address of the submitter"
+    )
+    
+    class Meta:
+        ordering = ['-started_at']
+        verbose_name = 'Survey Submission'
+        verbose_name_plural = 'Survey Submissions'
+    
+    def __str__(self):
+        return f"{self.prospect.name} - {self.survey.title} ({self.started_at.strftime('%Y-%m-%d')})"
+    
+    def is_completed(self):
+        """Check if this submission is completed."""
+        return self.completed_at is not None
+    
+    def disable_submission(self, reason=None, admin_user=None):
+        """Disable this submission (remove from statistics)."""
+        self.status = SurveySubmissionStatus.DISABLED
+        if reason:
+            admin_note = f"Disabled by {admin_user or 'admin'}: {reason}"
+            if self.admin_notes:
+                self.admin_notes += f"\n{admin_note}"
+            else:
+                self.admin_notes = admin_note
+        self.save(update_fields=['status', 'admin_notes'])
+    
+    def get_total_score(self):
+        """Calculate total score for this submission."""
+        if hasattr(self, 'score_result'):
+            return self.score_result.total_score
+        return 0
+
+
+class Response(models.Model):
+    """
+    Individual responses to questions within a survey submission.
+    """
+    submission = models.ForeignKey(
+        SurveySubmission,
+        on_delete=models.CASCADE,
+        related_name='responses'
+    )
+    
+    question = models.ForeignKey(
+        Question,
+        on_delete=models.CASCADE,
+        related_name='responses'
+    )
+    
+    # For single choice questions
+    selected_option = models.ForeignKey(
+        QuestionOption,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        help_text="Selected option for single choice questions"
+    )
+    
+    # For multiple choice questions
+    selected_options = models.ManyToManyField(
+        QuestionOption,
+        blank=True,
+        related_name='multi_responses',
+        help_text="Selected options for multiple choice questions"
+    )
+    
+    # For text/email questions
+    text_response = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Text response for text/email questions"
+    )
+    
+    # Calculated points for this response
+    points_earned = models.PositiveIntegerField(
+        default=0,
+        help_text="Points earned for this response"
+    )
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name = 'Response'
+        verbose_name_plural = 'Responses'
+        unique_together = ['submission', 'question']
+    
+    def __str__(self):
+        return f"{self.submission.prospect.name} - Q{self.question.order}"
+    
+    def calculate_points(self):
+        """Calculate and save points for this response."""
+        total_points = 0
+        
+        if self.selected_option:
+            total_points = self.selected_option.points
+        elif self.selected_options.exists():
+            # For multiple choice, sum all selected options
+            total_points = sum(opt.points for opt in self.selected_options.all())
+        
+        self.points_earned = total_points
+        self.save(update_fields=['points_earned'])
+        return total_points
