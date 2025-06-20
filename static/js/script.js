@@ -58,9 +58,6 @@ function handleFormSubmission(event) {
     const submitBtn = form.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
     
-    console.log('DEBUG: Enviando formulario a:', form.action);
-    console.log('DEBUG: CSRF Token:', getCSRFToken());
-    
     // Show loading state
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
     submitBtn.disabled = true;
@@ -71,17 +68,16 @@ function handleFormSubmission(event) {
         body: formData,
         headers: {
             'X-CSRFToken': getCSRFToken(),
+            'X-Requested-With': 'XMLHttpRequest',
         },
     })
     .then(response => {
-        console.log('DEBUG: Response status:', response.status);
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            return response.json().then(data => Promise.reject(data));
         }
         return response.json();
     })
     .then(data => {
-        console.log('DEBUG: Response data:', data);
         if (data.success) {
             showSuccessMessage(data.message);
             form.reset();
@@ -90,8 +86,8 @@ function handleFormSubmission(event) {
         }
     })
     .catch(error => {
-        console.error('DEBUG: Fetch error:', error);
-        showErrorMessage('Error procesando su solicitud. Por favor intente nuevamente.');
+        const message = error.message || 'Error procesando su solicitud. Por favor intente nuevamente.';
+        showErrorMessage(message);
     })
     .finally(() => {
         // Restore button state
@@ -265,8 +261,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add form submission handler for contact form - TEMPORARILY DISABLED
     const contactForm = document.getElementById('contactForm-1');
     if (contactForm) {
-        // Comentar esta línea para usar POST normal
-        // contactForm.addEventListener('submit', handleFormSubmission);
+        contactForm.addEventListener('submit', handleFormSubmission);
         console.log('Formulario de contacto encontrado - usando POST normal');
     }
     
@@ -287,6 +282,21 @@ document.addEventListener('DOMContentLoaded', function() {
             console.warn('Failed to load image:', this.src);
         });
     });
+});
+
+// Prevenir interferencia de otros scripts
+document.addEventListener('DOMContentLoaded', function() {
+    const contactForm = document.getElementById('contactForm-1');
+    if (contactForm) {
+        // Remover cualquier event listener que pueda haber sido agregado por otros scripts
+        contactForm.removeEventListener('submit', handleFormSubmission);
+        
+        // Asegurar que el formulario use POST nativo (sin cambiar la action)
+        contactForm.setAttribute('method', 'post');
+        
+        console.log('Formulario configurado para POST nativo');
+        console.log('Action del formulario:', contactForm.getAttribute('action'));
+    }
 });
 
 // Export functions for global access

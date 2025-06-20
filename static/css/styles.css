@@ -2190,3 +2190,38 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+/* Notificaciones mejoradas */
+.alert.position-fixed {
+  top: 100px;
+  right: 20px;
+  z-index: 1050;
+  min-width: 350px;
+  max-width: 500px;
+  box-shadow: 0 8px 25px rgba(0, 45, 116, 0.15);
+  border: none;
+  border-radius: 12px;
+  animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+  from {
+      transform: translateX(100%);
+      opacity: 0;
+  }
+  to {
+      transform: translateX(0);
+      opacity: 1;
+  }
+}
+
+.alert-success {
+  background: linear-gradient(135deg, var(--accent-color), #7cc85b);
+  color: white;
+  border-left: 4px solid #6abf4b;
+}
+
+.alert-danger {
+  background: linear-gradient(135deg, #dc3545, #c82333);
+  color: white;
+  border-left: 4px solid #dc3545;
+}
