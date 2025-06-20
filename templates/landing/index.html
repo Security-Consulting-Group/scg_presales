@@ -294,7 +294,16 @@
             <div class="row justify-content-center">
                 <div class="col-lg-6 text-center">
                     <h2>Diagnóstico de ciberseguridad gratuito</h2>
-                    <p class="lead mb-4">Le mostraremos las principales vulnerabilidades de su empresa hoy sin ningún costo.<br> Porque su seguridad no puede esperar.</p><button class="btn-primary btn-primary-personalized"><i class="fas fa-search me-2"></i>Solicitar diagnóstico sin costo </button>
+                    <p class="lead mb-4">Le mostraremos las principales vulnerabilidades de su empresa hoy sin ningún costo.<br> Porque su seguridad no puede esperar.</p>
+                    {% if survey_code %}
+                    <a href="/survey/{{ survey_code }}/" class="btn btn-primary-personalized" role="button">
+                        <i class="fas fa-search me-2"></i>Solicitar diagnóstico sin costo
+                    </a>
+                    {% else %}
+                    <button class="btn-primary btn-primary-personalized" disabled>
+                        <i class="fas fa-search me-2"></i>Diagnóstico próximamente disponible
+                    </button>
+                    {% endif %}
                 </div>
             </div>
         </div>

@@ -14,6 +14,18 @@ logger = logging.getLogger(__name__)
 class LandingPageView(TemplateView):
     """Vista principal del landing page"""
     template_name = 'landing/index.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Obtener el survey activo más reciente para el botón
+        from surveys.models import Survey
+        active_survey = Survey.objects.filter(is_active=True).order_by('-created_at').first()
+        
+        if active_survey:
+            context['survey_code'] = active_survey.code
+        
+        return context
 
 
 class ContactFormView(TemplateView):
