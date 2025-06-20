@@ -1,0 +1,563 @@
+{% load static %}
+<!DOCTYPE html>
+<html data-bs-theme="light" lang="es" data-bss-forced-theme="light">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Security Consulting Group | Protección Integral de Ciberseguridad</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container"><a class="navbar-brand" href="#"><img src="{% static 'img/ImagotipoPositivo.png' %}" alt="Security Consulting Group"></a><button data-bs-toggle="collapse" data-bs-target="#navbarNav" class="navbar-toggler" type="button"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#servicios">Servicios</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#equipo">Equipo</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contacto">Contacto</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav><!-- Start: HERO -->
+    <section class="hero-modern">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 order-2 order-lg-1">
+                    <div class="hero-content-modern">
+                        <h1 class="display-3 fw-bold hero-headline" data-aos="fade-up" data-aos-duration="800" data-aos-delay="200">¿Conoce realmente sus<br><span class="fw-bolder highlight-text">riesgos digitales</span>?</h1>
+                        <p class="lead hero-subheadline" data-aos="fade-up" data-aos-duration="800" data-aos-delay="300"> Somos su equipo de élite en ciberseguridad: <span class="fw-bold">análisis profundo, estrategia personalizada y protección a la medida</span> por expertos que entienden su negocio </p>
+                        <div data-aos="fade-up" data-aos-duration="800" data-aos-delay="400" class="hero-actions"><a class="btn d-inline-flex align-items-center gap-2 btn-primary-personalized" role="button" href="#diagnostico">Diagnóstico gratuito<i class="fas fa-arrow-right"></i></a></div>
+                        <div class="social-proof">
+                            <div class="row g-3 proof-stats">
+                                <div class="col-auto" data-aos="fade-up" data-aos-duration="800" data-aos-delay="500">
+                                    <div class="card bg-transparent text-center border-0 stat-item">
+                                        <div class="card-body p-2">
+                                            <div>
+                                                <h2 class="fw-bold mb-0 stat-number" data-target="99">0</h2><small class="text-primary stat-label">% éxito</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col" data-aos="fade-up" data-aos-duration="800" data-aos-delay="550">
+                                    <!-- Start: divider -->
+                                    <div class="stat-divider"></div><!-- End: divider -->
+                                </div>
+                                <div class="col-auto" data-aos="fade-up" data-aos-duration="800" data-aos-delay="600">
+                                    <div class="card bg-transparent text-center border-0 stat-item">
+                                        <div class="card-body p-2">
+                                            <div>
+                                                <h2 class="fw-bold mb-0 stat-number-plus" data-target="10">0</h2><small class="text-primary stat-label">años de experiencia</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col" data-aos="fade-up" data-aos-duration="800" data-aos-delay="650">
+                                    <!-- Start: divider -->
+                                    <div class="stat-divider"></div><!-- End: divider -->
+                                </div>
+                                <div class="col-auto" data-aos="fade-up" data-aos-duration="800" data-aos-delay="700">
+                                    <div class="card bg-transparent text-center border-0 stat-item">
+                                        <div class="card-body p-2">
+                                            <div>
+                                                <h2 class="fw-bold mb-0 stat-number" data-target="85">0</h2><small class="text-primary stat-label">% reducción de incidentes</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 order-1 order-lg-2">
+                    <div class="position-relative hero-visual" data-aos="fade-left" data-aos-duration="800" data-aos-delay="200">
+                        <div class="visual-placeholder"><img class="rounded img-fluid" width="636" height="504" src="{% static 'img/hero.png' %}"></div>
+                        <div class="position-absolute top-0 start-0 w-100 h-100 floating-elements">
+                            <div class="card bg-white border-0 shadow-sm position-absolute p-0 floating-card card-1">
+                                <div class="card-body d-flex align-items-center gap-2"><i class="fas fa-lock"></i><span class="fw-semibold">Protección</span></div>
+                            </div>
+                            <div class="card bg-white border-0 shadow-sm position-absolute p-0 floating-card card-2">
+                                <div class="card-body d-flex align-items-center gap-2"><i class="fas fa-drafting-compass"></i><span class="fw-semibold">Estrategia</span></div>
+                            </div>
+                            <div class="card bg-white border-0 shadow-sm position-absolute p-0 floating-card card-3">
+                                <div class="card-body d-flex align-items-center gap-2"><i class="fas fa-users"></i><span class="fw-semibold">Expertos</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section><!-- End: HERO -->
+    <!-- Start: PAIN -->
+    <section class="pain-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <h2 class="pain-title">¿Cuánto le costaría <span class="pain-highlight">perder TODO</span> mañana?</h2>
+                    <p class="pain-subtitle">¿Sabe con certeza si...</p>
+                    <div class="pain-content-wrapper">
+                        <div class="warnings-section">
+                            <div class="card border-warning border-5 mb-3 rounded-start-2 border-end-0 border-top-0 border-bottom-0" data-bss-hover-animate="pulse">
+                                <div class="card-body d-flex align-items-start"><i class="fas fa-exclamation-triangle text-warning flex-shrink-0 me-3"></i><span class="warning-text card-text">Sus empleados recibieron emails maliciosos hoy?</span></div>
+                            </div>
+                            <div class="card border-warning border-5 mb-3 rounded-start-2 border-start border-end-0 border-top-0 border-bottom-0" data-bss-hover-animate="pulse">
+                                <div class="card-body d-flex align-items-start"><i class="fas fa-exclamation-triangle text-warning flex-shrink-0 me-3"></i><span class="warning-text card-text">Su equipo utiliza las mismas contraseñas para todo?</span></div>
+                            </div>
+                            <div class="card border-warning border-5 mb-3 rounded-start-2 border-start border-end-0 border-top-0 border-bottom-0" data-bss-hover-animate="pulse">
+                                <div class="card-body d-flex align-items-start"><i class="fas fa-exclamation-triangle text-warning flex-shrink-0 me-3"></i><span class="warning-text card-text">Su red WiFi empresarial está verdaderamente protegida?</span></div>
+                            </div>
+                            <div class="card border-warning border-5 mb-3 rounded-start-2 border-start border-end-0 border-top-0 border-bottom-0" data-bss-hover-animate="pulse">
+                                <div class="card-body d-flex align-items-start"><i class="fas fa-exclamation-triangle text-warning flex-shrink-0 me-3"></i><span class="warning-text card-text">Sus sistemas tienen vulnerabilidades ocultas?</span></div>
+                            </div>
+                        </div>
+                        <div class="final-question-section">
+                            <p class="final-question">¿Está dispuesto a <strong>arriesgar</strong> todo lo que ha <strong>construido</strong>?</p>
+                        </div>
+                        <div class="pain-cta"><a class="btn btn-primary btn-primary-personalized" role="button" href="#servicios"><i class="fas fa-shield-alt me-2"></i>Quiero proteger mi empresa</a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section><!-- End: PAIN -->
+    <section class="value-prop">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <div class="text-center"><img data-aos="fade-right" data-aos-duration="800" data-aos-delay="200" src="{% static 'img/vuln_adv.png' %}"></div>
+                </div>
+                <div class="col-lg-6">
+                    <h2 data-aos="fade-up" data-aos-duration="800" data-aos-delay="200">Transformamos su mayor vulnerabilidad en su ventaja competitiva.</h2>
+                    <p class="lead mb-4" data-aos="fade-up" data-aos-duration="800" data-aos-delay="250">Nos convertimos en su aliado estratégico en ciberseguridad, con una metodología diseñada para:</p>
+                    <ul class="value-list">
+                        <li data-aos="fade-up" data-aos-duration="800" data-aos-delay="300">Anticipar amenazas antes de que sucedan</li>
+                        <li data-aos="fade-up" data-aos-duration="800" data-aos-delay="350">Proteger su reputación y capital con estrategias comprobadas</li>
+                        <li data-aos="fade-up" data-aos-duration="800" data-aos-delay="400">Convertir la ciberseguridad en una herramienta de atracción para clientes e inversionistas</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section><!-- Start: SERVICIOS -->
+    <section id="servicios" class="pricing">
+        <div class="container">
+            <h2>¿Qué obtendrá con nuestros servicios?</h2>
+            <p class="pricing-subtitle">Paquetes flexibles. Resultados reales.</p>
+            <div class="row">
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 pricing-card">
+                        <h3>Protección Esencial</h3>
+                        <div class="card-body d-flex flex-column">
+                            <div class="flex-grow-1 card-text">
+                                <ul class="pricing-features">
+                                    <li>Análisis de vulnerabilidades en equipos de red</li>
+                                    <li>Análisis de vulnerabilidades en páginas web</li>
+                                    <li>Informes ejecutivos y técnicos</li>
+                                    <li>Sesión mensual de asesoría</li>
+                                    <li>Coaching de ciberseguridad</li>
+                                    <li>Soporte esencial</li>
+                                </ul>
+                            </div>
+                        </div><button class="btn btn-primary mx-auto" type="button" data-bs-toggle="modal" data-bs-target="#modalEsencial">Ver Detalles</button>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 border-primary pricing-card featured">
+                        <h3>Seguridad Proactiva</h3>
+                        <div class="card-body d-flex flex-column">
+                            <div class="flex-grow-1 card-text">
+                                <ul class="pricing-features">
+                                    <li>Todo lo de <strong>Protección Esencial, más:</strong></li>
+                                    <li>Pruebas de Penetración web básica</li>
+                                    <li><span style="color: var(--text-primary);">Revisión de procesos DRP y BCP</span></li>
+                                    <li><span style="color: var(--text-primary);">Revisión de políticas de ciberseguridad</span></li>
+                                    <li><span style="color: var(--text-primary);">Revisión de seguridad física</span></li>
+                                    <li><span style="color: var(--text-primary);">Pruebas de carga web básicas</span></li>
+                                    <li><span style="color: var(--text-primary);">Soporte avanzado</span></li>
+                                </ul>
+                            </div>
+                        </div><button class="btn btn-primary mx-auto" type="button" data-bs-toggle="modal" data-bs-target="#modalProactiva">Ver Detalles</button>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 pricing-card">
+                        <h3>Defensa Integral</h3>
+                        <div class="card-body d-flex flex-column">
+                            <div class="flex-grow-1 card-text">
+                                <ul class="pricing-features">
+                                    <li><span style="color: var(--text-primary);">Todo lo de </span><strong><span style="color: var(--text-primary);">Seguridad Proactiva</span></strong><span style="color: var(--text-primary);">, más:</span></li>
+                                    <li><span style="color: var(--text-primary);">Pruebas de penetración web avanzada</span></li>
+                                    <li><span style="color: var(--text-primary);">Revisión de cumplimiento de políticas</span></li>
+                                    <li><span style="color: var(--text-primary);">Revisión de seguridad perimetral</span></li>
+                                    <li><span style="color: var(--text-primary);">Monitoreo de equipos en tiempo real</span></li>
+                                    <li><span style="color: var(--text-primary);">Detección de incidentes en tiempo real</span></li>
+                                    <li><span style="color: var(--text-primary);">Soporte premium</span></li>
+                                </ul>
+                            </div>
+                        </div><button class="btn btn-primary mx-auto" type="button" data-bs-toggle="modal" data-bs-target="#modalIntegral">Ver Detalles</button>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-5"><a class="btn btn-primary btn-primary-personalized" role="button" href="#contacto"><i class="fas fa-calendar-alt me-2"></i>Solicitar asesoría personalizada </a></div>
+        </div>
+    </section><!-- End: SERVICIOS -->
+    <!-- Start: FAQ -->
+    <section class="faq-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="text-center mb-5">
+                        <h2>Preguntas Frecuentes</h2>
+                        <p class="lead">Respuestas a las dudas más comunes sobre nuestros servicios</p>
+                    </div>
+                    <div class="faq-container">
+                        <div class="accordion" role="tablist" id="faq-accordion">
+                            <div class="accordion-item faq-item" data-aos="fade-left" data-aos-duration="800" data-aos-delay="200">
+                                <h2 class="accordion-header" role="tab"><button class="accordion-button collapsed faq-question collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-accordion .item-1" aria-expanded="false" aria-controls="faq-accordion .item-1"><span class="faq-icon">+</span><span class="faq-question-text">¿Qué tipo de empresas trabajan con Security Consulting Group?</span></button></h2>
+                                <div class="accordion-collapse collapse item-1 item-1 faq-answer" role="tabpanel" data-bs-parent="#faq-accordion">
+                                    <div class="accordion-body">
+                                        <p>Nos especializamos en pequeñas y medianas empresas (PYMEs) que buscan <strong>protección integral de ciberseguridad</strong>. Trabajamos con empresas de logística, seguros, y diversos sectores que necesitan anticiparse a las amenazas digitales y proteger su información crítica.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item faq-item" data-aos="fade-left" data-aos-duration="800" data-aos-delay="250">
+                                <h2 class="accordion-header" role="tab"><button class="accordion-button collapsed faq-question collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-accordion .item-2" aria-expanded="false" aria-controls="faq-accordion .item-2"><span class="faq-icon">+</span><span class="faq-question-text">¿Qué problemas resuelve el sistema de Security Consulting Group?</span></button></h2>
+                                <div class="accordion-collapse collapse item-2 item-2 faq-answer" role="tabpanel" data-bs-parent="#faq-accordion">
+                                    <div class="accordion-body">
+                                        <p>Nuestro sistema de ciberseguridad está diseñado para <strong>resolver las causas raíz</strong> de:</p>
+                                        <ul>
+                                            <li>Vulnerabilidades ocultas en redes y páginas web</li>
+                                            <li>Falta de preparación ante ciberataques</li>
+                                            <li>Ausencia de políticas de ciberseguridad efectivas</li>
+                                            <li>Equipos sin capacitación en buenas prácticas digitales</li>
+                                            <li>Riesgos en la seguridad física de sistemas críticos</li>
+                                            <li>Falta de planes de continuidad de negocio (BCP) y recuperación ante desastres (DRP)</li>
+                                        </ul>
+                                        <p>No solo <strong>identificamos</strong> <strong>problemas</strong>—<strong>diseñamos</strong> <strong>estrategias</strong> que previenen incidentes y protegen su reputación a largo plazo.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item faq-item" data-aos="fade-left" data-aos-duration="800" data-aos-delay="300">
+                                <h2 class="accordion-header" role="tab"><button class="accordion-button collapsed faq-question collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-accordion .item-3" aria-expanded="false" aria-controls="faq-accordion .item-3"><span class="faq-icon">+</span><span class="faq-question-text">¿Qué debo esperar al trabajar con Security Consulting Group?</span></button></h2>
+                                <div class="accordion-collapse collapse item-3 item-3 faq-answer" role="tabpanel" data-bs-parent="#faq-accordion">
+                                    <div class="accordion-body">
+                                        <p><strong>Diseñamos e implementamos </strong>una<strong> estrategia</strong> de ciberseguridad <strong>personalizada</strong> que combina análisis técnico y coaching estratégico. Espere:</p>
+                                        <ul>
+                                            <li>Claridad estratégica sobre sus riesgos reales</li>
+                                            <li>Infraestructura de seguridad robusta</li>
+                                            <li>Equipos capacitados en buenas prácticas</li>
+                                            <li>Reportes ejecutivos y técnicos detallados</li>
+                                            <li>Un plan de protección que escala con su crecimiento</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item faq-item" data-aos="fade-left" data-aos-duration="800" data-aos-delay="350">
+                                <h2 class="accordion-header" role="tab"><button class="accordion-button collapsed faq-question collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-accordion .item-4" aria-expanded="false" aria-controls="faq-accordion .item-4"><span class="faq-icon">+</span><span class="faq-question-text">¿Cuánto tiempo toma ver resultados con sus servicios?</span></button></h2>
+                                <div class="accordion-collapse collapse item-4 item-4 faq-answer" role="tabpanel" data-bs-parent="#faq-accordion">
+                                    <div class="accordion-body">
+                                        <p>Nuestros clientes han logrado eliminar vulnerabilidades críticas <strong>desde el primer trimestre</strong> de trabajo. El diagnóstico inicial se entrega de inmediato, y las mejoras en seguridad comienzan a implementarse desde la primera semana. Tenemos clientes con más de 4 años sin incidentes de seguridad.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item faq-item" data-aos="fade-left" data-aos-duration="800" data-aos-delay="400">
+                                <h2 class="accordion-header" role="tab"><button class="accordion-button collapsed faq-question collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-accordion .item-5" aria-expanded="false" aria-controls="faq-accordion .item-5"><span class="faq-icon">+</span><span class="faq-question-text">¿Cómo se diferencian de otras empresas de ciberseguridad?</span></button></h2>
+                                <div class="accordion-collapse collapse item-5 item-5 faq-answer" role="tabpanel" data-bs-parent="#faq-accordion">
+                                    <div class="accordion-body">
+                                        <p>Mientras otros venden herramientas, nosotros garantizamos resultados. <strong>Nos convertimos en su aliado estratégico</strong>, no solo un proveedor. Nuestro enfoque incluye:</p>
+                                        <ul>
+                                            <li>Prevención proactiva, no solo reacción</li>
+                                            <li>Reportes ejecutivos que los directivos entienden</li>
+                                            <li>Coaching continuo para sus equipos</li>
+                                            <li>Experiencia comprobada previniendo pérdidas millonarias</li>
+                                            <li>Metodología que convierte la ciberseguridad en ventaja competitiva</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section><!-- End: FAQ -->
+    <!-- Start: DIAGNOSTICO -->
+    <section id="diagnostico" class="free-diagnosis">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-6 text-center">
+                    <h2>Diagnóstico de ciberseguridad gratuito</h2>
+                    <p class="lead mb-4">Le mostraremos las principales vulnerabilidades de su empresa hoy sin ningún costo.<br> Porque su seguridad no puede esperar.</p><button class="btn-primary btn-primary-personalized"><i class="fas fa-search me-2"></i>Solicitar diagnóstico sin costo </button>
+                </div>
+            </div>
+        </div>
+    </section><!-- End: DIAGNOSTICO -->
+    <!-- Start: RECOMENDACIONES -->
+    <section class="testimonials">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2>Lo dicen nuestros clientes</h2>
+                <p class="testimonials-subtitle">Resultados reales de empresas que confiaron en nosotros</p>
+            </div>
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <div class="card testimonial-card" data-aos="fade-right" data-aos-duration="400" data-aos-delay="200">
+                        <div class="card-body">
+                            <div class="testimonial-quote"><i class="fas fa-quote-left quote-icon"></i>
+                                <p class="card-text testimonial-text">"Gracias al equipo de SCG dejamos de reaccionar y empezamos a prevenir. Hoy tenemos cero incidentes."</p>
+                            </div>
+                            <div class="bg-transparent testimonial-author card-footer">
+                                <div class="author-avatar"><i class="fas fa-user"></i></div>
+                                <div class="author-info">
+                                    <h5 class="author-name card-title">Gerente de Tecnología</h5>
+                                    <p class="text-muted card-subtitle author-company">Empresa de logística</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="card testimonial-card" data-aos="fade-right" data-aos-duration="400">
+                        <div class="card-body">
+                            <div class="testimonial-quote"><i class="fas fa-quote-left quote-icon"></i>
+                                <p class="card-text testimonial-text"><em>"Su claridad al explicar riesgos nos dio el control que necesitábamos como junta directiva."</em></p>
+                            </div>
+                            <div class="bg-transparent testimonial-author card-footer">
+                                <div class="author-avatar"><i class="fas fa-user"></i></div>
+                                <div class="author-info">
+                                    <h5 class="author-name card-title">Directora General</h5>
+                                    <p class="text-muted card-subtitle author-company">Empresa de Seguros</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section><!-- End: RECOMENDACIONES -->
+    <!-- Start: EQUIPO -->
+    <section id="equipo" class="team">
+        <div class="container">
+            <h2>Nuestro equipo</h2>
+            <p class="text-center mb-5">Conozca a quienes estarán a cargo de su seguridad</p>
+            <div class="row">
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card team-card">
+                        <div class="card-body text-center">
+                            <div class="team-avatar"><i class="fas fa-user"></i></div>
+                            <h4>Ing. Ismael</h4>
+                            <p class="text-primary">Socio Fundador, CCO y Especialista en Ciberseguridad Estratégica</p>
+                            <p>Más de X años de experiencia especializándose en estrategias de ciberseguridad empresarial.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card team-card">
+                        <div class="card-body text-center">
+                            <div class="team-avatar"><i class="fas fa-user"></i></div>
+                            <h4>Ing. Carlos</h4>
+                            <p class="text-primary">Socio Fundador, CFO</p>
+                            <p>Más de X años de experiencia en gestión financiera y estratégica de proyectos de ciberseguridad.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card team-card">
+                        <div class="card-body text-center">
+                            <div class="team-avatar"><i class="fas fa-user"></i></div>
+                            <h4>Ing. Jurgën</h4>
+                            <p class="text-primary">Socio Fundador, COO</p>
+                            <p>Más de X años de experiencia en operaciones e implementación de soluciones de ciberseguridad.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row justify-content-center mt-4">
+                <div class="col-lg-8 text-center">
+                    <p class="lead">Su enfoque práctico ha logrado eliminar vulnerabilidades críticas desde el primer trimestre de trabajo en múltiples compañías.</p>
+                    <h5><strong>¿Por qué esto importa?</strong></h5>
+                    <p>La ciberseguridad no puede dejarse en manos inexpertas.<br> Usted estará acompañado por expertos que entienden tanto la tecnología como el negocio.</p>
+                </div>
+            </div>
+        </div>
+    </section><!-- End: EQUIPO -->
+    <!-- Start: CONTACTO -->
+    <section id="contacto" class="contact">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 col-xl-9 col-xxl-8 text-center mb-5">
+                    <h2>Agende su asesoría gratuita ahora mismo</h2>
+                    <p class="contact-subtitle">Obtenga un diagnóstico personalizado de su situación actual de ciberseguridad</p>
+                </div>
+            </div>
+            
+            <!-- Messages -->
+            {% if messages %}
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %} me-2"></i>
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+            
+            <div class="row justify-content-center">
+                <div class="col-lg-6">
+                    <div class="contact-card">
+                        <form id="contactForm-1" action="{% url 'landing:contact' %}" method="post">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-6 mb-3"><input class="form-control" type="text" name="nombre" placeholder="Nombre completo" required=""></div>
+                                <div class="col-md-6 mb-3"><input class="form-control" type="text" name="empresa" placeholder="Empresa" required=""></div>
+                            </div>
+                            <div class="mb-3"><input class="form-control" type="email" name="email" placeholder="Correo electrónico" required=""></div>
+                            <div class="mb-4"><textarea class="form-control" name="preocupacion" placeholder="¿Qué le preocupa de la ciberseguridad de su empresa?" required="" rows="4"></textarea></div>
+                            <div class="text-center"><button class="btn-primary btn-primary-personalized" type="submit"><i class="fas fa-calendar-check me-2"></i>Quiero agendar mi sesión </button></div>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="calendar-img-card"><img src="{% static 'img/calendar_call.png' %}"></div>
+                </div>
+            </div>
+        </div>
+    </section><!-- End: CONTACTO -->
+    <div class="modal fade modal-lg" role="dialog" tabindex="-1" id="modalEsencial">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header text-center border-0 pb-0">
+                    <h3 class="modal-title fw-bold w-100">Protección Esencial</h3><button class="btn-close" type="button" aria-label="Close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <h6 class="fw-bold fst-italic text-center text-secondary mb-3"><span style="font-weight: normal !important;">Una línea de defensa sólida que protege los fundamentos de su negocio digital</span></h6>
+                    <h6 class="fw-bold text-primary mb-3" style="padding-top: 25px;padding-bottom: 10px;">Beneficios Ejecutivos:</h6>
+                    <ul class="list-unstyled" style="padding-right: 10px;padding-left: 10px;">
+                        <li class="mb-3"><span class="fw-bold" style="color: var(--accent-color)">✓&nbsp;</span><strong>Visibilidad Total:</strong>&nbsp;Informes ejecutivos claros que le permiten tomar decisiones informadas sobre riesgos cibernéticos</li>
+                        <li class="mb-3"><span class="fw-bold" style="color: var(--accent-color)">✓&nbsp;</span><strong>Prevención de Crisis:</strong>&nbsp;Identificación proactiva de vulnerabilidades antes de que se conviertan en incidentes costosos</li>
+                        <li class="mb-3"><span class="fw-bold" style="color: var(--accent-color)">✓&nbsp;</span><strong>Equipos Preparados:</strong>&nbsp;Su personal estará capacitado para ser su primera línea de defensa contra amenazas</li>
+                        <li class="mb-3"><span class="fw-bold" style="color: var(--accent-color)">✓&nbsp;</span><strong>Tranquilidad Operativa:</strong>&nbsp;Evaluaciones constantes que garantizan que sus sistemas críticos estén protegidos</li>
+                        <li class="mb-3"><span class="fw-bold" style="color: var(--accent-color)">✓&nbsp;</span><strong>Base Sólida de Confianza:</strong>&nbsp;Demuestra a clientes y socios que toma en serio la protección de datos</li>
+                    </ul>
+                    <h6 class="fw-bold text-primary mb-3" style="padding-top: 25px;padding-bottom: 10px;">Por qué esto importa para su empresa?</h6>
+                    <ul class="list-unstyled" style="padding-right: 10px;padding-left: 10px;">
+                        <li class="mb-3"><strong class="text-dark">•</strong>&nbsp;Evita interrupciones operativas que pueden costar miles de dólares por hora</li>
+                        <li class="mb-3"><strong class="text-dark">•</strong>&nbsp;Protege la reputación de su marca ante clientes y socios</li>
+                        <li class="mb-3"><strong class="text-dark">•</strong>&nbsp;Cumple con expectativas básicas de ciberseguridad para inversionistas y auditorías</li>
+                        <li class="mb-3"><strong class="text-dark">•</strong>&nbsp;Reduce significativamente el riesgo de multas por brechas de datos</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade modal-lg" role="dialog" tabindex="-1" id="modalProactiva">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header text-center border-0 pb-0">
+                    <h3 class="modal-title fw-bold w-100">Seguridad Proactiva</h3><button class="btn-close" type="button" aria-label="Close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <h6 class="fw-bold fst-italic text-center text-secondary mb-3"><span style="font-weight: normal !important;">Un escudo integral que anticipa amenazas y fortalece su posición competitiva</span></h6>
+                    <h6 class="fw-bold text-primary mb-3" style="padding-top: 25px;padding-bottom: 10px;">Beneficios Ejecutivos:</h6>
+                    <ul class="list-unstyled" style="padding-right: 10px;padding-left: 10px;">
+                        <li class="mb-3"><span class="fw-bold" style="color: var(--accent-color)">✓&nbsp;</span><strong>Ventaja Competitiva:</strong>&nbsp;Sus clientes confiarán más en una empresa que demuestra seriedad en ciberseguridad</li>
+                        <li class="mb-3"><span class="fw-bold" style="color: var(--accent-color)">✓&nbsp;</span><strong>Continuidad Garantizada:</strong>&nbsp;Planes de recuperación y continuidad que aseguran que su negocio siga operando sin importar qué pase</li>
+                        <li class="mb-3"><span class="fw-bold" style="color: var(--accent-color)">✓&nbsp;</span><strong>Inteligencia de Amenazas:</strong>&nbsp;Simulaciones de ataques reales que revelan exactamente dónde están sus puntos débiles</li>
+                        <li class="mb-3"><span class="fw-bold" style="color: var(--accent-color)">✓&nbsp;</span><strong>Cumplimiento Regulatorio:</strong>&nbsp;Políticas y procedimientos que lo mantienen al día con regulaciones de su industria</li>
+                        <li class="mb-3"><span class="fw-bold" style="color: var(--accent-color)">✓&nbsp;</span><strong>Seguridad Física Integrada:</strong>&nbsp;Protección completa que incluye tanto aspectos digitales como físicos de su infraestructura</li>
+                    </ul>
+                    <h6 class="fw-bold text-primary mb-3" style="padding-top: 25px;padding-bottom: 10px;">Por qué esto importa para su empresa?</h6>
+                    <ul class="list-unstyled" style="padding-right: 10px;padding-left: 10px;">
+                        <li class="mb-3"><strong class="text-dark">•</strong>&nbsp;Atrae inversionistas y socios que valoran la gestión de riesgos profesional</li>
+                        <li class="mb-3"><strong class="text-dark">•</strong>&nbsp;Reduce el tiempo de inactividad de días a horas en caso de incidentes</li>
+                        <li class="mb-3"><strong class="text-dark">•</strong>&nbsp;Convierte la ciberseguridad en una herramienta de ventas y diferenciación</li>
+                        <li class="mb-3"><strong class="text-dark">•</strong>&nbsp;Protege la inversión en tecnología y datos críticos del negocio</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade modal-lg" role="dialog" tabindex="-1" id="modalIntegral">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header text-center border-0 pb-0">
+                    <h3 class="modal-title fw-bold w-100">Defensa Integral</h3><button class="btn-close" type="button" aria-label="Close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <h6 class="fw-bold fst-italic text-center text-secondary mb-3"><span style="font-weight: normal !important;">Una fortaleza digital que transforma la ciberseguridad en su ventaja estratégica más poderosa</span></h6>
+                    <h6 class="fw-bold text-primary mb-3" style="padding-top: 25px;padding-bottom: 10px;">Beneficios Ejecutivos:</h6>
+                    <ul class="list-unstyled" style="padding-right: 10px;padding-left: 10px;">
+                        <li class="mb-3"><span class="fw-bold" style="color: var(--accent-color)">✓&nbsp;</span><strong>Liderazgo de Mercado:</strong>&nbsp;Su empresa será reconocida como líder en seguridad digital en su sector</li>
+                        <li class="mb-3"><span class="fw-bold" style="color: var(--accent-color)">✓&nbsp;</span><strong>Detección en Tiempo Real:</strong>&nbsp;Amenazas identificadas y neutralizadas antes de que afecten sus operaciones</li>
+                        <li class="mb-3"><span class="fw-bold" style="color: var(--accent-color)">✓&nbsp;</span><strong>Auditoría Continua:</strong>&nbsp;Verificación constante de que sus políticas se cumplen a todos los niveles</li>
+                        <li class="mb-3"><span class="fw-bold" style="color: var(--accent-color)">✓&nbsp;</span><strong>Respuesta Inmediata:</strong>&nbsp;Soporte prioritario que responde incidentes en 3 horas, no días</li>
+                        <li class="mb-3"><span class="fw-bold" style="color: var(--accent-color)">✓&nbsp;</span><strong>Penetración Avanzada:</strong>&nbsp;Pruebas exhaustivas que simulan ataques sofisticados para encontrar vulnerabilidades ocultas</li>
+                    </ul>
+                    <h6 class="fw-bold text-primary mb-3" style="padding-top: 25px;padding-bottom: 10px;">Por qué esto importa para su empresa?</h6>
+                    <ul class="list-unstyled" style="padding-right: 10px;padding-left: 10px;">
+                        <li class="mb-3"><strong class="text-dark">•</strong>&nbsp;Permite expansión internacional con confianza en mercados regulados</li>
+                        <li class="mb-3"><strong class="text-dark">•</strong>&nbsp;Atrae talento de primer nivel que valora trabajar en empresas seguras</li>
+                        <li class="mb-3"><strong class="text-dark">•</strong>&nbsp;Facilita fusiones y adquisiciones al demostrar madurez en gestión de riesgos</li>
+                        <li class="mb-3"><strong class="text-dark">•</strong>&nbsp;Convierte la seguridad en un diferenciador que justifica precios premium</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="footer-section"><img class="mb-3 footer-logo" src="{% static 'img/ImagotipoPositivo.png' %}" alt="Security Consulting Group">
+                        <p class="footer-description"> Especialistas en ciberseguridad para PYMES.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="footer-section">
+                        <h5 class="footer-title">Contacto</h5>
+                        <div class="footer-links"><a class="footer-link" href="mailto:services@securitygroupcr.com"><i class="fas fa-envelope"></i> services@securitygroupcr.com </a><a class="footer-link"><i class="fas fa-phone"></i> +506 1234-5678 </a>
+                            <div class="footer-link"><i class="fas fa-map-marker-alt"></i><span> San José, Costa Rica </span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12 col-lg-4 mb-4">
+                    <div class="footer-section">
+                        <h5 class="footer-title">Conectemos</h5>
+                        <div class="footer-social"><a class="social-link" href="https://www.linkedin.com/company/securitygroupcr/" target="_blank">
+                                <div class="social-icon"><i class="fab fa-linkedin-in"></i></div><span>LinkedIn</span>
+                            </a><a class="social-link" href="https://wa.me/50612345678" target="_blank">
+                                <div class="social-icon"><i class="fab fa-whatsapp"></i></div><span>WhatsApp</span>
+                            </a></div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <p class="footer-copyright">© 2024 Security Consulting Group. Todos los derechos reservados.</p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <p class="footer-tagline">Protegiendo su futuro digital</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer><a class="whatsapp-float" href="https://wa.me/50612345678" target="_blank"><i class="fab fa-whatsapp"></i></a>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script src="{% static 'js/bs-init.js' %}"></script>
+    <script src="{% static 'js/script.js' %}"></script>
+</body>
+
+</html>
