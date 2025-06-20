@@ -2225,3 +2225,160 @@ h1, h2, h3, h4, h5, h6 {
   color: white;
   border-left: 4px solid #dc3545;
 }
+
+/* ====================================
+   SCG NOTIFICATION SYSTEM - MEJORADO
+   ==================================== */
+
+   .scg-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    min-width: 380px;
+    max-width: 500px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 45, 116, 0.15), 0 8px 25px rgba(0, 0, 0, 0.1);
+    transform: translateX(120%);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    opacity: 0;
+    border: none;
+    overflow: hidden;
+}
+
+.scg-notification.scg-notification-show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.scg-notification-content {
+    display: flex;
+    align-items: flex-start;
+    padding: 20px 24px;
+    gap: 16px;
+    position: relative;
+}
+
+.scg-notification-success {
+    border-left: 5px solid var(--accent-color);
+    background: linear-gradient(135deg, 
+        rgba(106, 191, 75, 0.05) 0%, 
+        rgba(106, 191, 75, 0.02) 100%);
+}
+
+.scg-notification-error {
+    border-left: 5px solid #dc3545;
+    background: linear-gradient(135deg, 
+        rgba(220, 53, 69, 0.05) 0%, 
+        rgba(220, 53, 69, 0.02) 100%);
+}
+
+.scg-notification-icon {
+    font-size: 24px;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.scg-notification-success .scg-notification-icon {
+    color: var(--accent-color);
+}
+
+.scg-notification-error .scg-notification-icon {
+    color: #dc3545;
+}
+
+.scg-notification-text {
+    flex: 1;
+}
+
+.scg-notification-text strong {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--text-primary);
+    display: block;
+    margin-bottom: 4px;
+}
+
+.scg-notification-text p {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.scg-notification-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+.scg-notification-close:hover {
+    background: rgba(0, 45, 116, 0.08);
+    color: var(--text-primary);
+    transform: scale(1.1);
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+    .scg-notification {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        min-width: auto;
+        max-width: none;
+        transform: translateY(-120%);
+    }
+    
+    .scg-notification.scg-notification-show {
+        transform: translateY(0);
+    }
+    
+    .scg-notification-content {
+        padding: 16px 20px;
+        gap: 12px;
+    }
+    
+    .scg-notification-text strong {
+        font-size: 15px;
+    }
+    
+    .scg-notification-text p {
+        font-size: 13px;
+    }
+}
+
+/* Animación de entrada más suave */
+@keyframes slideInRight {
+    from {
+        transform: translateX(120%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Mejorar botones con micro-animaciones */
+.btn-primary-personalized {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.btn-primary-personalized:active {
+    transform: translateY(-2px) scale(0.98);
+}

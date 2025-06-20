@@ -58,9 +58,12 @@ function handleFormSubmission(event) {
     const submitBtn = form.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
     
-    // Show loading state
+    console.log('🚀 Enviando formulario via AJAX...');
+    
+    // Show loading state with animation
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
     submitBtn.disabled = true;
+    submitBtn.style.transform = 'scale(0.98)';
     
     // Send AJAX request to Django
     fetch(form.action, {
@@ -72,12 +75,14 @@ function handleFormSubmission(event) {
         },
     })
     .then(response => {
+        console.log('📡 Response status:', response.status);
         if (!response.ok) {
             return response.json().then(data => Promise.reject(data));
         }
         return response.json();
     })
     .then(data => {
+        console.log('✅ Success:', data);
         if (data.success) {
             showSuccessMessage(data.message);
             form.reset();
@@ -86,68 +91,80 @@ function handleFormSubmission(event) {
         }
     })
     .catch(error => {
+        console.error('❌ Error:', error);
         const message = error.message || 'Error procesando su solicitud. Por favor intente nuevamente.';
         showErrorMessage(message);
     })
     .finally(() => {
-        // Restore button state
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
+        // Restore button state with animation
+        setTimeout(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+            submitBtn.style.transform = 'scale(1)';
+        }, 300);
     });
 }
 
-// Show success message
+// Show success message with better styling
 function showSuccessMessage(message = '¡Gracias! Nos pondremos en contacto con usted pronto.') {
     const notification = document.createElement('div');
-    notification.className = 'alert alert-success position-fixed';
-    notification.style.cssText = `
-        top: 100px;
-        right: 20px;
-        z-index: 1050;
-        min-width: 300px;
-        box-shadow: var(--shadow-lg);
-    `;
+    notification.className = 'scg-notification scg-notification-success';
     notification.innerHTML = `
-        <i class="fas fa-check-circle me-2"></i>
-        ${message}
-        <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+        <div class="scg-notification-content">
+            <i class="fas fa-check-circle scg-notification-icon"></i>
+            <div class="scg-notification-text">
+                <strong>¡Perfecto!</strong>
+                <p>${message}</p>
+            </div>
+            <button type="button" class="scg-notification-close" onclick="this.closest('.scg-notification').remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
     `;
     
     document.body.appendChild(notification);
     
-    // Auto remove after 5 seconds
+    // Show with animation
+    setTimeout(() => notification.classList.add('scg-notification-show'), 10);
+    
+    // Auto remove after 6 seconds
     setTimeout(() => {
         if (notification.parentElement) {
-            notification.remove();
+            notification.classList.remove('scg-notification-show');
+            setTimeout(() => notification.remove(), 300);
         }
-    }, 5000);
+    }, 6000);
 }
 
-// Show error message
+// Show error message with better styling
 function showErrorMessage(message = 'Ocurrió un error. Por favor intente nuevamente.') {
     const notification = document.createElement('div');
-    notification.className = 'alert alert-danger position-fixed';
-    notification.style.cssText = `
-        top: 100px;
-        right: 20px;
-        z-index: 1050;
-        min-width: 300px;
-        box-shadow: var(--shadow-lg);
-    `;
+    notification.className = 'scg-notification scg-notification-error';
     notification.innerHTML = `
-        <i class="fas fa-exclamation-circle me-2"></i>
-        ${message}
-        <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+        <div class="scg-notification-content">
+            <i class="fas fa-exclamation-circle scg-notification-icon"></i>
+            <div class="scg-notification-text">
+                <strong>¡Ups!</strong>
+                <p>${message}</p>
+            </div>
+            <button type="button" class="scg-notification-close" onclick="this.closest('.scg-notification').remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
     `;
     
     document.body.appendChild(notification);
     
-    // Auto remove after 5 seconds
+    // Show with animation
+    setTimeout(() => notification.classList.add('scg-notification-show'), 10);
+    
+    // Auto remove after 6 seconds
     setTimeout(() => {
         if (notification.parentElement) {
-            notification.remove();
+            notification.classList.remove('scg-notification-show');
+            setTimeout(() => notification.remove(), 300);
         }
-    }, 5000);
+    }, 6000);
 }
 
 // Initialize count-up animation for statistics
@@ -249,8 +266,10 @@ function initBootstrapFAQ() {
     });
 }
 
-// Event Listeners
+// Event Listeners - CONSOLIDADO Y LIMPIO
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('🎯 Inicializando Security Consulting Group...');
+    
     // Initialize essential components
     initCountUpAnimation();
     initFloatingCardsParallax();
@@ -258,14 +277,21 @@ document.addEventListener('DOMContentLoaded', function() {
     initMobileNavigation();
     initBootstrapFAQ();
     
-    // Add form submission handler for contact form - TEMPORARILY DISABLED
+    // 🔥 ÚNICA configuración del formulario de contacto
     const contactForm = document.getElementById('contactForm-1');
     if (contactForm) {
+        // Asegurar que solo hay UN event listener
+        contactForm.removeEventListener('submit', handleFormSubmission);
         contactForm.addEventListener('submit', handleFormSubmission);
-        console.log('Formulario de contacto encontrado - usando POST normal');
+        
+        console.log('📧 Formulario configurado para AJAX');
+        console.log('🎯 Action:', contactForm.getAttribute('action'));
+        console.log('🔐 CSRF disponible:', !!getCSRFToken());
+    } else {
+        console.warn('⚠️ Formulario de contacto no encontrado');
     }
     
-    console.log('Security Consulting Group Django website initialized successfully!');
+    console.log('✅ SCG inicializado correctamente!');
 });
 
 // Scroll event listeners
@@ -282,21 +308,6 @@ document.addEventListener('DOMContentLoaded', function() {
             console.warn('Failed to load image:', this.src);
         });
     });
-});
-
-// Prevenir interferencia de otros scripts
-document.addEventListener('DOMContentLoaded', function() {
-    const contactForm = document.getElementById('contactForm-1');
-    if (contactForm) {
-        // Remover cualquier event listener que pueda haber sido agregado por otros scripts
-        contactForm.removeEventListener('submit', handleFormSubmission);
-        
-        // Asegurar que el formulario use POST nativo (sin cambiar la action)
-        contactForm.setAttribute('method', 'post');
-        
-        console.log('Formulario configurado para POST nativo');
-        console.log('Action del formulario:', contactForm.getAttribute('action'));
-    }
 });
 
 // Export functions for global access
