@@ -5,14 +5,13 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 import datetime
 
-
 class Survey(models.Model):
     """
     Main survey definition.
     
     Allows for multiple surveys over time (current + future versions).
     """
-    # NUEVO: Código único para URLs (YYYYMMDDHHMMSS)
+    # Código único para URLs (YYYYMMDDHHMMSS)
     code = models.CharField(
         max_length=14,
         unique=True,
@@ -41,6 +40,12 @@ class Survey(models.Model):
         help_text="Is this survey currently active for new submissions?"
     )
     
+    # NUEVO CAMPO:
+    is_featured = models.BooleanField(
+        default=False,
+        help_text="Show this survey on the landing page (only one can be featured)"
+    )
+    
     max_score = models.PositiveIntegerField(
         default=100,
         help_text="Maximum possible score for this survey"
@@ -49,20 +54,59 @@ class Survey(models.Model):
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.CharField(
-        max_length=100,
-        help_text="Who created this survey"
+    
+    # CAMPO ACTUALIZADO:
+    created_by = models.ForeignKey(
+        'core.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text="User who created this survey"
     )
     
     class Meta:
         ordering = ['-created_at']
         verbose_name = 'Survey'
         verbose_name_plural = 'Surveys'
-        # CAMBIADO: Ahora unique_together incluye code
         unique_together = ['title', 'version']
     
     def __str__(self):
         return f"{self.title} v{self.version} ({self.code})"
+    
+    def save(self, *args, **kwargs):
+        # Generar código automáticamente si es un nuevo survey
+        if not self.code:
+            self.code = self.generate_code()
+            
+            # Asegurar que el código sea único (por si hay colisión de tiempo)
+            while Survey.objects.filter(code=self.code).exists():
+                import time
+                time.sleep(1)  # Esperar 1 segundo
+                self.code = self.generate_code()
+        
+        # Si se marca como featured, desmarcar todos los demás
+        if self.is_featured:
+            Survey.objects.filter(is_featured=True).exclude(pk=self.pk).update(is_featured=False)
+            
+        super().save(*args, **kwargs)
+    
+    @classmethod
+    def generate_code(cls):
+        """Generate a new unique code in YYYYMMDDHHMMSS format."""
+        import datetime
+        now = datetime.datetime.now()
+        return now.strftime("%Y%m%d%H%M%S")
+    
+    @classmethod
+    def get_featured_survey(cls):
+        """Get the survey that should be displayed on landing page."""
+        # Primero buscar el marcado como featured
+        featured = cls.objects.filter(is_active=True, is_featured=True).first()
+        if featured:
+            return featured
+        
+        # Si no hay ninguno featured, usar el más reciente activo
+        return cls.objects.filter(is_active=True).order_by('-created_at').first()
     
     def get_active_questions(self):
         """Get all active questions for this survey, ordered by section and order."""
@@ -72,13 +116,6 @@ class Survey(models.Model):
         """Get the URL for this survey."""
         from django.urls import reverse
         return reverse('surveys:survey_detail', kwargs={'code': self.code})
-    
-    @classmethod
-    def generate_code(cls):
-        """Generate a new unique code in YYYYMMDDHHMMSS format."""
-        now = datetime.datetime.now()
-        return now.strftime("%Y%m%d%H%M%S")
-
 
 class SurveySection(models.Model):
     """
@@ -210,7 +247,7 @@ class QuestionOption(models.Model):
     )
     
     # Scoring for this option
-    points = models.PositiveIntegerField(
+    points = models.IntegerField(
         default=0,
         help_text="Points awarded for selecting this option"
     )
@@ -378,15 +415,16 @@ class Response(models.Model):
         return f"{self.submission.prospect.name} - Q{self.question.order}"
     
     def calculate_points(self):
-        """Calculate and save points for this response."""
-        total_points = 0
-        
-        if self.selected_option:
-            total_points = self.selected_option.points
-        elif self.selected_options.exists():
-            # For multiple choice, sum all selected options
-            total_points = sum(opt.points for opt in self.selected_options.all())
-        
-        self.points_earned = total_points
-        self.save(update_fields=['points_earned'])
-        return total_points
+            """Calculate and save points for this response."""
+            total_points = 0
+            
+            if self.selected_option:
+                # Single choice question
+                total_points = self.selected_option.points
+            elif self.selected_options.exists():
+                # Multiple choice question - sumar todos los puntos
+                total_points = sum(opt.points for opt in self.selected_options.all())
+            
+            self.points_earned = total_points
+            self.save(update_fields=['points_earned'])
+            return total_points

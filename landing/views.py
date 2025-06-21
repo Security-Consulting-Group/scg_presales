@@ -18,12 +18,13 @@ class LandingPageView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Obtener el survey activo más reciente para el botón
+        # Obtener el survey featured
         from surveys.models import Survey
-        active_survey = Survey.objects.filter(is_active=True).order_by('-created_at').first()
+        featured_survey = Survey.get_featured_survey()
         
-        if active_survey:
-            context['survey_code'] = active_survey.code
+        if featured_survey:
+            context['survey_code'] = featured_survey.code
+            context['survey_title'] = featured_survey.title
         
         return context
 

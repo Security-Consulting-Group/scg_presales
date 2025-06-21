@@ -213,6 +213,8 @@ class SurveySubmitView(View):
                         )
                         response.save()  # Guardar primero para poder usar M2M
                         response.selected_options.set(options)
+                        
+                        # Sumar puntos de todas las opciones seleccionadas
                         response.points_earned = sum(opt.points for opt in options)
                         response.save()
                 

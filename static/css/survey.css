@@ -466,3 +466,188 @@
       display: none;
     }
   }
+
+/* ====================================
+   PROGRESS BAR FIJO - ALWAYS VISIBLE
+   ==================================== */
+
+   .progress-bar-fixed {
+    position: fixed;
+    top: 70px; /* Debajo del navbar */
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-color);
+    z-index: 999;
+    padding: 20px 0;
+    box-shadow: 0 2px 10px rgba(0, 45, 116, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .progress-container-fixed {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  
+  .progress-info-fixed {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    min-width: 140px;
+    flex-shrink: 0;
+  }
+  
+  .progress-info-fixed .current-step {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.2;
+  }
+  
+  .progress-info-fixed .total-questions {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+  }
+  
+  .survey-progress-fixed {
+    flex: 1;
+    height: 16px;
+    border-radius: 20px;
+    background: rgba(0, 45, 116, 0.1);
+    overflow: hidden;
+    margin: 0 1rem;
+    position: relative;
+  }
+  
+  .survey-progress-fixed .progress-bar {
+    background: var(--gradient-primary);
+    border-radius: 20px;
+    transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 15px;
+    height: 100%;
+    position: relative;
+  }
+  
+  .survey-progress-fixed .progress-text {
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+    font-family: 'Inter', sans-serif;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    letter-spacing: 0.5px;
+  }
+  
+  /* Mostrar porcentaje solo cuando hay progreso significativo */
+  .survey-progress-fixed .progress-bar[style*="width: 0%"] .progress-text,
+  .survey-progress-fixed .progress-bar[style*="width: 1%"] .progress-text,
+  .survey-progress-fixed .progress-bar[style*="width: 2%"] .progress-text,
+  .survey-progress-fixed .progress-bar[style*="width: 3%"] .progress-text,
+  .survey-progress-fixed .progress-bar[style*="width: 4%"] .progress-text,
+  .survey-progress-fixed .progress-bar[style*="width: 5%"] .progress-text {
+    opacity: 0;
+  }
+  
+  .survey-progress-fixed .progress-bar:not([style*="width: 0%"]):not([style*="width: 1%"]):not([style*="width: 2%"]):not([style*="width: 3%"]):not([style*="width: 4%"]):not([style*="width: 5%"]) .progress-text {
+    opacity: 1;
+  }
+  
+  /* Ajustar el padding del survey para compensar la barra fija */
+  .survey-section {
+    padding-top: 220px; /* MÁS espacio para la barra fija */
+  }
+  
+  /* ====================================
+     RESPONSIVE DESIGN
+     ==================================== */
+  
+  @media (max-width: 768px) {
+    .progress-bar-fixed {
+      top: 60px; /* Navbar más pequeño en mobile */
+      padding: 16px 0;
+    }
+    
+    .progress-container-fixed {
+      flex-direction: column;
+      gap: 1rem;
+      align-items: stretch;
+      padding: 0 16px;
+    }
+    
+    .progress-info-fixed {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      min-width: auto;
+      width: 100%;
+    }
+    
+    .progress-info-fixed .current-step {
+      font-size: 0.95rem;
+    }
+    
+    .progress-info-fixed .total-questions {
+      font-size: 0.8rem;
+    }
+    
+    .survey-progress-fixed {
+      margin: 0;
+      height: 18px; /* MÁS grande en mobile */
+    }
+    
+    .survey-progress-fixed .progress-text {
+      font-size: 13px; /* MÁS grande en mobile */
+      padding-right: 15px;
+    }
+    
+    .survey-section {
+      padding-top: 180px; /* MÁS espacio en mobile */
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .progress-bar-fixed {
+      padding: 14px 0;
+    }
+    
+    .progress-container-fixed {
+      gap: 0.75rem;
+      padding: 0 12px;
+    }
+    
+    .progress-info-fixed .current-step {
+      font-size: 0.9rem;
+    }
+    
+    .progress-info-fixed .total-questions {
+      font-size: 0.75rem;
+    }
+    
+    .survey-progress-fixed {
+      height: 16px; /* AÚN MÁS grande en mobile pequeño */
+    }
+    
+    .survey-progress-fixed .progress-text {
+      font-size: 12px;
+      padding-right: 12px;
+    }
+    
+    .survey-section {
+      padding-top: 160px;
+    }
+  }

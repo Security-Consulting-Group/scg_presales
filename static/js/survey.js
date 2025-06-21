@@ -6,6 +6,7 @@ class SCGSurvey {
     constructor() {
         this.currentGroup = 1;
         this.totalGroups = document.querySelectorAll('.question-group').length;
+        this.totalQuestions = parseInt(document.querySelector('.total-questions').textContent.split(' ')[0]);
         this.responses = {};
         this.surveyCode = this.getSurveyCode();
         this.csrfToken = this.getCSRFToken();
@@ -16,7 +17,7 @@ class SCGSurvey {
     init() {
         console.log('🎯 Inicializando SCG Survey...');
         this.setupEventListeners();
-        this.updateProgress();
+        // NO llamar updateProgress() aquí - debe empezar en 0%
         this.validateCurrentGroup();
         console.log('✅ Survey inicializado correctamente!');
     }
@@ -61,6 +62,12 @@ class SCGSurvey {
         document.addEventListener('change', (e) => {
             if (e.target.hasAttribute('data-question')) {
                 this.captureResponse(e.target);
+                
+                // Validación especial para pregunta 3 (datos sensibles)
+                if (e.target.getAttribute('data-type') === 'multiple') {
+                    this.handleSensitiveDataLogic(e.target);
+                }
+                
                 this.validateCurrentGroup();
             }
         });
@@ -122,6 +129,9 @@ class SCGSurvey {
         }
 
         console.log('📝 Respuesta capturada:', questionId, this.responses[questionId]);
+        
+        // Actualizar progreso cada vez que se responde una pregunta
+        this.updateProgress();
     }
 
     validateCurrentGroup() {
@@ -201,11 +211,16 @@ class SCGSurvey {
         const contactGroup = document.getElementById('contact-group');
         if (contactGroup) {
             contactGroup.style.display = 'block';
-            contactGroup.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            // Scroll hacia arriba para mostrar el título
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
         }
 
-        // Actualizar progress a 100%
-        this.updateProgress(100);
+        // Actualizar progress a 90% (casi terminado)
+        this.updateProgress(90);
     }
 
     backToSurvey() {
@@ -231,12 +246,17 @@ class SCGSurvey {
         const group = document.getElementById(`group-${groupNumber}`);
         if (group) {
             group.style.display = 'block';
-            group.scrollIntoView({ behavior: 'smooth', block: 'start' });
             
-            // Revalidar el grupo actual
+            // Scroll hacia arriba para mostrar el título del survey
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+            
+            // Revalidar el grupo actual después del scroll
             setTimeout(() => {
                 this.validateCurrentGroup();
-            }, 100);
+            }, 500); // Esperar un poco más para que termine el scroll
         }
     }
 
@@ -246,7 +266,9 @@ class SCGSurvey {
         if (customPercent !== null) {
             percentage = customPercent;
         } else {
-            percentage = Math.round((this.currentGroup / this.totalGroups) * 88); // 88% máximo para las preguntas
+            // Calcular progreso basado en preguntas respondidas
+            const answeredQuestions = Object.keys(this.responses).length;
+            percentage = Math.round((answeredQuestions / this.totalQuestions) * 85); // 85% máximo para las preguntas
         }
 
         const progressBar = document.querySelector('#surveyProgress');
@@ -263,8 +285,22 @@ class SCGSurvey {
 
         if (currentStep && customPercent === null) {
             currentStep.textContent = `Paso ${this.currentGroup} de ${this.totalGroups}`;
+        } else if (currentStep && customPercent === 90) {
+            currentStep.textContent = 'Información de contacto';
         } else if (currentStep && customPercent === 100) {
-            currentStep.textContent = 'Finalizando...';
+            currentStep.textContent = '¡Completado!';
+        }
+        
+        // También actualizar la barra fija si existe
+        const fixedCurrentStep = document.querySelector('.progress-info-fixed .current-step');
+        if (fixedCurrentStep) {
+            if (customPercent === null) {
+                fixedCurrentStep.textContent = `Paso ${this.currentGroup} de ${this.totalGroups}`;
+            } else if (customPercent === 90) {
+                fixedCurrentStep.textContent = 'Información de contacto';
+            } else if (customPercent === 100) {
+                fixedCurrentStep.textContent = '¡Completado!';
+            }
         }
     }
 
@@ -373,7 +409,12 @@ class SCGSurvey {
         const thankYouMessage = document.getElementById('thankYouMessage');
         if (thankYouMessage) {
             thankYouMessage.style.display = 'block';
-            thankYouMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Scroll hacia arriba para mostrar el mensaje completo
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
         }
 
         // Progress a 100%
@@ -383,6 +424,39 @@ class SCGSurvey {
     validateEmail(email) {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
+    }
+    
+    handleSensitiveDataLogic(changedElement) {
+        const questionId = changedElement.getAttribute('data-question');
+        const allCheckboxes = document.querySelectorAll(`input[data-question="${questionId}"][type="checkbox"]`);
+        
+        // Buscar la opción "No manejamos información sensible" (la que tiene valor más alto)
+        let noSensitiveDataOption = null;
+        let maxOptionId = 0;
+        
+        allCheckboxes.forEach(checkbox => {
+            const optionId = parseInt(checkbox.value);
+            if (optionId > maxOptionId) {
+                maxOptionId = optionId;
+                noSensitiveDataOption = checkbox;
+            }
+        });
+        
+        if (noSensitiveDataOption && changedElement === noSensitiveDataOption) {
+            // Si seleccionó "No manejamos información sensible", deseleccionar todos los demás
+            if (changedElement.checked) {
+                allCheckboxes.forEach(checkbox => {
+                    if (checkbox !== noSensitiveDataOption) {
+                        checkbox.checked = false;
+                    }
+                });
+            }
+        } else {
+            // Si seleccionó cualquier otro tipo de dato, deseleccionar "No manejamos información sensible"
+            if (changedElement.checked && noSensitiveDataOption) {
+                noSensitiveDataOption.checked = false;
+            }
+        }
     }
 }
 

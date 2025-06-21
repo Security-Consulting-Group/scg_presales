@@ -40,17 +40,25 @@ class Command(BaseCommand):
                     self.style.SUCCESS(f'Iniciando carga de datos con código: {survey_code}')
                 )
                 
-                # Verificar si el survey ya existe
-                if Survey.objects.filter(code=survey_code).exists():
+                # Verificar si el survey ya existe (por título y versión)
+                from surveys.management.commands.survey_data_complete import SURVEY_DATA
+                survey_info = SURVEY_DATA['survey']
+                
+                existing_survey = Survey.objects.filter(
+                    title=survey_info['title'],
+                    version=survey_info['version']
+                ).first()
+                
+                if existing_survey:
                     if not force:
                         raise CommandError(
-                            f'Survey con código {survey_code} ya existe. '
+                            f'Survey "{survey_info["title"]}" v{survey_info["version"]} ya existe. '
                             'Use --force para sobrescribir.'
                         )
                     else:
-                        Survey.objects.filter(code=survey_code).delete()
+                        existing_survey.delete()
                         self.stdout.write(
-                            self.style.WARNING(f'Survey existente eliminado: {survey_code}')
+                            self.style.WARNING(f'Survey existente eliminado: {existing_survey.code}')
                         )
                 
                 # Crear el survey principal
@@ -84,8 +92,12 @@ class Command(BaseCommand):
     def create_survey(self, code):
         """Crea el survey principal."""
         from surveys.management.commands.survey_data_complete import SURVEY_DATA
+        from core.models import User
         
         survey_info = SURVEY_DATA['survey']
+        
+        # Buscar un usuario admin para asignar como created_by
+        admin_user = User.objects.filter(is_superuser=True).first()
         
         survey = Survey.objects.create(
             code=code,
@@ -93,7 +105,7 @@ class Command(BaseCommand):
             description=survey_info['description'],
             version=survey_info['version'],
             max_score=survey_info['max_score'],
-            created_by=survey_info['created_by'],
+            created_by=admin_user,  # Ahora es un User object
             is_active=True
         )
         

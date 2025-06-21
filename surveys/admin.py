@@ -7,20 +7,24 @@ from .models import (
     SurveySubmission, Response
 )
 
+# surveys/admin.py - Actualizar SurveyAdmin
 
 class SurveyAdmin(admin.ModelAdmin):
-    list_display = ['title', 'code', 'version', 'is_active', 'created_at', 'max_score']
-    list_filter = ['is_active', 'created_at', 'version']
+    list_display = ['title', 'code', 'version', 'is_active', 'is_featured', 'created_at', 'created_by_name', 'max_score']
+    list_filter = ['is_active', 'is_featured', 'created_at', 'version']
     search_fields = ['title', 'code', 'description']
     ordering = ['-created_at']
     readonly_fields = ['code', 'created_at', 'updated_at']
+    
+    # Permitir marcar/desmarcar featured desde la lista
+    list_editable = ['is_featured']
     
     fieldsets = (
         ('Basic Information', {
             'fields': ('title', 'description', 'version', 'code')
         }),
         ('Configuration', {
-            'fields': ('is_active', 'max_score', 'created_by')
+            'fields': ('is_active', 'is_featured', 'max_score', 'created_by')
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),
@@ -29,10 +33,60 @@ class SurveyAdmin(admin.ModelAdmin):
     )
     
     def get_readonly_fields(self, request, obj=None):
-        # Si es un survey nuevo, permitir editar created_by
+        # Si es un survey nuevo, ocultar campos que se generan automáticamente
         if obj is None:
-            return ['code', 'created_at', 'updated_at']
-        return ['code', 'created_at', 'updated_at', 'created_by']
+            return ['code', 'created_by', 'created_at', 'updated_at']
+        # Si ya existe, mostrar todos como solo lectura excepto los editables
+        return ['code', 'created_by', 'created_at', 'updated_at']
+    
+    def get_fieldsets(self, request, obj=None):
+        # Si es un survey nuevo, ocultar el campo code y created_by del formulario
+        if obj is None:
+            return (
+                ('Basic Information', {
+                    'fields': ('title', 'description', 'version')
+                }),
+                ('Configuration', {
+                    'fields': ('is_active', 'is_featured', 'max_score')
+                }),
+            )
+        # Si ya existe, mostrar todos los campos
+        return super().get_fieldsets(request, obj)
+    
+    def save_model(self, request, obj, form, change):
+        # Si es un nuevo survey, establecer created_by automáticamente
+        if not change:  # change=False significa que es nuevo
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
+    
+    actions = ['mark_as_featured', 'unmark_as_featured']
+    
+    def mark_as_featured(self, request, queryset):
+        """Mark selected survey as featured (only one at a time)."""
+        if queryset.count() > 1:
+            self.message_user(request, 'Solo se puede marcar un survey como featured a la vez.', level='warning')
+            return
+        
+        survey = queryset.first()
+        # El método save() del modelo se encarga de desmarcar los demás
+        survey.is_featured = True
+        survey.save()
+        
+        self.message_user(request, f'Survey "{survey.title}" marcado como featured.')
+    mark_as_featured.short_description = 'Mark as featured (will show on landing page)'
+    
+    def unmark_as_featured(self, request, queryset):
+        """Remove featured status from selected surveys."""
+        count = queryset.update(is_featured=False)
+        self.message_user(request, f'{count} surveys ya no están marcados como featured.')
+    unmark_as_featured.short_description = 'Remove featured status'
+    
+    def created_by_name(self, obj):
+        """Display the name of the user who created the survey."""
+        if obj.created_by:
+            return f"{obj.created_by.first_name} {obj.created_by.last_name}".strip() or obj.created_by.email
+        return "Unknown"
+    created_by_name.short_description = 'Created By'
 
 
 class SurveySectionAdmin(admin.ModelAdmin):

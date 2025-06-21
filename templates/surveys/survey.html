@@ -13,7 +13,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/survey.css' %}">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <script src="{% static 'js/survey.js' %}"></script>
     <meta name="csrf-token" content="{{ csrf_token }}">
 </head>
 
@@ -30,6 +29,23 @@
         </div>
     </nav>
 
+    <!-- Progress Bar Fijo - Siempre visible -->
+    <div class="progress-bar-fixed">
+        <div class="container">
+            <div class="progress-container-fixed">
+                <div class="progress-info-fixed">
+                    <span class="current-step">Paso 1 de {{ question_groups|length }}</span>
+                    <span class="total-questions">{{ total_questions }} preguntas</span>
+                </div>
+                <div class="progress survey-progress-fixed">
+                    <div class="progress-bar" role="progressbar" style="width: 0%" id="surveyProgress">
+                        <span class="progress-text">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Survey Container -->
     <section class="survey-section">
         <div class="container">
@@ -40,21 +56,8 @@
                     <div class="survey-header text-center mb-5" data-aos="fade-up">
                         <h1 class="survey-title">{{ survey.title }}</h1>
                         <p class="survey-description">
-                            {{ survey.description|default:"Responda 14 preguntas para evaluar la postura de ciberseguridad de su empresa y recibir recomendaciones personalizadas." }}
+                            {{ survey.description }}
                         </p>
-                        
-                        <!-- Progress Bar -->
-                        <div class="progress-container">
-                            <div class="progress survey-progress">
-                                <div class="progress-bar" role="progressbar" style="width: 0%" id="surveyProgress">
-                                    <span class="progress-text">0%</span>
-                                </div>
-                            </div>
-                            <div class="progress-info">
-                                <span class="current-step">Paso 1 de {{ question_groups|length }}</span>
-                                <span class="total-questions">{{ total_questions }} preguntas</span>
-                            </div>
-                        </div>
                     </div>
 
                     <!-- Survey Form -->
@@ -63,20 +66,9 @@
                         <!-- Question Groups (SPA Style) -->
                         {% for group in question_groups %}
                         <div class="question-group" id="group-{{ forloop.counter }}" {% if not forloop.first %}style="display: none;"{% endif %}>
-                            <div class="question-group-header">
-                                <h3 class="group-title">
-                                    {% if forloop.first %}
-                                        Información de su Empresa
-                                    {% elif forloop.last %}
-                                        Objetivos y Prioridades
-                                    {% else %}
-                                        Evaluación de Seguridad
-                                    {% endif %}
-                                </h3>
-                            </div>
 
                             {% for question in group %}
-                            <div class="question-card" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:1|mul:100 }}">
+                            <div class="question-card" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:100 }}">
                                 <div class="question-header">
                                     <span class="question-number">{{ question.section.order }}.{{ question.order }}</span>
                                     <h4 class="question-text">{{ question.question_text }}</h4>
@@ -157,15 +149,17 @@
                                 <button type="button" class="btn btn-outline-primary btn-nav" id="prevBtn">
                                     <i class="fas fa-arrow-left me-2"></i>Anterior
                                 </button>
+                                {% else %}
+                                <div></div> <!-- Spacer para alinear botón a la derecha -->
                                 {% endif %}
 
                                 {% if not forloop.last %}
-                                <button type="button" class="btn btn-primary btn-primary-personalized btn-nav" id="nextBtn">
+                                <button type="button" class="btn btn-primary btn-primary-personalized btn-nav" id="nextBtn" disabled>
                                     Siguiente<i class="fas fa-arrow-right ms-2"></i>
                                 </button>
                                 {% else %}
-                                <button type="button" class="btn btn-primary btn-primary-personalized btn-nav" id="showContactBtn">
-                                    Finalizar Diagnóstico<i class="fas fa-check ms-2"></i>
+                                <button type="button" class="btn btn-primary btn-primary-personalized btn-nav" id="showContactBtn" disabled>
+                                    Finalizar<i class="fas fa-check ms-2"></i>
                                 </button>
                                 {% endif %}
                             </div>
@@ -200,7 +194,7 @@
                                         <i class="fas fa-arrow-left me-2"></i>Regresar
                                     </button>
                                     <button type="submit" class="btn btn-primary btn-primary-personalized btn-nav" id="submitSurveyBtn">
-                                        <i class="fas fa-paper-plane me-2"></i>Enviar Diagnóstico
+                                        <i class="fas fa-paper-plane me-2"></i>Enviar
                                     </button>
                                 </div>
                             </div>
@@ -239,11 +233,11 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script src="{% static 'js/survey.js' %}"></script>
     <script>
         // Initialize AOS
         AOS.init();
         
-        // Survey JavaScript será el siguiente paso
         console.log('Survey loaded:', '{{ survey.code }}');
     </script>
 </body>

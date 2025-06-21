@@ -1,6 +1,6 @@
 """
 DATOS COMPLETOS DEL SURVEY - SCG DIAGNÓSTICO EJECUTIVO DE CIBERSEGURIDAD
-Para usar en management command para cargar las preguntas
+Ubicación: surveys/management/commands/survey_data_complete.py
 """
 
 SURVEY_DATA = {
@@ -85,12 +85,11 @@ SURVEY_DATA = {
             "question_type": "MULTIPLE_CHOICE",
             "is_required": True,
             "max_points": 5,
-            "help_text": "Puntuación: 0 tipos=5pts, 1 tipo=4pts, 2 tipos=3pts, 3 tipos=2pts, 4+ tipos=1pt",
             "options": [
-                {"text": "Datos financieros/tarjetas de crédito", "order": 1, "points": 0},
-                {"text": "Información personal (nombres, direcciones, teléfonos)", "order": 2, "points": 0},
-                {"text": "Información médica o de salud", "order": 3, "points": 0},
-                {"text": "Propiedad intelectual crítica", "order": 4, "points": 0},
+                {"text": "Datos financieros/tarjetas de crédito", "order": 1, "points": -1},
+                {"text": "Información personal", "order": 2, "points": -1},
+                {"text": "Información médica o de salud", "order": 3, "points": -1},
+                {"text": "Propiedad intelectual crítica", "order": 4, "points": -1},
                 {"text": "No manejamos información sensible", "order": 5, "points": 5}
             ]
         },
