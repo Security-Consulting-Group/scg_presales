@@ -1,0 +1,373 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if object %}Editar Survey{% else %}Nuevo Survey{% endif %}
+{% endblock %}
+
+{% block page_title %}
+    {% if object %}Editar Survey{% else %}Crear Nuevo Survey{% endif %}
+{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex gap-2">
+    {% if object %}
+        <a href="{% url 'admin_panel:survey_detail' code=object.code %}" 
+           class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Volver al Detalle
+        </a>
+        <a href="/survey/{{ object.code }}/" 
+           class="btn btn-outline-primary" 
+           target="_blank">
+            <i class="fas fa-external-link-alt me-1"></i>Ver en Vivo
+        </a>
+    {% else %}
+        <a href="{% url 'admin_panel:surveys_list' %}" 
+           class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Volver a Lista
+        </a>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-6">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h3 class="admin-card-title">
+                    <i class="fas fa-{% if object %}edit{% else %}plus{% endif %}"></i>
+                    {% if object %}Editar Survey{% else %}Información del Survey{% endif %}
+                </h3>
+            </div>
+            <div class="admin-card-body">
+                <form method="post" data-loading>
+                    {% csrf_token %}
+                    
+                    <!-- Title -->
+                    <div class="admin-form-group">
+                        <label for="id_title" class="admin-form-label">
+                            Título del Survey *
+                        </label>
+                        <input type="text" 
+                               id="id_title" 
+                               name="title" 
+                               class="admin-form-control" 
+                               placeholder="ej. Diagnóstico Ejecutivo de Ciberseguridad"
+                               value="{{ form.title.value|default:'' }}"
+                               required>
+                        {% if form.title.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.title.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="text-muted">
+                            Nombre descriptivo que aparecerá en el encabezado del survey
+                        </small>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="admin-form-group">
+                        <label for="id_description" class="admin-form-label">
+                            Descripción
+                        </label>
+                        <textarea id="id_description" 
+                                  name="description" 
+                                  class="admin-form-control" 
+                                  rows="3"
+                                  placeholder="Descripción del propósito y contenido del survey">{{ form.description.value|default:'' }}</textarea>
+                        {% if form.description.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.description.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="text-muted">
+                            Explicación breve de qué mide este survey
+                        </small>
+                    </div>
+
+                    <!-- Version and Max Score -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="admin-form-group">
+                                <label for="id_version" class="admin-form-label">
+                                    Versión *
+                                </label>
+                                <input type="text" 
+                                       id="id_version" 
+                                       name="version" 
+                                       class="admin-form-control" 
+                                       placeholder="1.0"
+                                       value="{{ form.version.value|default:'' }}"
+                                       required>
+                                {% if form.version.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.version.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <small class="text-muted">
+                                    Versión del survey (ej. 1.0, 2.1)
+                                </small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="admin-form-group">
+                                <label for="id_max_score" class="admin-form-label">
+                                    Puntuación Máxima *
+                                </label>
+                                <input type="number" 
+                                       id="id_max_score" 
+                                       name="max_score" 
+                                       class="admin-form-control" 
+                                       placeholder="100"
+                                       value="{{ form.max_score.value|default:'' }}"
+                                       min="1"
+                                       required>
+                                {% if form.max_score.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.max_score.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <small class="text-muted">
+                                    Máximo puntaje posible
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status Checkboxes -->
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">Estado y Configuración</label>
+                        <div class="d-flex flex-column gap-3">
+                            <!-- Is Active -->
+                            <div class="form-check">
+                                <input type="checkbox" 
+                                       id="id_is_active" 
+                                       name="is_active" 
+                                       class="form-check-input"
+                                       {% if form.is_active.value %}checked{% endif %}>
+                                <label for="id_is_active" class="form-check-label">
+                                    <strong>Survey Activo</strong>
+                                    <br>
+                                    <small class="text-muted">
+                                        Permite que nuevos prospects puedan acceder y completar el survey
+                                    </small>
+                                </label>
+                            </div>
+                            
+                            <!-- Is Featured -->
+                            <div class="form-check">
+                                <input type="checkbox" 
+                                       id="id_is_featured" 
+                                       name="is_featured" 
+                                       class="form-check-input"
+                                       {% if form.is_featured.value %}checked{% endif %}>
+                                <label for="id_is_featured" class="form-check-label">
+                                    <strong>Survey Featured</strong>
+                                    <br>
+                                    <small class="text-muted">
+                                        Aparecerá como botón principal en la landing page (solo uno puede estar featured)
+                                    </small>
+                                </label>
+                            </div>
+                        </div>
+                        {% if form.is_active.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.is_active.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        {% if form.is_featured.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.is_featured.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {% if object %}
+                    <!-- Read-only fields for existing surveys -->
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">Información del Sistema</label>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Código</label>
+                                <div class="d-flex align-items-center gap-2">
+                                    <code class="bg-light p-2 rounded flex-grow-1">{{ object.code }}</code>
+                                    <small class="text-muted">(No editable)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Creado</label>
+                                <div class="bg-light p-2 rounded">
+                                    {{ object.created_at|date:"d M Y - H:i" }}
+                                    {% if object.created_by %}
+                                        <br><small class="text-muted">por {{ object.created_by.first_name }} {{ object.created_by.last_name }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <div>
+                            {% if object %}
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Los cambios se aplicarán inmediatamente
+                                </small>
+                            {% else %}
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Se generará un código único automáticamente
+                                </small>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{% if object %}{% url 'admin_panel:survey_detail' code=object.code %}{% else %}{% url 'admin_panel:surveys_list' %}{% endif %}" 
+                               class="btn btn-admin-secondary">
+                                Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-admin-primary">
+                                <i class="fas fa-{% if object %}save{% else %}plus{% endif %} me-1"></i>
+                                {% if object %}Guardar Cambios{% else %}Crear Survey{% endif %}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if object %}
+        <!-- Additional Actions Card -->
+        <div class="admin-card mt-4">
+            <div class="admin-card-header">
+                <h3 class="admin-card-title">
+                    <i class="fas fa-tools"></i>
+                    Acciones Adicionales
+                </h3>
+            </div>
+            <div class="admin-card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <h6 class="mb-2">
+                                <i class="fas fa-eye text-primary me-2"></i>
+                                Previsualizar Survey
+                            </h6>
+                            <p class="text-muted small mb-3">
+                                Ve cómo se muestra el survey a los prospects
+                            </p>
+                            <a href="/survey/{{ object.code }}/" 
+                               target="_blank" 
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-external-link-alt me-1"></i>Abrir en Nueva Pestaña
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <h6 class="mb-2">
+                                <i class="fas fa-copy text-success me-2"></i>
+                                Compartir URL
+                            </h6>
+                            <p class="text-muted small mb-3">
+                                Copia el enlace para enviar a prospects
+                            </p>
+                            <button class="btn btn-sm btn-outline-success" 
+                                    onclick="copyToClipboard('{{ request.build_absolute_uri }}/survey/{{ object.code }}/')">
+                                <i class="fas fa-copy me-1"></i>Copiar Enlace
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Warning Card for Important Actions -->
+        {% if object.submissions.count > 0 %}
+        <div class="admin-card mt-4 border-warning">
+            <div class="admin-card-header bg-warning bg-opacity-10">
+                <h3 class="admin-card-title text-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Información Importante
+                </h3>
+            </div>
+            <div class="admin-card-body">
+                <p class="mb-2">
+                    <strong>Este survey tiene {{ object.submissions.count }} submission{{ object.submissions.count|pluralize:"s" }}.</strong>
+                </p>
+                <p class="text-muted small mb-0">
+                    • Cambiar el estado a "Inactivo" evitará nuevas submissions<br>
+                    • Las submissions existentes no se verán afectadas<br>
+                    • Considera duplicar el survey antes de hacer cambios mayores
+                </p>
+            </div>
+        </div>
+        {% endif %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('📝 Survey Form cargado');
+    
+    // Featured checkbox warning
+    const featuredCheckbox = document.getElementById('id_is_featured');
+    if (featuredCheckbox) {
+        featuredCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                window.scgAdmin.showNotification(
+                    'Solo un survey puede estar featured a la vez. Si guardas, otros surveys perderán el estado featured.',
+                    'info'
+                );
+            }
+        });
+    }
+    
+    // Form validation
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const title = document.getElementById('id_title').value.trim();
+        const version = document.getElementById('id_version').value.trim();
+        const maxScore = document.getElementById('id_max_score').value;
+        
+        if (!title || !version || !maxScore) {
+            e.preventDefault();
+            window.scgAdmin.showNotification('Por favor completa todos los campos requeridos', 'error');
+            return;
+        }
+        
+        if (parseInt(maxScore) < 1) {
+            e.preventDefault();
+            window.scgAdmin.showNotification('La puntuación máxima debe ser mayor a 0', 'error');
+            return;
+        }
+    });
+});
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        window.scgAdmin.showNotification('URL copiada al portapapeles', 'success');
+    }).catch(function(err) {
+        console.error('Error copiando al portapapeles:', err);
+        window.scgAdmin.showNotification('Error copiando al portapapeles', 'error');
+    });
+}
+</script>
+{% endblock %}

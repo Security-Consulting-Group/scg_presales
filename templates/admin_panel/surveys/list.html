@@ -1,0 +1,269 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}Surveys{% endblock %}
+{% block page_title %}Gestión de Surveys{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex gap-2">
+    <a href="{% url 'admin_panel:survey_create' %}" class="btn btn-admin-primary">
+        <i class="fas fa-plus me-1"></i>Nuevo Survey
+    </a>
+    <button class="btn btn-outline-secondary" onclick="window.location.reload()">
+        <i class="fas fa-sync-alt me-1"></i>Actualizar
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Filters Section -->
+<div class="admin-filters">
+    <form method="get" id="filterForm" class="row g-3 align-items-end">
+        <!-- Search -->
+        <div class="col-md-4">
+            <label for="searchInput" class="admin-form-label">Buscar</label>
+            <div class="admin-search-input">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" 
+                       id="searchInput" 
+                       name="search" 
+                       class="admin-form-control" 
+                       placeholder="Título, código, descripción..." 
+                       value="{{ search }}">
+            </div>
+        </div>
+        
+        <!-- Status Filter -->
+        <div class="col-md-3">
+            <label for="statusFilter" class="admin-form-label">Estado</label>
+            <select id="statusFilter" name="status" class="admin-form-control">
+                <option value="">Todos los estados</option>
+                <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Activos</option>
+                <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactivos</option>
+            </select>
+        </div>
+        
+        <!-- Actions -->
+        <div class="col-md-5">
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-admin-primary">
+                    <i class="fas fa-filter me-1"></i>Filtrar
+                </button>
+                <button type="button" id="clearFilters" class="btn btn-admin-secondary">
+                    <i class="fas fa-times me-1"></i>Limpiar
+                </button>
+                <div class="ms-auto">
+                    <small class="text-muted">
+                        {{ surveys|length }} de {{ page_obj.paginator.count }} surveys
+                    </small>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Results Section -->
+{% if surveys %}
+<div class="admin-table">
+    <table class="table table-hover mb-0">
+        <thead>
+            <tr>
+                <th data-sort="title">
+                    <i class="fas fa-clipboard-list me-2"></i>Survey
+                </th>
+                <th data-sort="version">Versión</th>
+                <th data-sort="is_active">Estado</th>
+                <th data-sort="is_featured">Featured</th>
+                <th data-sort="created_at">Creado</th>
+                <th data-sort="submissions_count">Submissions</th>
+                <th class="text-end">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for survey in surveys %}
+            <tr data-href="{% url 'admin_panel:survey_detail' code=survey.code %}">
+                <td>
+                    <div>
+                        <strong class="text-truncate d-block" style="max-width: 200px;">
+                            {{ survey.title }}
+                        </strong>
+                        <small class="text-muted">
+                            <i class="fas fa-code me-1"></i>{{ survey.code }}
+                        </small>
+                    </div>
+                </td>
+                <td>
+                    <span class="badge bg-light text-dark">v{{ survey.version }}</span>
+                </td>
+                <td>
+                    {% if survey.is_active %}
+                        <span class="status-badge status-active">
+                            <i class="fas fa-check-circle me-1"></i>Activo
+                        </span>
+                    {% else %}
+                        <span class="status-badge status-inactive">
+                            <i class="fas fa-times-circle me-1"></i>Inactivo
+                        </span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if survey.is_featured %}
+                        <span class="badge bg-warning text-dark">
+                            <i class="fas fa-star me-1"></i>Featured
+                        </span>
+                    {% else %}
+                        <span class="text-muted">-</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div>
+                        <div>{{ survey.created_at|date:"d M Y" }}</div>
+                        <small class="text-muted">{{ survey.created_at|date:"H:i" }}</small>
+                    </div>
+                </td>
+                <td>
+                    <span class="badge-count">
+                        {{ survey.submissions.count }}
+                    </span>
+                </td>
+                <td class="text-end">
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                type="button" 
+                                data-bs-toggle="dropdown">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'admin_panel:survey_detail' code=survey.code %}">
+                                    <i class="fas fa-eye me-2"></i>Ver Detalle
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'admin_panel:survey_edit' code=survey.code %}">
+                                    <i class="fas fa-edit me-2"></i>Editar
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <button class="dropdown-item" 
+                                        data-toggle-url="{% url 'admin_panel:toggle_survey_status' code=survey.code %}"
+                                        data-confirm="¿Seguro que deseas {% if survey.is_active %}desactivar{% else %}activar{% endif %} este survey?">
+                                    {% if survey.is_active %}
+                                        <i class="fas fa-toggle-off me-2 text-danger"></i>Desactivar
+                                    {% else %}
+                                        <i class="fas fa-toggle-on me-2 text-success"></i>Activar
+                                    {% endif %}
+                                </button>
+                            </li>
+                            <li>
+                                <a class="dropdown-item text-primary" 
+                                   href="/survey/{{ survey.code }}/" 
+                                   target="_blank">
+                                    <i class="fas fa-external-link-alt me-2"></i>Ver en Vivo
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+<nav class="admin-pagination">
+    {% if page_obj.has_previous %}
+        <a href="?{% if search %}search={{ search }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}page=1" 
+           class="page-link">
+            <i class="fas fa-angle-double-left"></i>
+        </a>
+        <a href="?{% if search %}search={{ search }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}page={{ page_obj.previous_page_number }}" 
+           class="page-link">
+            <i class="fas fa-angle-left"></i>
+        </a>
+    {% endif %}
+    
+    <span class="page-link active">
+        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+    </span>
+    
+    {% if page_obj.has_next %}
+        <a href="?{% if search %}search={{ search }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}page={{ page_obj.next_page_number }}" 
+           class="page-link">
+            <i class="fas fa-angle-right"></i>
+        </a>
+        <a href="?{% if search %}search={{ search }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}page={{ page_obj.paginator.num_pages }}" 
+           class="page-link">
+            <i class="fas fa-angle-double-right"></i>
+        </a>
+    {% endif %}
+</nav>
+{% endif %}
+
+{% else %}
+<!-- Empty State -->
+<div class="admin-card">
+    <div class="admin-card-body">
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                {% if search or status_filter %}
+                    <i class="fas fa-search"></i>
+                {% else %}
+                    <i class="fas fa-clipboard-list"></i>
+                {% endif %}
+            </div>
+            {% if search or status_filter %}
+                <h4>No se encontraron surveys</h4>
+                <p class="text-muted">
+                    No hay surveys que coincidan con los filtros aplicados.
+                    <br>Intenta ajustar los criterios de búsqueda.
+                </p>
+                <button type="button" id="clearFilters" class="btn btn-admin-secondary">
+                    <i class="fas fa-times me-1"></i>Limpiar filtros
+                </button>
+            {% else %}
+                <h4>No hay surveys creados</h4>
+                <p class="text-muted">
+                    Empieza creando tu primer survey para diagnosticar<br>
+                    la ciberseguridad de tus prospects.
+                </p>
+                <a href="{% url 'admin_panel:survey_create' %}" class="btn btn-admin-primary">
+                    <i class="fas fa-plus me-1"></i>Crear Primer Survey
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('📋 Survey List cargado');
+    
+    // Add click tracking for survey links
+    const surveyRows = document.querySelectorAll('tr[data-href]');
+    surveyRows.forEach(row => {
+        row.addEventListener('click', function(e) {
+            // Skip if clicking on dropdown or buttons
+            if (e.target.closest('.dropdown, button, a')) {
+                return;
+            }
+            window.location.href = this.dataset.href;
+        });
+    });
+    
+    // Enhanced search with keyboard shortcut
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            document.getElementById('searchInput').focus();
+        }
+    });
+});
+</script>
+{% endblock %}
