@@ -1,0 +1,347 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if object %}Editar Sección{% else %}Nueva Sección{% endif %}
+{% endblock %}
+
+{% block page_title %}
+    {% if object %}Editar Sección{% else %}Crear Nueva Sección{% endif %}
+{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex gap-2">
+    <a href="{% url 'admin_panel:survey_detail' code=survey.code %}#sections" 
+       class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Volver al Survey
+    </a>
+    {% if object %}
+        <a href="{% url 'admin_panel:survey_detail' code=survey.code %}#sections" 
+           class="btn btn-outline-primary">
+            <i class="fas fa-eye me-1"></i>Ver Survey
+        </a>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-6">
+        
+        <!-- Survey Context -->
+        <div class="admin-card mb-4">
+            <div class="admin-card-body">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="flex-grow-1">
+                        <h5 class="mb-1">{{ survey.title }}</h5>
+                        <div class="d-flex align-items-center gap-3 text-muted">
+                            <span><i class="fas fa-code me-1"></i>{{ survey.code }}</span>
+                            <span><i class="fas fa-folder me-1"></i>{{ survey.sections.count }} sección{{ survey.sections.count|pluralize:"es" }}</span>
+                        </div>
+                    </div>
+                    <div>
+                        {% if survey.is_active %}
+                            <span class="status-badge status-active">
+                                <i class="fas fa-check-circle me-1"></i>Activo
+                            </span>
+                        {% else %}
+                            <span class="status-badge status-inactive">
+                                <i class="fas fa-times-circle me-1"></i>Inactivo
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Form -->
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h3 class="admin-card-title">
+                    <i class="fas fa-{% if object %}edit{% else %}plus{% endif %}"></i>
+                    {% if object %}Editar Sección{% else %}Información de la Sección{% endif %}
+                </h3>
+            </div>
+            <div class="admin-card-body">
+                <form method="post" data-loading>
+                    {% csrf_token %}
+                    
+                    <!-- Title -->
+                    <div class="admin-form-group">
+                        <label for="id_title" class="admin-form-label">
+                            Título de la Sección *
+                        </label>
+                        <input type="text" 
+                               id="id_title" 
+                               name="title" 
+                               class="admin-form-control" 
+                               placeholder="ej. Contexto de Negocio, Gestión de Accesos..."
+                               value="{{ form.title.value|default:'' }}"
+                               required>
+                        {% if form.title.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.title.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="text-muted">
+                            Nombre descriptivo que organizará las preguntas relacionadas
+                        </small>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="admin-form-group">
+                        <label for="id_description" class="admin-form-label">
+                            Descripción
+                        </label>
+                        <textarea id="id_description" 
+                                  name="description" 
+                                  class="admin-form-control" 
+                                  rows="3"
+                                  placeholder="Descripción de qué evalúa esta sección">{{ form.description.value|default:'' }}</textarea>
+                        {% if form.description.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.description.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="text-muted">
+                            Explicación breve del propósito de esta sección
+                        </small>
+                    </div>
+
+                    <!-- Order and Max Points -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="admin-form-group">
+                                <label for="id_order" class="admin-form-label">
+                                    Orden *
+                                </label>
+                                <input type="number" 
+                                       id="id_order" 
+                                       name="order" 
+                                       class="admin-form-control" 
+                                       placeholder="{{ next_order|default:'1' }}"
+                                       value="{{ form.order.value|default:next_order }}"
+                                       min="1"
+                                       required>
+                                {% if form.order.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.order.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <small class="text-muted">
+                                    Posición en el survey (1, 2, 3...)
+                                </small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="admin-form-group">
+                                <label for="id_max_points" class="admin-form-label">
+                                    Puntos Máximos *
+                                </label>
+                                <input type="number" 
+                                       id="id_max_points" 
+                                       name="max_points" 
+                                       class="admin-form-control" 
+                                       placeholder="15"
+                                       value="{{ form.max_points.value|default:'' }}"
+                                       min="0"
+                                       required>
+                                {% if form.max_points.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.max_points.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <small class="text-muted">
+                                    Máximo puntaje de esta sección
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if object %}
+                    <!-- Read-only info for existing sections -->
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">Información Adicional</label>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Preguntas</label>
+                                <div class="bg-light p-2 rounded">
+                                    <i class="fas fa-question-circle me-2 text-primary"></i>
+                                    {{ object.questions.count }} pregunta{{ object.questions.count|pluralize:"s" }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Survey</label>
+                                <div class="bg-light p-2 rounded text-truncate">
+                                    {{ object.survey.title }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <div>
+                            {% if object %}
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Los cambios se aplicarán inmediatamente
+                                </small>
+                            {% else %}
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Después podrás agregar preguntas a esta sección
+                                </small>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'admin_panel:survey_detail' code=survey.code %}#sections" 
+                               class="btn btn-admin-secondary">
+                                Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-admin-primary">
+                                <i class="fas fa-{% if object %}save{% else %}plus{% endif %} me-1"></i>
+                                {% if object %}Guardar Cambios{% else %}Crear Sección{% endif %}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if not object %}
+        <!-- Help Card for New Sections -->
+        <div class="admin-card mt-4">
+            <div class="admin-card-header">
+                <h3 class="admin-card-title">
+                    <i class="fas fa-lightbulb"></i>
+                    Consejos para Crear Secciones
+                </h3>
+            </div>
+            <div class="admin-card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <h6 class="mb-2">
+                                <i class="fas fa-sort-numeric-up text-primary me-2"></i>
+                                Orden Lógico
+                            </h6>
+                            <p class="text-muted small mb-0">
+                                Organiza las secciones de lo general a lo específico. 
+                                Ejemplo: Contexto → Accesos → Infraestructura → Respuesta
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <h6 class="mb-2">
+                                <i class="fas fa-balance-scale text-success me-2"></i>
+                                Distribución de Puntos
+                            </h6>
+                            <p class="text-muted small mb-0">
+                                Asigna más puntos a las secciones más críticas para la evaluación. 
+                                El total debe sumar {{ survey.max_score }} puntos.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if object and object.questions.exists %}
+        <!-- Questions Preview -->
+        <div class="admin-card mt-4">
+            <div class="admin-card-header">
+                <h3 class="admin-card-title">
+                    <i class="fas fa-question-circle"></i>
+                    Preguntas de esta Sección
+                </h3>
+            </div>
+            <div class="admin-card-body">
+                <div class="list-group list-group-flush">
+                    {% for question in object.questions.all %}
+                    <div class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="badge bg-secondary">{{ question.order }}</span>
+                                <span class="badge bg-info">{{ question.get_question_type_display }}</span>
+                                {% if question.is_required %}
+                                    <span class="badge bg-warning text-dark">Requerida</span>
+                                {% endif %}
+                            </div>
+                            <p class="mb-1">{{ question.question_text|truncatechars:80 }}</p>
+                            <small class="text-muted">
+                                {{ question.options.count }} opción{{ question.options.count|pluralize:"es" }} • 
+                                {{ question.max_points }} puntos
+                            </small>
+                        </div>
+                        <a href="{% url 'admin_panel:question_edit' pk=question.id %}" 
+                           class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="text-center mt-3">
+                    <a href="{% url 'admin_panel:question_create' code=survey.code %}" 
+                       class="btn btn-admin-primary">
+                        <i class="fas fa-plus me-1"></i>Agregar Pregunta a esta Sección
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('📝 Section Form cargado');
+    
+    // Form validation
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const title = document.getElementById('id_title').value.trim();
+        const order = document.getElementById('id_order').value;
+        const maxPoints = document.getElementById('id_max_points').value;
+        
+        if (!title || !order || !maxPoints) {
+            e.preventDefault();
+            window.scgAdmin.showNotification('Por favor completa todos los campos requeridos', 'error');
+            return;
+        }
+        
+        if (parseInt(order) < 1) {
+            e.preventDefault();
+            window.scgAdmin.showNotification('El orden debe ser mayor a 0', 'error');
+            return;
+        }
+        
+        if (parseInt(maxPoints) < 0) {
+            e.preventDefault();
+            window.scgAdmin.showNotification('Los puntos máximos no pueden ser negativos', 'error');
+            return;
+        }
+    });
+    
+    // Auto-suggest order
+    const orderInput = document.getElementById('id_order');
+    if (orderInput && !orderInput.value) {
+        const nextOrder = {{ next_order|default:1 }};
+        orderInput.value = nextOrder;
+    }
+});
+</script>
+{% endblock %}

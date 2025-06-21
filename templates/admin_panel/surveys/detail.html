@@ -521,75 +521,49 @@
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('📋 Survey Detail with Tabs cargado:', '{{ survey.code }}');
-    
-    // Tab navigation functions
-    window.showTab = function(tabName) {
-        const tab = document.getElementById(tabName + '-tab');
-        if (tab) {
-            tab.click();
-        }
-    };
-    
-    // Section management
-    document.addEventListener('click', function(e) {
-        if (e.target.id === 'addSectionBtn' || e.target.id === 'addFirstSectionBtn') {
-            console.log('🔄 Agregando nueva sección...');
-            // TODO: Implementar modal/form para crear sección
-            window.scgAdmin.showNotification('Función de crear sección próximamente', 'info');
-        }
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('📋 Survey Detail with Tabs cargado:', '{{ survey.code }}');
         
-        if (e.target.classList.contains('edit-section-btn')) {
-            const sectionId = e.target.dataset.sectionId;
-            console.log('✏️ Editando sección:', sectionId);
-            // TODO: Implementar modal/form para editar sección
-            window.scgAdmin.showNotification('Función de editar sección próximamente', 'info');
-        }
-        
-        if (e.target.classList.contains('delete-section-btn')) {
-            const sectionId = e.target.dataset.sectionId;
-            const confirmMsg = e.target.dataset.confirm;
-            if (confirm(confirmMsg)) {
-                console.log('🗑️ Eliminando sección:', sectionId);
-                // TODO: Implementar eliminación de sección
-                window.scgAdmin.showNotification('Función de eliminar sección próximamente', 'info');
+        // Tab navigation functions
+        window.showTab = function(tabName) {
+            const tab = document.getElementById(tabName + '-tab');
+            if (tab) {
+                tab.click();
             }
-        }
+        };
         
-        // Question management
-        if (e.target.id === 'addQuestionBtn' || e.target.id === 'addFirstQuestionBtn') {
-            console.log('🔄 Agregando nueva pregunta...');
-            // TODO: Implementar modal/form para crear pregunta
-            window.scgAdmin.showNotification('Función de crear pregunta próximamente', 'info');
-        }
-        
-        if (e.target.classList.contains('edit-question-btn')) {
-            const questionId = e.target.dataset.questionId;
-            console.log('✏️ Editando pregunta:', questionId);
-            // TODO: Implementar modal/form para editar pregunta
-            window.scgAdmin.showNotification('Función de editar pregunta próximamente', 'info');
-        }
-        
-        if (e.target.classList.contains('delete-question-btn')) {
-            const questionId = e.target.dataset.questionId;
-            const confirmMsg = e.target.dataset.confirm;
-            if (confirm(confirmMsg)) {
-                console.log('🗑️ Eliminando pregunta:', questionId);
-                // TODO: Implementar eliminación de pregunta
-                window.scgAdmin.showNotification('Función de eliminar pregunta próximamente', 'info');
+        // Section management - QUITAR LOS POPUPS
+        document.addEventListener('click', function(e) {
+            // Los botones de agregar sección y pregunta ya no muestran popups
+            // Se manejan por los enlaces href normales
+            
+            if (e.target.classList.contains('delete-section-btn')) {
+                const actionUrl = e.target.dataset.actionUrl;
+                const confirmMsg = e.target.dataset.confirm;
+                if (confirm(confirmMsg)) {
+                    console.log('🗑️ Eliminando sección via:', actionUrl);
+                    // Esta funcionalidad sí se puede implementar después
+                }
             }
-        }
+            
+            if (e.target.classList.contains('delete-question-btn')) {
+                const actionUrl = e.target.dataset.actionUrl;
+                const confirmMsg = e.target.dataset.confirm;
+                if (confirm(confirmMsg)) {
+                    console.log('🗑️ Eliminando pregunta via:', actionUrl);
+                    // Esta funcionalidad sí se puede implementar después
+                }
+            }
+        });
     });
-});
-
-function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(function() {
-        window.scgAdmin.showNotification('Copiado al portapapeles', 'success');
-    }).catch(function(err) {
-        console.error('Error copiando al portapapeles:', err);
-        window.scgAdmin.showNotification('Error copiando al portapapeles', 'error');
-    });
-}
+    
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(function() {
+            window.scgAdmin.showNotification('Copiado al portapapeles', 'success');
+        }).catch(function(err) {
+            console.error('Error copiando al portapapeles:', err);
+            window.scgAdmin.showNotification('Error copiando al portapapeles', 'error');
+        });
+    }
 </script>
 {% endblock %}

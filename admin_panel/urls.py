@@ -27,6 +27,7 @@ urlpatterns = [
     path('surveys/<str:code>/questions/create/', views.QuestionCreateView.as_view(), name='question_create'),
     path('questions/<int:pk>/edit/', views.QuestionUpdateView.as_view(), name='question_edit'),
     path('questions/<int:pk>/delete/', views.QuestionDeleteView.as_view(), name='question_delete'),
+    path('ajax/questions/<int:question_id>/options/bulk-save/', views.OptionBulkSaveView.as_view(), name='option_bulk_save'),
     
     # Prospects CRUD
     path('prospects/', views.ProspectListView.as_view(), name='prospects_list'),
@@ -36,4 +37,9 @@ urlpatterns = [
     # AJAX Actions
     path('ajax/surveys/<str:code>/toggle-status/', views.ToggleSurveyStatusView.as_view(), name='toggle_survey_status'),
     path('ajax/inquiries/<int:inquiry_id>/mark-responded/', views.MarkInquiryRespondedView.as_view(), name='mark_inquiry_responded'),
+    
+    # Question Options AJAX
+    path('ajax/questions/<int:question_id>/options/create/', views.OptionCreateView.as_view(), name='option_create'),
+    path('ajax/options/<int:pk>/update/', views.OptionUpdateView.as_view(), name='option_update'),
+    path('ajax/options/<int:pk>/delete/', views.OptionDeleteView.as_view(), name='option_delete'),
 ]
