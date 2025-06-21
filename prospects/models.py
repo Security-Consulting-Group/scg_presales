@@ -2,7 +2,7 @@
 Prospects models for SCG Presales system.
 """
 from django.db import models
-from django.core.validators import EmailValidator
+from django.core.validators import EmailValidator, RegexValidator
 from django.utils import timezone
 
 
@@ -52,6 +52,20 @@ class Prospect(models.Model):
         help_text="Prospect's full name"
     )
     
+    # NUEVO: Phone number field
+    phone = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        validators=[
+            RegexValidator(
+                regex=r'^\+?[\d\s\-\(\)]{8,20}$',
+                message="Ingrese un número de teléfono válido. Ejemplo: +506 1234-5678"
+            )
+        ],
+        help_text="Número de teléfono del contacto (formato: +506 1234-5678)"
+    )
+    
     # Company information (may be filled progressively)
     company_name = models.CharField(
         max_length=200,
@@ -89,6 +103,7 @@ class Prospect(models.Model):
             ('CONTACT_FORM', 'Contact Form'),
             ('SURVEY', 'Diagnostic Survey'),
             ('REFERRAL', 'Referral'),
+            ('MANUAL', 'Manual Entry'),  # NUEVO: Para prospects creados manualmente
             ('OTHER', 'Other'),
         ],
         help_text="How this prospect first contacted us"
@@ -113,7 +128,7 @@ class Prospect(models.Model):
     
     def get_latest_score(self):
         """Get the most recent survey score for this prospect."""
-        from scoring.models import SurveySubmission
+        from surveys.models import SurveySubmission  # Updated import path
         latest_submission = self.survey_submissions.filter(
             status='ACTIVE'
         ).order_by('-created_at').first()
@@ -131,8 +146,24 @@ class Prospect(models.Model):
         if self.status == ProspectStatus.LEAD and self.has_completed_survey():
             self.status = ProspectStatus.QUALIFIED
             self.save(update_fields=['status', 'updated_at'])
+    
+    def get_formatted_phone(self):
+        """Return formatted phone number for display."""
+        if self.phone:
+            # Simple formatting for Costa Rica numbers
+            phone = self.phone.replace(' ', '').replace('-', '').replace('(', '').replace(')', '')
+            if phone.startswith('+506'):
+                # Format: +506 1234-5678
+                return f"+506 {phone[4:8]}-{phone[8:]}"
+            elif len(phone) == 8:
+                # Assume Costa Rica number without country code
+                return f"+506 {phone[:4]}-{phone[4:]}"
+            else:
+                return self.phone
+        return None
 
 
+# Rest of the models remain the same...
 class ProspectInquiry(models.Model):
     """
     Multiple inquiries/questions from the same prospect.

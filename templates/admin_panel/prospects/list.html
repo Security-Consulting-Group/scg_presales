@@ -1,0 +1,355 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}Prospects{% endblock %}
+{% block page_title %}Gestión de Prospects{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/prospects.css' %}">
+{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex gap-2">
+    <a href="{% url 'admin_panel:prospect_create' %}" class="btn btn-primary btn-sm">
+        <i class="fas fa-plus me-1"></i>Crear Prospect
+    </a>
+    <button class="btn btn-outline-primary btn-sm" onclick="window.location.reload()">
+        <i class="fas fa-sync-alt me-1"></i>Actualizar
+    </button>
+    <button class="btn btn-outline-secondary btn-sm" onclick="exportProspects()">
+        <i class="fas fa-download me-1"></i>Exportar
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Filters Section -->
+<div class="admin-filters">
+    <form method="get" id="filterForm" class="row g-3 align-items-end">
+        <!-- Search -->
+        <div class="col-md-4">
+            <label for="searchInput" class="admin-form-label">Buscar</label>
+            <div class="admin-search-input">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" 
+                       id="searchInput" 
+                       name="search" 
+                       class="admin-form-control" 
+                       placeholder="Nombre, email o empresa..."
+                       value="{{ search }}">
+            </div>
+        </div>
+        
+        <!-- Status Filter -->
+        <div class="col-md-2">
+            <label for="statusFilter" class="admin-form-label">Estado</label>
+            <select id="statusFilter" name="status" class="admin-form-control">
+                <option value="">Todos</option>
+                {% for value, label in status_choices %}
+                <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>
+                    {{ label }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <!-- Source Filter -->
+        <div class="col-md-2">
+            <label for="sourceFilter" class="admin-form-label">Origen</label>
+            <select id="sourceFilter" name="source" class="admin-form-control">
+                <option value="">Todos</option>
+                {% for value, label in source_choices %}
+                <option value="{{ value }}" {% if source_filter == value %}selected{% endif %}>
+                    {{ label }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <!-- Industry Filter -->
+        <div class="col-md-2">
+            <label for="industryFilter" class="admin-form-label">Industria</label>
+            <select id="industryFilter" name="industry" class="admin-form-control">
+                <option value="">Todas</option>
+                {% for value, label in industry_choices %}
+                <option value="{{ value }}" {% if industry_filter == value %}selected{% endif %}>
+                    {{ label }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <!-- Clear Filters -->
+        <div class="col-md-2">
+            <button type="button" id="clearFilters" class="btn btn-admin-secondary w-100">
+                <i class="fas fa-times me-1"></i>Limpiar
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Results Summary -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="prospects-summary">
+            <span class="results-count">
+                <i class="fas fa-users me-2"></i>
+                <strong>{{ prospects|length }}</strong> prospects encontrados
+                {% if search or status_filter or source_filter or industry_filter %}
+                de <strong>{{ prospects.paginator.count }}</strong> total
+                {% endif %}
+            </span>
+        </div>
+    </div>
+    <div class="col-md-4 text-end">
+        <div class="view-options">
+            <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-outline-primary active" id="tableView">
+                    <i class="fas fa-table"></i>
+                </button>
+                <button type="button" class="btn btn-outline-primary" id="cardView">
+                    <i class="fas fa-th-large"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Prospects Table -->
+<div class="admin-table" id="prospectsTable">
+    {% if prospects %}
+    <table class="table table-hover mb-0">
+        <thead>
+            <tr>
+                <th data-sort="name">
+                    <i class="fas fa-user me-2"></i>Prospect
+                </th>
+                <th data-sort="company_name">
+                    <i class="fas fa-building me-2"></i>Empresa
+                </th>
+                <th data-sort="status">
+                    <i class="fas fa-flag me-2"></i>Estado
+                </th>
+                <th data-sort="initial_source">
+                    <i class="fas fa-source me-2"></i>Origen
+                </th>
+                <th data-sort="created_at">
+                    <i class="fas fa-calendar me-2"></i>Registro
+                </th>
+                <th data-sort="last_contact_at">
+                    <i class="fas fa-clock me-2"></i>Último Contacto
+                </th>
+                <th class="text-center">
+                    <i class="fas fa-cog"></i>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for prospect in prospects %}
+            <tr data-href="{% url 'admin_panel:prospect_detail' prospect.pk %}" class="prospect-row">
+                <td>
+                    <div class="prospect-info">
+                        <div class="prospect-avatar">
+                            {{ prospect.name|first|upper }}
+                        </div>
+                        <div class="prospect-details">
+                            <strong class="prospect-name">{{ prospect.name }}</strong>
+                            <small class="prospect-email text-muted">{{ prospect.email }}</small>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="company-info">
+                        {% if prospect.company_name %}
+                        <strong>{{ prospect.company_name }}</strong>
+                        {% if prospect.company_industry %}
+                        <br><small class="text-muted">{{ prospect.get_company_industry_display }}</small>
+                        {% endif %}
+                        {% else %}
+                        <span class="text-muted">Sin especificar</span>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>
+                    <span class="status-badge status-{{ prospect.status|lower }}">
+                        {{ prospect.get_status_display }}
+                    </span>
+                </td>
+                <td>
+                    <span class="source-badge">
+                        <i class="fas fa-{% if prospect.initial_source == 'SURVEY' %}clipboard-list{% elif prospect.initial_source == 'CONTACT_FORM' %}envelope{% elif prospect.initial_source == 'REFERRAL' %}user-friends{% else %}question{% endif %} me-1"></i>
+                        {{ prospect.get_initial_source_display }}
+                    </span>
+                </td>
+                <td>
+                    <span class="date-info">
+                        <strong>{{ prospect.created_at|date:"d/m/Y" }}</strong>
+                        <br><small class="text-muted">{{ prospect.created_at|date:"H:i" }}</small>
+                    </span>
+                </td>
+                <td>
+                    {% if prospect.last_contact_at %}
+                    <span class="date-info">
+                        <strong>{{ prospect.last_contact_at|date:"d/m/Y" }}</strong>
+                        <br><small class="text-muted">{{ prospect.last_contact_at|date:"H:i" }}</small>
+                    </span>
+                    {% else %}
+                    <span class="text-muted">Nunca</span>
+                    {% endif %}
+                </td>
+                <td class="text-center">
+                    <div class="action-buttons">
+                        <a href="{% url 'admin_panel:prospect_detail' prospect.pk %}" 
+                           class="btn btn-sm btn-outline-primary"
+                           data-bs-toggle="tooltip" 
+                           title="Ver detalles">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="{% url 'admin_panel:prospect_edit' prospect.pk %}" 
+                           class="btn btn-sm btn-outline-secondary"
+                           data-bs-toggle="tooltip" 
+                           title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        {% if prospect.survey_submissions.count > 0 %}
+                        <button class="btn btn-sm btn-outline-success"
+                                data-bs-toggle="tooltip" 
+                                title="Survey completado">
+                            <i class="fas fa-check-circle"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <!-- Empty State -->
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            <i class="fas fa-users"></i>
+        </div>
+        <h4>No se encontraron prospects</h4>
+        {% if search or status_filter or source_filter or industry_filter %}
+        <p class="text-muted">
+            Intenta ajustar los filtros de búsqueda o 
+            <a href="{% url 'admin_panel:prospects_list' %}" class="text-primary">ver todos los prospects</a>
+        </p>
+        {% else %}
+        <p class="text-muted">
+            Los prospects aparecerán aquí cuando se registren a través del<br>
+            formulario de contacto o completen el survey de diagnóstico
+        </p>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Card View (Hidden by default) -->
+<div class="prospects-cards d-none" id="prospectsCards">
+    <div class="row">
+        {% for prospect in prospects %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="prospect-card" onclick="window.location.href='{% url 'admin_panel:prospect_detail' prospect.pk %}'">
+                <div class="prospect-card-header">
+                    <div class="prospect-avatar">
+                        {{ prospect.name|first|upper }}
+                    </div>
+                    <div class="prospect-info">
+                        <h6 class="prospect-name">{{ prospect.name }}</h6>
+                        <small class="prospect-email">{{ prospect.email }}</small>
+                    </div>
+                    <span class="status-badge status-{{ prospect.status|lower }}">
+                        {{ prospect.get_status_display }}
+                    </span>
+                </div>
+                <div class="prospect-card-body">
+                    {% if prospect.company_name %}
+                    <div class="company-info mb-2">
+                        <i class="fas fa-building me-2"></i>
+                        <strong>{{ prospect.company_name }}</strong>
+                        {% if prospect.company_industry %}
+                        <br><small class="text-muted ms-3">{{ prospect.get_company_industry_display }}</small>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="prospect-meta">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar me-1"></i>
+                            Registrado: {{ prospect.created_at|date:"d/m/Y" }}
+                        </small>
+                        <br>
+                        <small class="text-muted">
+                            <i class="fas fa-source me-1"></i>
+                            Origen: {{ prospect.get_initial_source_display }}
+                        </small>
+                    </div>
+                </div>
+                <div class="prospect-card-footer">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="prospect-stats">
+                            <small class="badge-count">
+                                {{ prospect.inquiries.count }} consultas
+                            </small>
+                            {% if prospect.survey_submissions.count > 0 %}
+                            <small class="badge-count bg-success">
+                                Survey completado
+                            </small>
+                            {% endif %}
+                        </div>
+                        <div class="prospect-actions">
+                            <a href="{% url 'admin_panel:prospect_edit' prospect.pk %}" 
+                               class="btn btn-sm btn-outline-primary"
+                               onclick="event.stopPropagation()">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if is_paginated %}
+<nav aria-label="Paginación de prospects">
+    <ul class="admin-pagination">
+        {% if page_obj.has_previous %}
+        <li>
+            <a class="page-link" href="?{% if search %}search={{ search }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}{% if source_filter %}source={{ source_filter }}&{% endif %}{% if industry_filter %}industry={{ industry_filter }}&{% endif %}page={{ page_obj.previous_page_number }}">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        </li>
+        {% endif %}
+        
+        {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+        <li><a class="page-link active" href="#">{{ num }}</a></li>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+        <li>
+            <a class="page-link" href="?{% if search %}search={{ search }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}{% if source_filter %}source={{ source_filter }}&{% endif %}{% if industry_filter %}industry={{ industry_filter }}&{% endif %}page={{ num }}">
+                {{ num }}
+            </a>
+        </li>
+        {% endif %}
+        {% endfor %}
+        
+        {% if page_obj.has_next %}
+        <li>
+            <a class="page-link" href="?{% if search %}search={{ search }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}{% if source_filter %}source={{ source_filter }}&{% endif %}{% if industry_filter %}industry={{ industry_filter }}&{% endif %}page={{ page_obj.next_page_number }}">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/prospects.js' %}"></script>
+{% endblock %}

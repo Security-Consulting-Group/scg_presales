@@ -1,0 +1,601 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}{{ prospect.name }} - Prospect Detail{% endblock %}
+{% block page_title %}Detalle del Prospect{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/prospects.css' %}">
+{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex gap-2">
+    <a href="{% url 'admin_panel:prospects_list' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="fas fa-arrow-left me-1"></i>Volver
+    </a>
+    <a href="{% url 'admin_panel:prospect_edit' prospect.pk %}" class="btn btn-primary btn-sm">
+        <i class="fas fa-edit me-1"></i>Editar
+    </a>
+    <div class="dropdown">
+        <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <i class="fas fa-ellipsis-v"></i>
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="mailto:{{ prospect.email }}">
+                <i class="fas fa-envelope me-2"></i>Enviar Email
+            </a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="#" onclick="exportProspectData('{{ prospect.pk }}')">
+                <i class="fas fa-download me-2"></i>Exportar Datos
+            </a></li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Prospect Header Card -->
+<div class="prospect-header-card">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <div class="d-flex align-items-center gap-3">
+                <div class="prospect-avatar-large">
+                    {{ prospect.name|first|upper }}
+                </div>
+                <div class="prospect-header-info">
+                    <h2 class="prospect-name">{{ prospect.name }}</h2>
+                    <p class="prospect-email">
+                        <i class="fas fa-envelope me-2"></i>
+                        <a href="mailto:{{ prospect.email }}">{{ prospect.email }}</a>
+                    </p>
+                    {% if prospect.company_name %}
+                    <p class="prospect-company">
+                        <i class="fas fa-building me-2"></i>
+                        {{ prospect.company_name }}
+                        {% if prospect.company_industry %}
+                        <span class="text-muted">- {{ prospect.get_company_industry_display }}</span>
+                        {% endif %}
+                    </p>
+                    {% endif %}
+                    {% if prospect.phone %}
+                    <p class="prospect-phone">
+                        <i class="fas fa-phone me-2"></i>
+                        <a href="tel:{{ prospect.phone }}">{{ prospect.get_formatted_phone }}</a>
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 text-end">
+            <div class="prospect-header-stats">
+                <span class="status-badge status-{{ prospect.status|lower }} mb-2">
+                    {{ prospect.get_status_display }}
+                </span>
+                <div class="prospect-meta">
+                    <small class="text-muted d-block">
+                        <i class="fas fa-calendar me-1"></i>
+                        Registrado: {{ prospect.created_at|date:"d/m/Y H:i" }}
+                    </small>
+                    <small class="text-muted d-block">
+                        <i class="fas fa-source me-1"></i>
+                        Origen: {{ prospect.get_initial_source_display }}
+                    </small>
+                    {% if prospect.last_contact_at %}
+                    <small class="text-muted d-block">
+                        <i class="fas fa-clock me-1"></i>
+                        Último contacto: {{ prospect.last_contact_at|date:"d/m/Y H:i" }}
+                    </small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content Tabs -->
+<div class="row">
+    <div class="col-12">
+        <div class="admin-card">
+            <div class="admin-card-header border-0 pb-0">
+                <ul class="nav nav-tabs" id="prospectDetailTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">
+                            <i class="fas fa-info-circle me-2"></i>Overview
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="inquiries-tab" data-bs-toggle="tab" data-bs-target="#inquiries" type="button" role="tab">
+                            <i class="fas fa-comments me-2"></i>Consultas
+                            {% if inquiries %}
+                            <span class="badge bg-primary ms-1">{{ inquiries|length }}</span>
+                            {% endif %}
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="surveys-tab" data-bs-toggle="tab" data-bs-target="#surveys" type="button" role="tab">
+                            <i class="fas fa-clipboard-list me-2"></i>Surveys
+                            {% if survey_submissions %}
+                            <span class="badge bg-success ms-1">{{ survey_submissions|length }}</span>
+                            {% endif %}
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="notes-tab" data-bs-toggle="tab" data-bs-target="#notes" type="button" role="tab">
+                            <i class="fas fa-sticky-note me-2"></i>Notas
+                            {% if interaction_notes %}
+                            <span class="badge bg-secondary ms-1">{{ interaction_notes|length }}</span>
+                            {% endif %}
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="admin-card-body">
+                <div class="tab-content" id="prospectDetailTabContent">
+                    <!-- Overview Tab -->
+                    <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                        <div class="row">
+                            <!-- Company Information -->
+                            <div class="col-lg-6">
+                                <div class="info-section">
+                                    <h5 class="section-title">
+                                        <i class="fas fa-building me-2"></i>Información de la Empresa
+                                    </h5>
+                                    <div class="info-grid">
+                                        <div class="info-item">
+                                            <label>Empresa:</label>
+                                            <span>{{ prospect.company_name|default:"No especificado" }}</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <label>Industria:</label>
+                                            <span>{{ prospect.get_company_industry_display|default:"No especificado" }}</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <label>Tamaño:</label>
+                                            <span>{{ prospect.get_company_size_display|default:"No especificado" }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Contact Information -->
+                            <div class="col-lg-6">
+                                <div class="info-section">
+                                    <h5 class="section-title">
+                                        <i class="fas fa-user me-2"></i>Información de Contacto
+                                    </h5>
+                                    <div class="info-grid">
+                                        <div class="info-item">
+                                            <label>Nombre:</label>
+                                            <span>{{ prospect.name }}</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <label>Email:</label>
+                                            <span>
+                                                <a href="mailto:{{ prospect.email }}">{{ prospect.email }}</a>
+                                            </span>
+                                        </div>
+                                        {% if prospect.phone %}
+                                        <div class="info-item">
+                                            <label>Teléfono:</label>
+                                            <span>
+                                                <a href="tel:{{ prospect.phone }}">{{ prospect.get_formatted_phone }}</a>
+                                            </span>
+                                        </div>
+                                        {% endif %}
+                                        <div class="info-item">
+                                            <label>Estado:</label>
+                                            <span class="status-badge status-{{ prospect.status|lower }}">
+                                                {{ prospect.get_status_display }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Stats -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="quick-stats">
+                                    <div class="row text-center">
+                                        <div class="col-md-3">
+                                            <div class="stat-item">
+                                                <div class="stat-value">{{ inquiries|length }}</div>
+                                                <div class="stat-label">Consultas</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="stat-item">
+                                                <div class="stat-value">{{ survey_submissions|length }}</div>
+                                                <div class="stat-label">Surveys</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="stat-item">
+                                                <div class="stat-value">{{ interaction_notes|length }}</div>
+                                                <div class="stat-label">Notas</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="stat-item">
+                                                <div class="stat-value">
+                                                    {% if latest_score %}{{ latest_score }}%{% else %}N/A{% endif %}
+                                                </div>
+                                                <div class="stat-label">Último Score</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Inquiries Tab -->
+                    <div class="tab-pane fade" id="inquiries" role="tabpanel">
+                        {% if inquiries %}
+                        <div class="inquiries-list">
+                            {% for inquiry in inquiries %}
+                            <div class="inquiry-item {% if not inquiry.is_responded %}unresponded{% endif %}">
+                                <div class="inquiry-header">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="inquiry-meta">
+                                            <span class="inquiry-date">
+                                                <i class="fas fa-calendar me-1"></i>
+                                                {{ inquiry.created_at|date:"d/m/Y H:i" }}
+                                            </span>
+                                            <span class="inquiry-source">
+                                                <i class="fas fa-source me-1"></i>
+                                                {{ inquiry.get_source_display }}
+                                            </span>
+                                        </div>
+                                        <div class="inquiry-status">
+                                            {% if inquiry.is_responded %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check me-1"></i>Respondido
+                                            </span>
+                                            {% else %}
+                                            <button class="btn btn-sm btn-outline-primary" 
+                                                    data-action-url="{% url 'admin_panel:mark_inquiry_responded' inquiry.id %}"
+                                                    data-confirm="¿Marcar esta consulta como respondida?">
+                                                <i class="fas fa-reply me-1"></i>Marcar Respondido
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="inquiry-content">
+                                    <p>{{ inquiry.message }}</p>
+                                </div>
+                                {% if inquiry.is_responded %}
+                                <div class="inquiry-footer">
+                                    <small class="text-success">
+                                        <i class="fas fa-check-circle me-1"></i>
+                                        Respondido el {{ inquiry.responded_at|date:"d/m/Y H:i" }}
+                                        {% if inquiry.responded_by %}por {{ inquiry.responded_by }}{% endif %}
+                                    </small>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                            <h5>No hay consultas</h5>
+                            <p class="text-muted">
+                                Este prospect no ha realizado consultas aún
+                            </p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Surveys Tab -->
+                    <div class="tab-pane fade" id="surveys" role="tabpanel">
+                        {% if survey_submissions %}
+                        <div class="surveys-list">
+                            {% for submission in survey_submissions %}
+                            <div class="survey-item">
+                                <div class="survey-header">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="survey-info">
+                                            <h6 class="survey-title">{{ submission.survey.title }}</h6>
+                                            <div class="survey-meta">
+                                                <span class="survey-date">
+                                                    <i class="fas fa-calendar me-1"></i>
+                                                    Iniciado: {{ submission.started_at|date:"d/m/Y H:i" }}
+                                                </span>
+                                                {% if submission.completed_at %}
+                                                <span class="survey-completed">
+                                                    <i class="fas fa-check-circle me-1"></i>
+                                                    Completado: {{ submission.completed_at|date:"d/m/Y H:i" }}
+                                                </span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="survey-score">
+                                            {% if submission.is_completed %}
+                                            <div class="score-display">
+                                                <div class="score-value">{{ submission.get_total_score }}%</div>
+                                                <div class="score-label">Score Total</div>
+                                            </div>
+                                            {% else %}
+                                            <span class="badge bg-warning">
+                                                <i class="fas fa-clock me-1"></i>En Progreso
+                                            </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="survey-details">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <div class="survey-description">
+                                                <p class="text-muted mb-2">{{ submission.survey.description }}</p>
+                                                <div class="survey-stats">
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-question-circle me-1"></i>
+                                                        {{ submission.responses.count }} respuestas registradas
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 text-end">
+                                            <div class="survey-actions">
+                                                <a href="#" class="btn btn-sm btn-outline-primary" 
+                                                   onclick="viewSurveyDetails('{{ submission.id }}')">
+                                                    <i class="fas fa-eye me-1"></i>Ver Respuestas
+                                                </a>
+                                                {% if submission.status == 'ACTIVE' %}
+                                                <button class="btn btn-sm btn-outline-danger"
+                                                        onclick="disableSurveySubmission('{{ submission.id }}')">
+                                                    <i class="fas fa-ban me-1"></i>Deshabilitar
+                                                </button>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <i class="fas fa-clipboard-list"></i>
+                            </div>
+                            <h5>No hay surveys completados</h5>
+                            <p class="text-muted">
+                                Este prospect no ha completado ningún survey aún
+                            </p>
+                            <a href="#" class="btn btn-primary" onclick="inviteToSurvey('{{ prospect.pk }}')">
+                                <i class="fas fa-paper-plane me-2"></i>Invitar a Completar Survey
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Notes Tab -->
+                    <div class="tab-pane fade" id="notes" role="tabpanel">
+                        <div class="notes-header mb-3">
+                            <button class="btn btn-primary btn-sm" onclick="addInteractionNote('{{ prospect.pk }}')">
+                                <i class="fas fa-plus me-1"></i>Agregar Nota
+                            </button>
+                        </div>
+                        
+                        {% if interaction_notes %}
+                        <div class="notes-list">
+                            {% for note in interaction_notes %}
+                            <div class="note-item">
+                                <div class="note-header">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="note-meta">
+                                            <h6 class="note-title">{{ note.title }}</h6>
+                                            <div class="note-info">
+                                                <span class="note-type">
+                                                    <i class="fas fa-{% if note.note_type == 'PHONE_CALL' %}phone{% elif note.note_type == 'MEETING' %}handshake{% elif note.note_type == 'EMAIL' %}envelope{% elif note.note_type == 'DEMO' %}desktop{% elif note.note_type == 'PROPOSAL' %}file-contract{% else %}comment{% endif %} me-1"></i>
+                                                    {{ note.get_note_type_display }}
+                                                </span>
+                                                <span class="note-date">
+                                                    <i class="fas fa-calendar me-1"></i>
+                                                    {{ note.created_at|date:"d/m/Y H:i" }}
+                                                </span>
+                                                <span class="note-author">
+                                                    <i class="fas fa-user me-1"></i>
+                                                    {{ note.created_by }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        {% if note.follow_up_date %}
+                                        <div class="follow-up-badge">
+                                            <span class="badge bg-warning">
+                                                <i class="fas fa-clock me-1"></i>
+                                                Seguimiento: {{ note.follow_up_date|date:"d/m/Y" }}
+                                            </span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="note-content">
+                                    <p>{{ note.content|linebreaks }}</p>
+                                    {% if note.next_steps %}
+                                    <div class="next-steps">
+                                        <strong>Próximos pasos:</strong>
+                                        <p class="text-muted">{{ note.next_steps|linebreaks }}</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <i class="fas fa-sticky-note"></i>
+                            </div>
+                            <h5>No hay notas de interacción</h5>
+                            <p class="text-muted">
+                                Agrega notas sobre llamadas, reuniones y seguimientos
+                            </p>
+                            <button class="btn btn-primary" onclick="addInteractionNote('{{ prospect.pk }}')">
+                                <i class="fas fa-plus me-2"></i>Agregar Primera Nota
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions Sidebar -->
+<div class="row mt-4">
+    <div class="col-lg-8">
+        <!-- Timeline placeholder -->
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h5 class="admin-card-title">
+                    <i class="fas fa-history me-2"></i>Cronología de Actividad
+                </h5>
+            </div>
+            <div class="admin-card-body">
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-timeline"></i>
+                    </div>
+                    <h6>Timeline de actividad próximamente</h6>
+                    <p class="text-muted">
+                        Aquí se mostrará un cronograma de todas las interacciones
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Quick Actions -->
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h5 class="admin-card-title">
+                    <i class="fas fa-bolt me-2"></i>Acciones Rápidas
+                </h5>
+            </div>
+            <div class="admin-card-body">
+                <div class="d-grid gap-2">
+                    <a href="mailto:{{ prospect.email }}" class="btn btn-outline-primary">
+                        <i class="fas fa-envelope me-2"></i>Enviar Email
+                    </a>
+                    {% if prospect.phone %}
+                    <a href="tel:{{ prospect.phone }}" class="btn btn-outline-success">
+                        <i class="fas fa-phone me-2"></i>Llamar
+                    </a>
+                    {% endif %}
+                    <button class="btn btn-outline-secondary" onclick="addInteractionNote('{{ prospect.pk }}')">
+                        <i class="fas fa-sticky-note me-2"></i>Agregar Nota
+                    </button>
+                    <button class="btn btn-outline-success" onclick="scheduleFollowUp('{{ prospect.pk }}')">
+                        <i class="fas fa-calendar-plus me-2"></i>Programar Seguimiento
+                    </button>
+                    <hr>
+                    <button class="btn btn-outline-warning" onclick="changeProspectStatus('{{ prospect.pk }}')">
+                        <i class="fas fa-exchange-alt me-2"></i>Cambiar Estado
+                    </button>
+                    <button class="btn btn-outline-info" onclick="exportProspectData('{{ prospect.pk }}')">
+                        <i class="fas fa-download me-2"></i>Exportar Datos
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Prospect Summary Stats -->
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h5 class="admin-card-title">
+                    <i class="fas fa-chart-pie me-2"></i>Resumen
+                </h5>
+            </div>
+            <div class="admin-card-body">
+                <div class="summary-stats">
+                    <div class="summary-item">
+                        <div class="summary-label">Días desde registro</div>
+                        <div class="summary-value">{{ prospect.created_at|timesince }}</div>
+                    </div>
+                    {% if prospect.last_contact_at %}
+                    <div class="summary-item">
+                        <div class="summary-label">Último contacto</div>
+                        <div class="summary-value">{{ prospect.last_contact_at|timesince }} atrás</div>
+                    </div>
+                    {% endif %}
+                    <div class="summary-item">
+                        <div class="summary-label">Total interacciones</div>
+                        <div class="summary-value">
+                            {{ inquiries|length|add:interaction_notes|length }}
+                        </div>
+                    </div>
+                    {% if survey_submissions %}
+                    <div class="summary-item">
+                        <div class="summary-label">Engagement score</div>
+                        <div class="summary-value">
+                            <span class="badge bg-success">Alto</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/prospects.js' %}"></script>
+<script>
+// Prospect detail specific functions
+function viewSurveyDetails(submissionId) {
+    // TODO: Implementar modal o página de detalles del survey
+    console.log('Ver detalles del survey:', submissionId);
+    window.scgAdmin.showNotification('Función en desarrollo', 'info');
+}
+
+function disableSurveySubmission(submissionId) {
+    if (confirm('¿Está seguro de que desea deshabilitar esta submisión del survey?')) {
+        // TODO: Implementar AJAX call para deshabilitar
+        console.log('Deshabilitar submission:', submissionId);
+        window.scgAdmin.showNotification('Función en desarrollo', 'info');
+    }
+}
+
+function inviteToSurvey(prospectId) {
+    // TODO: Implementar invitación por email
+    console.log('Invitar a survey:', prospectId);
+    window.scgAdmin.showNotification('Función en desarrollo', 'info');
+}
+
+function addInteractionNote(prospectId) {
+    // TODO: Implementar modal para agregar nota
+    console.log('Agregar nota para prospect:', prospectId);
+    window.scgAdmin.showNotification('Función en desarrollo', 'info');
+}
+
+function scheduleFollowUp(prospectId) {
+    // TODO: Implementar modal para programar seguimiento
+    console.log('Programar seguimiento para:', prospectId);
+    window.scgAdmin.showNotification('Función en desarrollo', 'info');
+}
+
+function changeProspectStatus(prospectId) {
+    // TODO: Implementar modal para cambiar estado
+    console.log('Cambiar estado del prospect:', prospectId);
+    window.scgAdmin.showNotification('Función en desarrollo', 'info');
+}
+
+function exportProspectData(prospectId) {
+    // TODO: Implementar exportación de datos
+    console.log('Exportar datos del prospect:', prospectId);
+    window.scgAdmin.showNotification('Exportación iniciada', 'success');
+}
+</script>
+{% endblock %}

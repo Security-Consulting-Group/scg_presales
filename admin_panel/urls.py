@@ -28,9 +28,10 @@ urlpatterns = [
     path('questions/<int:pk>/edit/', views.QuestionUpdateView.as_view(), name='question_edit'),
     path('questions/<int:pk>/delete/', views.QuestionDeleteView.as_view(), name='question_delete'),
     path('ajax/questions/<int:question_id>/options/bulk-save/', views.OptionBulkSaveView.as_view(), name='option_bulk_save'),
-    
+
     # Prospects CRUD
     path('prospects/', views.ProspectListView.as_view(), name='prospects_list'),
+    path('prospects/create/', views.ProspectCreateView.as_view(), name='prospect_create'),  # NEW
     path('prospects/<int:pk>/', views.ProspectDetailView.as_view(), name='prospect_detail'),
     path('prospects/<int:pk>/edit/', views.ProspectUpdateView.as_view(), name='prospect_edit'),
     

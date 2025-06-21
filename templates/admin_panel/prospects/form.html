@@ -1,0 +1,661 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}{% if object %}Editar{% else %}Crear{% endif %} Prospect{% endblock %}
+{% block page_title %}{% if object %}Editar Prospect{% else %}Crear Prospect{% endif %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/prospects.css' %}">
+{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex gap-2">
+    <a href="{% if object %}{% url 'admin_panel:prospect_detail' object.pk %}{% else %}{% url 'admin_panel:prospects_list' %}{% endif %}" 
+       class="btn btn-outline-secondary btn-sm">
+        <i class="fas fa-arrow-left me-1"></i>
+        {% if object %}Volver al Detalle{% else %}Volver a Lista{% endif %}
+    </a>
+    {% if object %}
+    <a href="{% url 'admin_panel:prospects_list' %}" class="btn btn-outline-primary btn-sm">
+        <i class="fas fa-list me-1"></i>Ver Todos
+    </a>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h3 class="admin-card-title">
+                    <i class="fas fa-{% if object %}edit{% else %}plus{% endif %} me-2"></i>
+                    {% if object %}Editar Información del Prospect{% else %}Crear Nuevo Prospect{% endif %}
+                </h3>
+                {% if object %}
+                <small class="text-muted">
+                    Prospect ID: {{ object.pk }} | Registrado: {{ object.created_at|date:"d/m/Y H:i" }}
+                </small>
+                {% endif %}
+            </div>
+            
+            <div class="admin-card-body">
+                <form method="post" class="prospect-form" data-loading>
+                    {% csrf_token %}
+                    
+                    <!-- Form Errors -->
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        {{ form.non_field_errors }}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Personal Information Section -->
+                    <div class="form-section">
+                        <div class="form-section-header">
+                            <h5 class="form-section-title">
+                                <i class="fas fa-user me-2"></i>Información Personal
+                            </h5>
+                            <p class="form-section-subtitle">
+                                Datos básicos del contacto principal
+                            </p>
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label for="{{ form.phone.id_for_label }}" class="admin-form-label">
+                                        <i class="fas fa-phone me-2"></i>Teléfono
+                                    </label>
+                                    {{ form.phone }}
+                                    {% if form.phone.errors %}
+                                    <div class="form-error">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                        {{ form.phone.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                    <small class="form-help">
+                                        Número de teléfono (ejemplo: +506 1234-5678)
+                                    </small>
+                                </div>
+                            </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label for="{{ form.name.id_for_label }}" class="admin-form-label required">
+                                        <i class="fas fa-user me-2"></i>Nombre Completo
+                                    </label>
+                                    {{ form.name }}
+                                    {% if form.name.errors %}
+                                    <div class="form-error">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                        {{ form.name.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                    <small class="form-help">
+                                        Nombre y apellido del contacto principal
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label for="{{ form.email.id_for_label }}" class="admin-form-label required">
+                                        <i class="fas fa-envelope me-2"></i>Correo Electrónico
+                                    </label>
+                                    {{ form.email }}
+                                    {% if form.email.errors %}
+                                    <div class="form-error">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                        {{ form.email.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                    <small class="form-help">
+                                        Email principal para comunicaciones
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Company Information Section -->
+                    <div class="form-section">
+                        <div class="form-section-header">
+                            <h5 class="form-section-title">
+                                <i class="fas fa-building me-2"></i>Información de la Empresa
+                            </h5>
+                            <p class="form-section-subtitle">
+                                Detalles sobre la organización del prospect
+                            </p>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label for="{{ form.company_name.id_for_label }}" class="admin-form-label">
+                                        <i class="fas fa-building me-2"></i>Nombre de la Empresa
+                                    </label>
+                                    {{ form.company_name }}
+                                    {% if form.company_name.errors %}
+                                    <div class="form-error">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                        {{ form.company_name.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                    <small class="form-help">
+                                        Razón social o nombre comercial
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label for="{{ form.company_industry.id_for_label }}" class="admin-form-label">
+                                        <i class="fas fa-industry me-2"></i>Industria
+                                    </label>
+                                    {{ form.company_industry }}
+                                    {% if form.company_industry.errors %}
+                                    <div class="form-error">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                        {{ form.company_industry.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                    <small class="form-help">
+                                        Sector al que pertenece la empresa
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label for="{{ form.company_size.id_for_label }}" class="admin-form-label">
+                                        <i class="fas fa-users me-2"></i>Tamaño de la Empresa
+                                    </label>
+                                    {{ form.company_size }}
+                                    {% if form.company_size.errors %}
+                                    <div class="form-error">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                        {{ form.company_size.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                    <small class="form-help">
+                                        Número aproximado de empleados
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sales Pipeline Section -->
+                    <div class="form-section">
+                        <div class="form-section-header">
+                            <h5 class="form-section-title">
+                                <i class="fas fa-chart-line me-2"></i>Pipeline de Ventas
+                            </h5>
+                            <p class="form-section-subtitle">
+                                Estado actual en el proceso de ventas
+                            </p>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label for="{{ form.status.id_for_label }}" class="admin-form-label">
+                                        <i class="fas fa-flag me-2"></i>Estado del Prospect
+                                    </label>
+                                    {{ form.status }}
+                                    {% if form.status.errors %}
+                                    <div class="form-error">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                        {{ form.status.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                    <small class="form-help">
+                                        Etapa actual en el pipeline de ventas
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label for="{{ form.last_contact_at.id_for_label }}" class="admin-form-label">
+                                        <i class="fas fa-clock me-2"></i>Último Contacto
+                                    </label>
+                                    {{ form.last_contact_at }}
+                                    {% if form.last_contact_at.errors %}
+                                    <div class="form-error">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                        {{ form.last_contact_at.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                    <small class="form-help">
+                                        Fecha de la última comunicación (YYYY-MM-DD HH:MM:SS)
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Status Information (Read-only for existing prospects) -->
+                    {% if object %}
+                    <div class="form-section">
+                        <div class="form-section-header">
+                            <h5 class="form-section-title">
+                                <i class="fas fa-info-circle me-2"></i>Información del Sistema
+                            </h5>
+                            <p class="form-section-subtitle">
+                                Datos automáticos del sistema (solo lectura)
+                            </p>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">
+                                        <i class="fas fa-calendar-plus me-2"></i>Fecha de Registro
+                                    </label>
+                                    <div class="form-control-plaintext">
+                                        {{ object.created_at|date:"d/m/Y H:i:s" }}
+                                    </div>
+                                    <small class="form-help">
+                                        Cuándo se registró por primera vez
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">
+                                        <i class="fas fa-source me-2"></i>Origen Inicial
+                                    </label>
+                                    <div class="form-control-plaintext">
+                                        <span class="source-badge">
+                                            {{ object.get_initial_source_display }}
+                                        </span>
+                                    </div>
+                                    <small class="form-help">
+                                        Cómo llegó inicialmente a SCG
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">
+                                        <i class="fas fa-edit me-2"></i>Última Actualización
+                                    </label>
+                                    <div class="form-control-plaintext">
+                                        {{ object.updated_at|date:"d/m/Y H:i:s" }}
+                                    </div>
+                                    <small class="form-help">
+                                        Última modificación de datos
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Quick Stats -->
+                        <div class="prospect-stats-summary">
+                            <div class="row text-center">
+                                <div class="col-md-3">
+                                    <div class="stat-box">
+                                        <div class="stat-value">{{ total_inquiries_count|default:0 }}</div>
+                                        <div class="stat-label">Consultas</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="stat-box">
+                                        <div class="stat-value">{{ surveys_count|default:0 }}</div>
+                                        <div class="stat-label">Surveys</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="stat-box">
+                                        <div class="stat-value">{{ notes_count|default:0 }}</div>
+                                        <div class="stat-label">Notas</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="stat-box">
+                                        <div class="stat-value">
+                                            {% if surveys_count > 0 %}
+                                            <i class="fas fa-check-circle text-success"></i>
+                                            {% else %}
+                                            <i class="fas fa-times-circle text-muted"></i>
+                                            {% endif %}
+                                        </div>
+                                        <div class="stat-label">Survey Completo</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="form-actions-left">
+                                {% if object %}
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Los cambios se guardarán inmediatamente
+                                </small>
+                                {% else %}
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Se creará un nuevo prospect en el sistema
+                                </small>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-actions-right">
+                                <a href="{% if object %}{% url 'admin_panel:prospect_detail' object.pk %}{% else %}{% url 'admin_panel:prospects_list' %}{% endif %}" 
+                                   class="btn btn-admin-secondary me-2">
+                                    <i class="fas fa-times me-1"></i>Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-admin-primary">
+                                    <i class="fas fa-save me-1"></i>
+                                    {% if object %}Guardar Cambios{% else %}Crear Prospect{% endif %}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Additional Actions (only for existing prospects) -->
+        {% if object %}
+        <div class="admin-card mt-4">
+            <div class="admin-card-header">
+                <h5 class="admin-card-title">
+                    <i class="fas fa-cogs me-2"></i>Acciones Adicionales
+                </h5>
+            </div>
+            <div class="admin-card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="action-group">
+                            <h6 class="action-group-title">Comunicaciones</h6>
+                            <div class="d-grid gap-2">
+                                <a href="mailto:{{ object.email }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-envelope me-2"></i>Enviar Email
+                                </a>
+                                <button class="btn btn-outline-secondary" onclick="scheduleFollowUp('{{ object.pk }}')">
+                                    <i class="fas fa-calendar-plus me-2"></i>Programar Seguimiento
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="action-group">
+                            <h6 class="action-group-title">Datos y Reportes</h6>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-info" onclick="exportProspectData('{{ object.pk }}')">
+                                    <i class="fas fa-download me-2"></i>Exportar Datos
+                                </button>
+                                <button class="btn btn-outline-warning" onclick="mergeProspect('{{ object.pk }}')">
+                                    <i class="fas fa-compress-arrows-alt me-2"></i>Fusionar Prospect
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Danger Zone -->
+                <hr class="mt-4">
+                <div class="danger-zone">
+                    <h6 class="text-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Zona de Peligro
+                    </h6>
+                    <p class="text-muted small mb-3">
+                        Estas acciones son irreversibles. Úsalas con precaución.
+                    </p>
+                    <button class="btn btn-outline-danger btn-sm" 
+                            onclick="archiveProspect('{{ object.pk }}')">
+                        <i class="fas fa-archive me-1"></i>Archivar Prospect
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Form Help Sidebar -->
+    <div class="col-lg-4">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h5 class="admin-card-title">
+                    <i class="fas fa-question-circle me-2"></i>Ayuda
+                </h5>
+            </div>
+            <div class="admin-card-body">
+                <div class="help-section">
+                    <h6>Campos Requeridos</h6>
+                    <ul class="help-list">
+                        <li><strong>Nombre:</strong> Nombre completo del contacto</li>
+                        <li><strong>Email:</strong> Debe ser único en el sistema</li>
+                    </ul>
+                </div>
+                
+                <div class="help-section">
+                    <h6>Estados del Prospect</h6>
+                    <ul class="help-list">
+                        <li><strong>Lead:</strong> Contacto inicial</li>
+                        <li><strong>Qualified:</strong> Ha completado survey</li>
+                        <li><strong>In Process:</strong> En negociación</li>
+                        <li><strong>Closed Won:</strong> Cliente convertido</li>
+                        <li><strong>Closed Lost:</strong> Oportunidad perdida</li>
+                    </ul>
+                </div>
+                
+                <div class="help-section">
+                    <h6>Consejos</h6>
+                    <ul class="help-list">
+                        <li>Mantén la información actualizada</li>
+                        <li>Registra todas las interacciones</li>
+                        <li>Usa el campo "Último Contacto" para seguimiento</li>
+                        <li>La industria ayuda en la segmentación</li>
+                    </ul>
+                </div>
+                
+                {% if not object %}
+                <div class="help-section">
+                    <div class="alert alert-info">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        <strong>Nuevo Prospect:</strong> Los prospects normalmente se crean automáticamente cuando completan formularios. Use esta función solo para casos especiales.
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Quick Stats (for existing prospects) -->
+        {% if object %}
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h5 class="admin-card-title">
+                    <i class="fas fa-chart-bar me-2"></i>Estadísticas Rápidas
+                </h5>
+            </div>
+            <div class="admin-card-body">
+                <div class="quick-stats-grid">
+                    <div class="quick-stat-item">
+                        <div class="quick-stat-value">{{ object.created_at|timesince }}</div>
+                        <div class="quick-stat-label">Tiempo en sistema</div>
+                    </div>
+                    
+                    {% if object.last_contact_at %}
+                    <div class="quick-stat-item">
+                        <div class="quick-stat-value">{{ object.last_contact_at|timesince }}</div>
+                        <div class="quick-stat-label">Desde último contacto</div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="quick-stat-item">
+                        <div class="quick-stat-value">
+                            {% if pending_inquiries_count > 0 %}
+                            <span class="text-warning">{{ pending_inquiries_count }}</span>
+                            {% else %}
+                            <span class="text-success">0</span>
+                            {% endif %}
+                        </div>
+                        <div class="quick-stat-label">Consultas pendientes</div>
+                    </div>
+                    
+                    <div class="quick-stat-item">
+                        <div class="quick-stat-value">
+                            {% if surveys_count > 0 %}
+                            <span class="text-success">Sí</span>
+                            {% else %}
+                            <span class="text-muted">No</span>
+                            {% endif %}
+                        </div>
+                        <div class="quick-stat-label">Survey completado</div>
+                    </div>
+                </div>
+                
+                <!-- Engagement Score -->
+                <div class="engagement-score mt-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted">Engagement Score</span>
+                        <span class="badge bg-{% if surveys_count > 0 %}success{% elif total_inquiries_count > 1 %}warning{% else %}secondary{% endif %}">
+                            {% if surveys_count > 0 %}Alto{% elif total_inquiries_count > 1 %}Medio{% else %}Bajo{% endif %}
+                        </span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-{% if surveys_count > 0 %}success{% elif total_inquiries_count > 1 %}warning{% else %}secondary{% endif %}" 
+                             style="width: {% if surveys_count > 0 %}85{% elif total_inquiries_count > 1 %}60{% else %}25{% endif %}%">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/prospects.js' %}"></script>
+<script>
+// Form specific functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize form validation
+    initProspectForm();
+    
+    // Auto-format email field
+    const emailField = document.getElementById('{{ form.email.id_for_label }}');
+    if (emailField) {
+        emailField.addEventListener('blur', function() {
+            this.value = this.value.toLowerCase().trim();
+        });
+    }
+    
+    // Status change warnings
+    const statusField = document.getElementById('{{ form.status.id_for_label }}');
+    if (statusField) {
+        statusField.addEventListener('change', function() {
+            if (this.value === 'CLOSED_LOST') {
+                if (!confirm('¿Está seguro de marcar este prospect como "Closed Lost"? Esta acción indica que se perdió la oportunidad.')) {
+                    this.value = '{{ object.status|default:"LEAD" }}';
+                }
+            }
+        });
+    }
+});
+
+function initProspectForm() {
+    const form = document.querySelector('.prospect-form');
+    
+    // Add real-time validation
+    const requiredFields = form.querySelectorAll('input[required], select[required]');
+    requiredFields.forEach(field => {
+        field.addEventListener('blur', validateField);
+        field.addEventListener('input', clearFieldError);
+    });
+}
+
+function validateField(event) {
+    const field = event.target;
+    const value = field.value.trim();
+    
+    // Clear previous errors
+    clearFieldError(event);
+    
+    // Validate based on field type
+    if (field.type === 'email' && value) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) {
+            showFieldError(field, 'Por favor ingrese un email válido');
+            return false;
+        }
+    }
+    
+    if (field.required && !value) {
+        showFieldError(field, 'Este campo es obligatorio');
+        return false;
+    }
+    
+    return true;
+}
+
+function showFieldError(field, message) {
+    const formGroup = field.closest('.admin-form-group');
+    const existingError = formGroup.querySelector('.form-error');
+    
+    if (!existingError) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'form-error';
+        errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle me-1"></i>${message}`;
+        field.parentNode.insertBefore(errorDiv, field.nextSibling);
+    }
+    
+    field.classList.add('is-invalid');
+}
+
+function clearFieldError(event) {
+    const field = event.target;
+    const formGroup = field.closest('.admin-form-group');
+    const existingError = formGroup.querySelector('.form-error');
+    
+    if (existingError && !existingError.textContent.includes('Este campo es obligatorio')) {
+        existingError.remove();
+    }
+    
+    field.classList.remove('is-invalid');
+}
+
+// Additional actions for existing prospects
+{% if object %}
+function scheduleFollowUp(prospectId) {
+    // TODO: Implement follow-up scheduling modal
+    console.log('Schedule follow up for prospect:', prospectId);
+    window.scgAdmin.showNotification('Función en desarrollo', 'info');
+}
+
+function exportProspectData(prospectId) {
+    // TODO: Implement data export
+    console.log('Export data for prospect:', prospectId);
+    window.scgAdmin.showNotification('Exportación iniciada', 'success');
+}
+
+function mergeProspect(prospectId) {
+    // TODO: Implement prospect merging
+    console.log('Merge prospect:', prospectId);
+    window.scgAdmin.showNotification('Función en desarrollo', 'info');
+}
+
+function archiveProspect(prospectId) {
+    if (confirm('¿Está seguro de que desea archivar este prospect? Esta acción se puede revertir pero el prospect no aparecerá en las listas principales.')) {
+        // TODO: Implement archiving
+        console.log('Archive prospect:', prospectId);
+        window.scgAdmin.showNotification('Función en desarrollo', 'info');
+    }
+}
+{% endif %}
+</script>
+{% endblock %}

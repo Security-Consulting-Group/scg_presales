@@ -265,14 +265,44 @@ class ProspectUpdateView(LoginRequiredMixin, UpdateView):
     model = Prospect
     template_name = 'admin_panel/prospects/form.html'
     fields = [
-        'name', 'email', 'company_name', 'company_industry', 
+        'name', 'email', 'phone', 'company_name', 'company_industry', 
         'company_size', 'status', 'last_contact_at'
     ]
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Add stats for existing prospects
+        if self.object:
+            context['pending_inquiries_count'] = self.object.inquiries.filter(is_responded=False).count()
+            context['total_inquiries_count'] = self.object.inquiries.count()
+            context['surveys_count'] = self.object.survey_submissions.filter(status='ACTIVE').count()
+            context['notes_count'] = self.object.interaction_notes.count()
+        
+        return context
     
     def get_success_url(self):
         messages.success(self.request, f'Prospect "{self.object.name}" actualizado exitosamente.')
         return reverse_lazy('admin_panel:prospect_detail', kwargs={'pk': self.object.pk})
 
+
+class ProspectCreateView(LoginRequiredMixin, CreateView):
+    """Create new prospect manually"""
+    model = Prospect
+    template_name = 'admin_panel/prospects/form.html'
+    fields = [
+        'name', 'email', 'phone', 'company_name', 'company_industry', 
+        'company_size', 'status'
+    ]
+    
+    def form_valid(self, form):
+        # Set initial_source to MANUAL for manually created prospects
+        form.instance.initial_source = 'MANUAL'
+        messages.success(self.request, f'Prospect "{form.instance.name}" creado exitosamente.')
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse_lazy('admin_panel:prospect_detail', kwargs={'pk': self.object.pk})
 
 # ====================================
 # SURVEY SECTIONS CRUD

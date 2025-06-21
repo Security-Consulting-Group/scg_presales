@@ -1,0 +1,931 @@
+/* ====================================
+   SCG PROSPECTS SPECIFIC STYLES
+   ==================================== */
+
+/* Results Summary */
+.prospects-summary {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.results-count {
+    font-family: 'Inter', sans-serif;
+    color: var(--admin-text-primary);
+    font-size: 0.95rem;
+}
+
+.view-options .btn-group .btn {
+    padding: 0.5rem 0.75rem;
+    border-color: var(--admin-border-color);
+}
+
+/* Prospect Info in Table */
+.prospect-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.prospect-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--admin-primary);
+    color: var(--admin-text-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.prospect-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.prospect-name {
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.prospect-email {
+    font-size: 0.8rem;
+    color: var(--admin-text-secondary);
+    margin: 0;
+}
+
+/* Company Info */
+.company-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+/* Source Badge */
+.source-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.85rem;
+    color: var(--admin-text-secondary);
+    font-weight: 500;
+}
+
+/* Date Info */
+.date-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    font-size: 0.9rem;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 0.25rem;
+    justify-content: center;
+}
+
+.action-buttons .btn {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.8rem;
+}
+
+/* Table Row Hover */
+.prospect-row {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.prospect-row:hover {
+    background-color: rgba(58, 141, 222, 0.05) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 45, 116, 0.1);
+}
+
+/* ====================================
+   CARD VIEW STYLES
+   ==================================== */
+
+.prospects-cards {
+    margin-top: 1rem;
+}
+
+.prospect-card {
+    background: var(--admin-bg-white);
+    border-radius: 12px;
+    border: 1px solid var(--admin-border-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.prospect-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--admin-shadow-lg);
+    border-color: var(--admin-primary-light);
+}
+
+.prospect-card-header {
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--admin-border-color);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.prospect-card-header .prospect-avatar {
+    width: 48px;
+    height: 48px;
+    font-size: 1.1rem;
+}
+
+.prospect-card-header .prospect-info {
+    flex: 1;
+}
+
+.prospect-card-header .prospect-name {
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+}
+
+.prospect-card-header .prospect-email {
+    font-size: 0.85rem;
+}
+
+.prospect-card-body {
+    padding: 1rem 1.25rem;
+}
+
+.prospect-card-footer {
+    padding: 1rem 1.25rem;
+    background: var(--admin-bg-light);
+    border-top: 1px solid var(--admin-border-color);
+}
+
+.prospect-stats {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.prospect-actions {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.prospect-meta {
+    line-height: 1.4;
+}
+
+/* ====================================
+   PROSPECT DETAIL PAGE STYLES
+   ==================================== */
+
+/* Header Card */
+.prospect-header-card {
+    background: var(--admin-bg-white);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--admin-shadow-sm);
+    border: 1px solid var(--admin-border-color);
+}
+
+.prospect-avatar-large {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--admin-primary);
+    color: var(--admin-text-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.prospect-header-info .prospect-name {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.prospect-header-info .prospect-email {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.prospect-header-info .prospect-email a {
+    color: var(--admin-primary-light);
+    text-decoration: none;
+}
+
+.prospect-header-info .prospect-email a:hover {
+    text-decoration: underline;
+}
+
+.prospect-header-info .prospect-company {
+    font-size: 1rem;
+    color: var(--admin-text-primary);
+    margin: 0;
+}
+
+.prospect-header-stats {
+    text-align: right;
+}
+
+.prospect-header-stats .status-badge {
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.prospect-meta {
+    line-height: 1.6;
+}
+
+/* Tab Content */
+.nav-tabs .nav-link {
+    color: var(--admin-text-secondary);
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--admin-primary);
+    border-bottom-color: var(--admin-primary);
+    background: none;
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--admin-primary-light);
+    border-color: transparent;
+}
+
+/* Info Sections */
+.info-section {
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--admin-border-color);
+}
+
+.info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+}
+
+.info-item label {
+    font-weight: 600;
+    color: var(--admin-text-secondary);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.info-item span {
+    color: var(--admin-text-primary);
+    font-weight: 500;
+}
+
+/* Quick Stats */
+.quick-stats {
+    background: var(--admin-bg-light);
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--admin-primary);
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: var(--admin-text-secondary);
+    font-weight: 500;
+}
+
+/* Inquiries List */
+.inquiries-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.inquiry-item {
+    background: var(--admin-bg-light);
+    border-radius: 8px;
+    padding: 1.25rem;
+    border-left: 4px solid var(--admin-primary-light);
+    transition: all 0.2s ease;
+}
+
+.inquiry-item.unresponded {
+    border-left-color: #f59e0b;
+    background: rgba(245, 158, 11, 0.05);
+}
+
+.inquiry-item:hover {
+    box-shadow: var(--admin-shadow-sm);
+}
+
+.inquiry-header {
+    margin-bottom: 0.75rem;
+}
+
+.inquiry-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.85rem;
+    color: var(--admin-text-secondary);
+}
+
+.inquiry-content {
+    margin-bottom: 0.75rem;
+}
+
+.inquiry-content p {
+    margin: 0;
+    color: var(--admin-text-primary);
+    line-height: 1.5;
+}
+
+.inquiry-footer {
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--admin-border-color);
+}
+
+/* Surveys List */
+.surveys-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.survey-item {
+    background: var(--admin-bg-light);
+    border-radius: 8px;
+    padding: 1.25rem;
+    border-left: 4px solid var(--admin-accent-color);
+}
+
+.survey-header {
+    margin-bottom: 1rem;
+}
+
+.survey-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.survey-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.85rem;
+    color: var(--admin-text-secondary);
+}
+
+.survey-completed {
+    color: var(--admin-accent-color);
+}
+
+.score-display {
+    text-align: center;
+}
+
+.score-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--admin-accent-color);
+}
+
+.score-label {
+    font-size: 0.8rem;
+    color: var(--admin-text-secondary);
+}
+
+.survey-description {
+    margin-bottom: 0.75rem;
+}
+
+.survey-stats {
+    font-size: 0.85rem;
+}
+
+.survey-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Notes List */
+.notes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.note-item {
+    background: var(--admin-bg-light);
+    border-radius: 8px;
+    padding: 1.25rem;
+    border-left: 4px solid var(--admin-text-secondary);
+}
+
+.note-header {
+    margin-bottom: 0.75rem;
+}
+
+.note-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.note-info {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.85rem;
+    color: var(--admin-text-secondary);
+}
+
+.follow-up-badge {
+    flex-shrink: 0;
+}
+
+.note-content {
+    margin-bottom: 0.75rem;
+}
+
+.next-steps {
+    background: rgba(58, 141, 222, 0.05);
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+/* Summary Stats */
+.summary-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--admin-border-color);
+}
+
+.summary-item:last-child {
+    border-bottom: none;
+}
+
+.summary-label {
+    font-size: 0.9rem;
+    color: var(--admin-text-secondary);
+    font-weight: 500;
+}
+
+.summary-value {
+    font-weight: 600;
+    color: var(--admin-text-primary);
+}
+
+/* ====================================
+   FORM STYLES
+   ==================================== */
+
+/* Form Sections */
+.form-section {
+    margin-bottom: 2.5rem;
+    padding: 1.5rem;
+    background: var(--admin-bg-light);
+    border-radius: 8px;
+    border: 1px solid var(--admin-border-color);
+}
+
+.form-section-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--admin-border-color);
+}
+
+.form-section-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.form-section-subtitle {
+    font-size: 0.9rem;
+    color: var(--admin-text-secondary);
+    margin: 0;
+}
+
+/* Form Controls */
+.admin-form-group {
+    margin-bottom: 1.5rem;
+}
+
+.admin-form-label.required::after {
+    content: '*';
+    color: #dc3545;
+    margin-left: 0.25rem;
+}
+
+.form-control-plaintext {
+    background: var(--admin-bg-white);
+    border: 1px solid var(--admin-border-color);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    color: var(--admin-text-primary);
+    font-weight: 500;
+}
+
+.form-error {
+    color: #dc3545;
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.form-help {
+    font-size: 0.8rem;
+    color: var(--admin-text-secondary);
+    margin-top: 0.25rem;
+    font-style: italic;
+}
+
+.admin-form-control.is-invalid {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.15);
+}
+
+/* Form Actions */
+.form-actions {
+    margin-top: 2.5rem;
+    padding: 1.5rem;
+    background: var(--admin-bg-white);
+    border-radius: 8px;
+    border: 1px solid var(--admin-border-color);
+}
+
+.form-actions-left {
+    display: flex;
+    align-items: center;
+}
+
+.form-actions-right {
+    display: flex;
+    gap: 0.75rem;
+}
+
+/* Prospect Stats Summary */
+.prospect-stats-summary {
+    background: var(--admin-bg-white);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+    border: 1px solid var(--admin-border-color);
+}
+
+.stat-box {
+    padding: 1rem;
+    text-align: center;
+}
+
+.stat-box .stat-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--admin-primary);
+    margin-bottom: 0.25rem;
+}
+
+.stat-box .stat-label {
+    font-size: 0.8rem;
+    color: var(--admin-text-secondary);
+    font-weight: 500;
+}
+
+/* Action Groups */
+.action-group {
+    margin-bottom: 2rem;
+}
+
+.action-group-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--admin-border-color);
+}
+
+/* Danger Zone */
+.danger-zone {
+    background: rgba(220, 53, 69, 0.05);
+    border: 1px solid rgba(220, 53, 69, 0.2);
+    border-radius: 8px;
+    padding: 1.25rem;
+}
+
+/* Help Section */
+.help-section {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--admin-border-color);
+}
+
+.help-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.help-section h6 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    margin-bottom: 0.75rem;
+}
+
+.help-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.help-list li {
+    padding: 0.375rem 0;
+    font-size: 0.9rem;
+    color: var(--admin-text-primary);
+    border-bottom: 1px solid rgba(0, 45, 116, 0.1);
+}
+
+.help-list li:last-child {
+    border-bottom: none;
+}
+
+/* Quick Stats Grid */
+.quick-stats-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.quick-stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--admin-border-color);
+}
+
+.quick-stat-item:last-child {
+    border-bottom: none;
+}
+
+.quick-stat-value {
+    font-weight: 600;
+    color: var(--admin-text-primary);
+}
+
+.quick-stat-label {
+    font-size: 0.85rem;
+    color: var(--admin-text-secondary);
+}
+
+/* Engagement Score */
+.engagement-score {
+    padding: 1rem;
+    background: var(--admin-bg-light);
+    border-radius: 6px;
+}
+
+/* ====================================
+   RESPONSIVE DESIGN
+   ==================================== */
+
+@media (max-width: 768px) {
+    .prospect-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .prospect-avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 0.9rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .prospect-header-card {
+        padding: 1.5rem;
+    }
+    
+    .prospect-header-card .row {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .prospect-avatar-large {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+        margin: 0 auto 1rem;
+    }
+    
+    .prospect-header-stats {
+        text-align: center;
+        margin-top: 1rem;
+    }
+    
+    .inquiry-meta,
+    .survey-meta,
+    .note-info {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .form-section {
+        padding: 1rem;
+    }
+    
+    .form-actions {
+        padding: 1rem;
+    }
+    
+    .form-actions .d-flex {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .form-actions-right {
+        justify-content: center;
+    }
+    
+    .quick-stats {
+        padding: 1rem;
+    }
+    
+    .stat-item {
+        margin-bottom: 1rem;
+    }
+    
+    .info-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+    
+    .survey-header .d-flex,
+    .inquiry-header .d-flex,
+    .note-header .d-flex {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .survey-actions,
+    .prospect-actions {
+        margin-top: 0.75rem;
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 480px) {
+    .prospects-summary {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .view-options {
+        margin-top: 0.5rem;
+    }
+    
+    .prospect-card {
+        margin-bottom: 1rem;
+    }
+    
+    .prospect-card-header {
+        padding: 1rem;
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .prospect-card-header .prospect-info {
+        width: 100%;
+    }
+    
+    .prospect-card-body,
+    .prospect-card-footer {
+        padding: 1rem;
+    }
+    
+    .prospect-stats {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .form-section-title {
+        font-size: 1.1rem;
+    }
+    
+    .admin-form-group {
+        margin-bottom: 1.25rem;
+    }
+    
+    .help-section h6 {
+        font-size: 0.95rem;
+    }
+    
+    .help-list li {
+        font-size: 0.85rem;
+        padding: 0.5rem 0;
+    }
+}
+
+/* ====================================
+   PRINT STYLES
+   ==================================== */
+
+@media print {
+    .action-buttons,
+    .survey-actions,
+    .prospect-actions,
+    .form-actions,
+    .danger-zone {
+        display: none !important;
+    }
+    
+    .prospect-header-card,
+    .admin-card {
+        box-shadow: none !important;
+        border: 1px solid #000 !important;
+    }
+    
+    .status-badge {
+        border: 1px solid #000 !important;
+        color: #000 !important;
+    }
+    
+    .nav-tabs {
+        display: none !important;
+    }
+    
+    .tab-content .tab-pane {
+        display: block !important;
+        opacity: 1 !important;
+    }
+}
+
+/* ====================================
+   DARK MODE SUPPORT (Future)
+   ==================================== */
+
+@media (prefers-color-scheme: dark) {
+    /* Future dark mode styles can be added here */
+}

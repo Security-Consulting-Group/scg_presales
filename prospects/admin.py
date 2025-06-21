@@ -7,15 +7,15 @@ from .models import Prospect, ProspectInquiry, InteractionNote
 
 @admin.register(Prospect)
 class ProspectAdmin(admin.ModelAdmin):
-    list_display = ['name', 'email', 'company_name', 'status', 'created_at', 'last_contact_at']
+    list_display = ['name', 'email', 'phone', 'company_name', 'status', 'created_at', 'last_contact_at']
     list_filter = ['status', 'company_industry', 'company_size', 'initial_source', 'created_at']
-    search_fields = ['name', 'email', 'company_name']
+    search_fields = ['name', 'email', 'phone', 'company_name']
     ordering = ['-created_at']
     readonly_fields = ['created_at', 'updated_at']
     
     fieldsets = (
         ('Basic Information', {
-            'fields': ('name', 'email', 'status', 'initial_source')
+            'fields': ('name', 'email', 'phone', 'status', 'initial_source')
         }),
         ('Company Information', {
             'fields': ('company_name', 'company_industry', 'company_size')
