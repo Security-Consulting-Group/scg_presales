@@ -214,8 +214,27 @@ class SurveySubmitView(View):
                         response.save()  # Guardar primero para poder usar M2M
                         response.selected_options.set(options)
                         
-                        # Sumar puntos de todas las opciones seleccionadas
-                        response.points_earned = sum(opt.points for opt in options)
+                        # FIXED: Handle special scoring for question 3 (sensitive data question)
+                        if question.order == 3 and question.section.order == 1:
+                            # Special logic for question 3: count types of sensitive data
+                            num_selected = len(option_ids)
+                            
+                            # Check if "No manejamos información sensible" was selected
+                            no_sensitive_option = options.filter(
+                                option_text__icontains="No manejamos información sensible"
+                            ).first()
+                            
+                            if no_sensitive_option:
+                                # If "No sensitive data" was selected, award 5 points
+                                response.points_earned = 5
+                            else:
+                                # Award points inversely based on number of sensitive data types
+                                scoring_map = {0: 5, 1: 4, 2: 3, 3: 2, 4: 1}
+                                response.points_earned = scoring_map.get(num_selected, 1)
+                        else:
+                            # Regular multiple choice: sum all points
+                            response.points_earned = sum(opt.points for opt in options)
+                        
                         response.save()
                 
                 elif question.question_type in ['TEXT', 'EMAIL']:

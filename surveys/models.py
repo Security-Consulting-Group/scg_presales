@@ -399,7 +399,7 @@ class Response(models.Model):
     )
     
     # Calculated points for this response
-    points_earned = models.PositiveIntegerField(
+    points_earned = models.IntegerField(
         default=0,
         help_text="Points earned for this response"
     )
