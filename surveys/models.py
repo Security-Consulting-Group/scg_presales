@@ -361,7 +361,7 @@ class SurveySubmission(models.Model):
     def get_total_score(self):
         """Calculate total score for this submission."""
         if hasattr(self, 'score_result'):
-            return self.score_result.total_score
+            return self.score_result.total_points
         return 0
 
 

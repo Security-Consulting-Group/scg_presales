@@ -4,15 +4,19 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, TemplateView, View
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, TemplateView, View, DeleteView
 from django.urls import reverse_lazy
-from django.db.models import Q, Count
-from django.http import JsonResponse
+from django.db.models import Q, Count, Avg, Min, Max
+from django.http import JsonResponse, HttpResponse
 from django.core.paginator import Paginator
+from django.utils import timezone
+from datetime import timedelta, datetime
+import csv
 
 from surveys.models import Survey, SurveySubmission, SurveySection, Question, QuestionOption
-from django.views.generic import DeleteView
 from prospects.models import Prospect, ProspectInquiry, InteractionNote
+from scoring.models import ScoreResult, SurveyRiskConfiguration, RiskLevelPackageRecommendation, RiskLevel
+from scoring.signals import recalculate_scores_for_survey
 from core.models import User
 import json
 
@@ -472,145 +476,6 @@ class MarkInquiryRespondedView(LoginRequiredMixin, View):
         
 
 # ====================================
-# SURVEY SECTIONS CRUD
-# ====================================
-
-class SectionCreateView(LoginRequiredMixin, CreateView):
-    """Create new section for a survey"""
-    model = SurveySection
-    template_name = 'admin_panel/surveys/section_form.html'
-    fields = ['title', 'description', 'order', 'max_points']
-    
-    def dispatch(self, request, *args, **kwargs):
-        self.survey = get_object_or_404(Survey, code=kwargs['code'])
-        return super().dispatch(request, *args, **kwargs)
-    
-    def form_valid(self, form):
-        form.instance.survey = self.survey
-        messages.success(self.request, f'Sección "{form.instance.title}" creada exitosamente.')
-        return super().form_valid(form)
-    
-    def get_success_url(self):
-        return reverse_lazy('admin_panel:survey_detail', kwargs={'code': self.survey.code}) + '#sections'
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['survey'] = self.survey
-        context['next_order'] = self.survey.sections.count() + 1
-        return context
-
-
-class SectionUpdateView(LoginRequiredMixin, UpdateView):
-    """Edit existing section"""
-    model = SurveySection
-    template_name = 'admin_panel/surveys/section_form.html'
-    fields = ['title', 'description', 'order', 'max_points']
-    
-    def get_success_url(self):
-        messages.success(self.request, f'Sección "{self.object.title}" actualizada exitosamente.')
-        return reverse_lazy('admin_panel:survey_detail', kwargs={'code': self.object.survey.code}) + '#sections'
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['survey'] = self.object.survey
-        return context
-
-
-class SectionDeleteView(LoginRequiredMixin, View):
-    """Delete section via AJAX"""
-    
-    def post(self, request, pk):
-        section = get_object_or_404(SurveySection, pk=pk)
-        survey_code = section.survey.code
-        section_title = section.title
-        questions_count = section.questions.count()
-        
-        # Delete section (cascade will delete questions)
-        section.delete()
-        
-        return JsonResponse({
-            'success': True,
-            'message': f'Sección "{section_title}" eliminada exitosamente ({questions_count} preguntas eliminadas).',
-            'redirect_url': reverse_lazy('admin_panel:survey_detail', kwargs={'code': survey_code}) + '#sections'
-        })
-
-
-# ====================================
-# SURVEY QUESTIONS CRUD
-# ====================================
-
-class QuestionCreateView(LoginRequiredMixin, CreateView):
-    """Create new question for a survey"""
-    model = Question
-    template_name = 'admin_panel/surveys/question_form.html'
-    fields = ['section', 'question_text', 'question_type', 'order', 'is_required', 'max_points', 'help_text']
-    
-    def dispatch(self, request, *args, **kwargs):
-        self.survey = get_object_or_404(Survey, code=kwargs['code'])
-        return super().dispatch(request, *args, **kwargs)
-    
-    def form_valid(self, form):
-        form.instance.survey = self.survey
-        messages.success(self.request, f'Pregunta creada exitosamente.')
-        return super().form_valid(form)
-    
-    def get_success_url(self):
-        return reverse_lazy('admin_panel:survey_detail', kwargs={'code': self.survey.code}) + '#questions'
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['survey'] = self.survey
-        context['sections'] = self.survey.sections.all().order_by('order')
-        return context
-    
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
-        # Limit section choices to this survey's sections
-        form.fields['section'].queryset = self.survey.sections.all().order_by('order')
-        return form
-
-
-class QuestionUpdateView(LoginRequiredMixin, UpdateView):
-    """Edit existing question"""
-    model = Question
-    template_name = 'admin_panel/surveys/question_form.html'
-    fields = ['section', 'question_text', 'question_type', 'order', 'is_required', 'max_points', 'help_text']
-    
-    def get_success_url(self):
-        messages.success(self.request, f'Pregunta actualizada exitosamente.')
-        return reverse_lazy('admin_panel:survey_detail', kwargs={'code': self.object.survey.code}) + '#questions'
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['survey'] = self.object.survey
-        context['sections'] = self.object.survey.sections.all().order_by('order')
-        return context
-    
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
-        # Limit section choices to this survey's sections
-        form.fields['section'].queryset = self.object.survey.sections.all().order_by('order')
-        return form
-
-
-class QuestionDeleteView(LoginRequiredMixin, View):
-    """Delete question via AJAX"""
-    
-    def post(self, request, pk):
-        question = get_object_or_404(Question, pk=pk)
-        survey_code = question.survey.code
-        options_count = question.options.count()
-        
-        # Delete question (cascade will delete options)
-        question.delete()
-        
-        return JsonResponse({
-            'success': True,
-            'message': f'Pregunta eliminada exitosamente ({options_count} opciones eliminadas).',
-            'redirect_url': reverse_lazy('admin_panel:survey_detail', kwargs={'code': survey_code}) + '#questions'
-        })
-        
-# ====================================
 # QUESTION OPTIONS AJAX MANAGEMENT
 # ====================================
 
@@ -853,3 +718,425 @@ class OptionBulkSaveView(LoginRequiredMixin, View):
                 'success': False,
                 'message': 'Error guardando las opciones'
             }, status=500)
+
+
+# ====================================
+# SCORING VIEWS
+# ====================================
+
+class ScoringDashboardView(LoginRequiredMixin, TemplateView):
+    """Dashboard principal del módulo de scoring"""
+    template_name = 'admin_panel/scoring/dashboard.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Estadísticas generales
+        total_scores = ScoreResult.objects.count()
+        recent_scores = ScoreResult.objects.filter(
+            calculated_at__gte=timezone.now() - timedelta(days=7)
+        ).count()
+        
+        # Distribución por risk level
+        risk_distribution = ScoreResult.objects.values('risk_level').annotate(
+            count=Count('id')
+        ).order_by('risk_level')
+        
+        # Scores por survey
+        scores_by_survey = ScoreResult.objects.select_related('submission__survey').values(
+            'submission__survey__title'
+        ).annotate(
+            count=Count('id'),
+            avg_score=Avg('score_percentage')
+        ).order_by('-count')[:5]
+        
+        # Risk levels más recientes
+        recent_critical = ScoreResult.objects.filter(
+            risk_level='CRITICAL'
+        ).select_related('submission__prospect').order_by('-calculated_at')[:5]
+        
+        # Surveys sin configuración de riesgo
+        surveys_without_config = Survey.objects.filter(
+            risk_config__isnull=True,
+            is_active=True
+        ).count()
+        
+        # Prospectos con scores más altos
+        top_prospects = ScoreResult.objects.filter(
+            risk_level__in=['EXCELLENT', 'GOOD']
+        ).select_related('submission__prospect').order_by('-score_percentage')[:10]
+        
+        context.update({
+            'total_scores': total_scores,
+            'recent_scores': recent_scores,
+            'risk_distribution': risk_distribution,
+            'scores_by_survey': scores_by_survey,
+            'recent_critical': recent_critical,
+            'surveys_without_config': surveys_without_config,
+            'top_prospects': top_prospects,
+            'risk_level_colors': {
+                'CRITICAL': '#dc3545',
+                'HIGH': '#fd7e14', 
+                'MODERATE': '#ffc107',
+                'GOOD': '#20c997',
+                'EXCELLENT': '#28a745'
+            }
+        })
+        
+        return context
+
+
+class ScoreResultListView(LoginRequiredMixin, ListView):
+    """Lista todos los resultados de scoring con filtros"""
+    model = ScoreResult
+    template_name = 'admin_panel/scoring/list.html'
+    context_object_name = 'score_results'
+    paginate_by = 25
+    
+    def get_queryset(self):
+        queryset = ScoreResult.objects.select_related(
+            'submission__prospect', 
+            'submission__survey'
+        ).order_by('-calculated_at')
+        
+        # Filtro por risk level
+        risk_level = self.request.GET.get('risk_level')
+        if risk_level and risk_level in dict(RiskLevel.choices):
+            queryset = queryset.filter(risk_level=risk_level)
+        
+        # Filtro por survey
+        survey = self.request.GET.get('survey')
+        if survey:
+            queryset = queryset.filter(submission__survey_id=survey)
+        
+        # Filtro por rango de score
+        min_score = self.request.GET.get('min_score')
+        max_score = self.request.GET.get('max_score')
+        if min_score:
+            try:
+                queryset = queryset.filter(score_percentage__gte=float(min_score))
+            except ValueError:
+                pass
+        if max_score:
+            try:
+                queryset = queryset.filter(score_percentage__lte=float(max_score))
+            except ValueError:
+                pass
+        
+        # Filtro por fecha
+        date_from = self.request.GET.get('date_from')
+        date_to = self.request.GET.get('date_to')
+        if date_from:
+            try:
+                date_from = datetime.strptime(date_from, '%Y-%m-%d').date()
+                queryset = queryset.filter(calculated_at__date__gte=date_from)
+            except ValueError:
+                pass
+        if date_to:
+            try:
+                date_to = datetime.strptime(date_to, '%Y-%m-%d').date()
+                queryset = queryset.filter(calculated_at__date__lte=date_to)
+            except ValueError:
+                pass
+        
+        # Búsqueda por nombre o email del prospect
+        search = self.request.GET.get('search')
+        if search:
+            queryset = queryset.filter(
+                Q(submission__prospect__name__icontains=search) |
+                Q(submission__prospect__email__icontains=search) |
+                Q(submission__prospect__company_name__icontains=search)
+            )
+        
+        return queryset
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Para los filtros
+        context['surveys'] = Survey.objects.filter(is_active=True).order_by('title')
+        context['risk_levels'] = RiskLevel.choices
+        
+        # Valores actuales de filtros
+        context['current_filters'] = {
+            'risk_level': self.request.GET.get('risk_level', ''),
+            'survey': self.request.GET.get('survey', ''),
+            'min_score': self.request.GET.get('min_score', ''),
+            'max_score': self.request.GET.get('max_score', ''),
+            'date_from': self.request.GET.get('date_from', ''),
+            'date_to': self.request.GET.get('date_to', ''),
+            'search': self.request.GET.get('search', ''),
+        }
+        
+        # Estadísticas rápidas de la query actual
+        current_queryset = self.get_queryset()
+        context['filtered_stats'] = {
+            'total': current_queryset.count(),
+            'avg_score': current_queryset.aggregate(avg=Avg('score_percentage'))['avg'] or 0,
+            'risk_distribution': current_queryset.values('risk_level').annotate(
+                count=Count('id')
+            ).order_by('risk_level')
+        }
+        
+        return context
+
+
+class ScoreResultDetailView(LoginRequiredMixin, DetailView):
+    """Vista detallada de un resultado de scoring"""
+    model = ScoreResult
+    template_name = 'admin_panel/scoring/detail.html'
+    context_object_name = 'score_result'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        score_result = self.object
+        submission = score_result.submission
+        
+        # Información del prospect y survey
+        context['prospect'] = submission.prospect
+        context['survey'] = submission.survey
+        context['submission'] = submission
+        
+        # Responses del survey agrupadas por sección
+        responses = submission.responses.select_related(
+            'question__section', 
+            'selected_option'
+        ).order_by('question__section__order', 'question__order')
+        
+        responses_by_section = {}
+        for response in responses:
+            section = response.question.section
+            if section not in responses_by_section:
+                responses_by_section[section] = []
+            responses_by_section[section].append(response)
+        
+        context['responses_by_section'] = responses_by_section
+        
+        # Configuración de riesgo del survey
+        try:
+            risk_config = submission.survey.risk_config
+            context['risk_config'] = risk_config
+        except SurveyRiskConfiguration.DoesNotExist:
+            context['risk_config'] = None
+        
+        # Recomendaciones de paquetes
+        try:
+            package_recommendation = RiskLevelPackageRecommendation.objects.get(
+                survey=submission.survey,
+                risk_level=score_result.risk_level
+            )
+            context['package_recommendation'] = package_recommendation
+        except RiskLevelPackageRecommendation.DoesNotExist:
+            context['package_recommendation'] = None
+        
+        # Historial de scores del mismo prospect (otros surveys)
+        other_scores = ScoreResult.objects.filter(
+            submission__prospect=submission.prospect
+        ).exclude(
+            id=score_result.id
+        ).select_related('submission__survey').order_by('-calculated_at')[:5]
+        
+        context['other_scores'] = other_scores
+        
+        # Comparación con otros scores del mismo survey
+        same_survey_stats = ScoreResult.objects.filter(
+            submission__survey=submission.survey
+        ).aggregate(
+            avg_score=Avg('score_percentage'),
+            min_score=Min('score_percentage'),
+            max_score=Max('score_percentage'),
+            total_count=Count('id')
+        )
+        
+        context['same_survey_stats'] = same_survey_stats
+        
+        # Percentil del score actual
+        if same_survey_stats['total_count'] > 1:
+            better_scores = ScoreResult.objects.filter(
+                submission__survey=submission.survey,
+                score_percentage__gt=score_result.score_percentage
+            ).count()
+            
+            percentile = ((same_survey_stats['total_count'] - better_scores) / 
+                         same_survey_stats['total_count']) * 100
+            context['score_percentile'] = round(percentile, 1)
+        else:
+            context['score_percentile'] = None
+        
+        return context
+
+
+class SurveyRiskConfigListView(LoginRequiredMixin, ListView):
+    """Lista las configuraciones de riesgo por survey"""
+    model = SurveyRiskConfiguration
+    template_name = 'admin_panel/scoring/risk_config_list.html'
+    context_object_name = 'risk_configs'
+    paginate_by = 20
+    
+    def get_queryset(self):
+        return SurveyRiskConfiguration.objects.select_related('survey').order_by('-created_at')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Surveys sin configuración
+        surveys_without_config = Survey.objects.filter(
+            risk_config__isnull=True,
+            is_active=True
+        ).order_by('title')
+        
+        context['surveys_without_config'] = surveys_without_config
+        
+        return context
+
+
+class SurveyRiskConfigDetailView(LoginRequiredMixin, DetailView):
+    """Vista detallada de configuración de riesgo"""
+    model = SurveyRiskConfiguration
+    template_name = 'admin_panel/scoring/risk_config_detail.html'
+    context_object_name = 'risk_config'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        risk_config = self.object
+        survey = risk_config.survey
+        
+        # Estadísticas de scores con esta configuración
+        scores_stats = ScoreResult.objects.filter(
+            submission__survey=survey
+        ).values('risk_level').annotate(
+            count=Count('id'),
+            avg_score=Avg('score_percentage')
+        ).order_by('risk_level')
+        
+        context['scores_stats'] = scores_stats
+        
+        # Recomendaciones de paquetes para este survey
+        package_recommendations = RiskLevelPackageRecommendation.objects.filter(
+            survey=survey
+        ).order_by('risk_level')
+        
+        context['package_recommendations'] = package_recommendations
+        
+        # Submissions recientes
+        recent_submissions = ScoreResult.objects.filter(
+            submission__survey=survey
+        ).select_related('submission__prospect').order_by('-calculated_at')[:10]
+        
+        context['recent_submissions'] = recent_submissions
+        
+        return context
+
+
+class RecalculateScoresView(LoginRequiredMixin, View):
+    """Vista AJAX para recalcular scores masivamente"""
+    
+    def post(self, request):
+        survey_id = request.POST.get('survey_id')
+        force_recalculate = request.POST.get('force', 'false').lower() == 'true'
+        
+        if not survey_id:
+            return JsonResponse({
+                'success': False,
+                'message': 'ID del survey es requerido'
+            }, status=400)
+        
+        try:
+            survey = Survey.objects.get(id=survey_id)
+        except Survey.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'message': 'Survey no encontrado'
+            }, status=404)
+        
+        try:
+            # Usar la función utilitaria del signals
+            success_count, error_count = recalculate_scores_for_survey(
+                survey=survey,
+                force=force_recalculate
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'message': f'Recálculo completado: {success_count} exitosos, {error_count} errores',
+                'stats': {
+                    'success_count': success_count,
+                    'error_count': error_count
+                }
+            })
+            
+        except Exception as e:
+            logger.error(f"Error en recálculo masivo para survey {survey_id}: {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'message': f'Error en el recálculo: {str(e)}'
+            }, status=500)
+
+
+class ExportScoresView(LoginRequiredMixin, View):
+    """Vista para exportar scores en CSV"""
+    
+    def get(self, request):
+        # Aplicar los mismos filtros que en la lista
+        queryset = ScoreResult.objects.select_related(
+            'submission__prospect', 
+            'submission__survey'
+        ).order_by('-calculated_at')
+        
+        # Aplicar filtros (misma lógica que ScoreResultListView)
+        risk_level = request.GET.get('risk_level')
+        if risk_level and risk_level in dict(RiskLevel.choices):
+            queryset = queryset.filter(risk_level=risk_level)
+        
+        survey = request.GET.get('survey')
+        if survey:
+            queryset = queryset.filter(submission__survey_id=survey)
+        
+        search = request.GET.get('search')
+        if search:
+            queryset = queryset.filter(
+                Q(submission__prospect__name__icontains=search) |
+                Q(submission__prospect__email__icontains=search) |
+                Q(submission__prospect__company_name__icontains=search)
+            )
+        
+        # Crear response CSV
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="scores_export_{timezone.now().strftime("%Y%m%d_%H%M%S")}.csv"'
+        
+        writer = csv.writer(response)
+        
+        # Headers
+        writer.writerow([
+            'Prospect',
+            'Email', 
+            'Empresa',
+            'Survey',
+            'Score (%)',
+            'Puntos',
+            'Risk Level',
+            'Paquete Primario',
+            'Paquete Secundario',
+            'Fecha Cálculo',
+            'Fecha Completion'
+        ])
+        
+        # Datos
+        for score in queryset:
+            writer.writerow([
+                score.submission.prospect.name,
+                score.submission.prospect.email,
+                score.submission.prospect.company_name or '',
+                score.submission.survey.title,
+                f"{score.score_percentage}%",
+                f"{score.total_points}/{score.submission.survey.max_score}",
+                score.get_risk_level_display(),
+                score.primary_package,
+                score.secondary_package or '',
+                score.calculated_at.strftime('%Y-%m-%d %H:%M:%S'),
+                score.submission.completed_at.strftime('%Y-%m-%d %H:%M:%S') if score.submission.completed_at else ''
+            ])
+        
+        return response

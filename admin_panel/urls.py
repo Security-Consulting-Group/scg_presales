@@ -43,4 +43,23 @@ urlpatterns = [
     path('ajax/questions/<int:question_id>/options/create/', views.OptionCreateView.as_view(), name='option_create'),
     path('ajax/options/<int:pk>/update/', views.OptionUpdateView.as_view(), name='option_update'),
     path('ajax/options/<int:pk>/delete/', views.OptionDeleteView.as_view(), name='option_delete'),
+    
+    # ====================================
+    # SCORING URLS
+    # ====================================
+    
+    # Scoring Dashboard
+    path('scoring/', views.ScoringDashboardView.as_view(), name='scoring_dashboard'),
+    
+    # Score Results CRUD
+    path('scoring/results/', views.ScoreResultListView.as_view(), name='score_results_list'),
+    path('scoring/results/<int:pk>/', views.ScoreResultDetailView.as_view(), name='score_result_detail'),
+    path('scoring/results/export/', views.ExportScoresView.as_view(), name='export_scores'),
+    
+    # Risk Configuration Management
+    path('scoring/risk-configs/', views.SurveyRiskConfigListView.as_view(), name='risk_configs_list'),
+    path('scoring/risk-configs/<int:pk>/', views.SurveyRiskConfigDetailView.as_view(), name='risk_config_detail'),
+    
+    # AJAX Actions for Scoring
+    path('ajax/scoring/recalculate/', views.RecalculateScoresView.as_view(), name='recalculate_scores'),
 ]

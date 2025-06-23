@@ -1,0 +1,422 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}Score Results{% endblock %}
+{% block page_title %}Resultados de Scoring{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/scoring.css' %}">
+{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex gap-2">
+    <button class="btn btn-outline-primary btn-sm" onclick="exportScores()">
+        <i class="fas fa-download me-1"></i>Exportar CSV
+    </button>
+    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#recalculateModal">
+        <i class="fas fa-sync-alt me-1"></i>Recalcular Scores
+    </button>
+    <a href="{% url 'admin_panel:risk_configs_list' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="fas fa-cog me-1"></i>Risk Configs
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Filtros -->
+<div class="admin-filters">
+    <form method="get" id="filterForm" class="row g-3 align-items-end">
+        <!-- Búsqueda -->
+        <div class="col-md-3">
+            <label class="form-label">Buscar</label>
+            <div class="admin-search-input">
+                <input type="text" class="form-control" name="search" 
+                       value="{{ current_filters.search }}" 
+                       placeholder="Nombre, email, empresa...">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+        </div>
+        
+        <!-- Risk Level -->
+        <div class="col-md-2">
+            <label class="form-label">Risk Level</label>
+            <select class="form-select" name="risk_level">
+                <option value="">Todos</option>
+                {% for value, label in risk_levels %}
+                <option value="{{ value }}" {% if current_filters.risk_level == value %}selected{% endif %}>
+                    {{ label }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <!-- Survey -->
+        <div class="col-md-3">
+            <label class="form-label">Survey</label>
+            <select class="form-select" name="survey">
+                <option value="">Todos los surveys</option>
+                {% for survey in surveys %}
+                <option value="{{ survey.id }}" {% if current_filters.survey == survey.id|stringformat:"s" %}selected{% endif %}>
+                    {{ survey.title }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <!-- Rango de Score -->
+        <div class="col-md-2">
+            <label class="form-label">Score Mín</label>
+            <input type="number" class="form-control" name="min_score" 
+                   value="{{ current_filters.min_score }}" 
+                   placeholder="0" min="0" max="100">
+        </div>
+        
+        <div class="col-md-2">
+            <label class="form-label">Score Máx</label>
+            <input type="number" class="form-control" name="max_score" 
+                   value="{{ current_filters.max_score }}" 
+                   placeholder="100" min="0" max="100">
+        </div>
+        
+        <!-- Fechas -->
+        <div class="col-md-3">
+            <label class="form-label">Fecha Desde</label>
+            <input type="date" class="form-control" name="date_from" 
+                   value="{{ current_filters.date_from }}">
+        </div>
+        
+        <div class="col-md-3">
+            <label class="form-label">Fecha Hasta</label>
+            <input type="date" class="form-control" name="date_to" 
+                   value="{{ current_filters.date_to }}">
+        </div>
+        
+        <!-- Botones -->
+        <div class="col-md-6">
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter me-1"></i>Filtrar
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="clearFilters">
+                    <i class="fas fa-times me-1"></i>Limpiar
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Estadísticas Filtradas -->
+{% if filtered_stats.total > 0 %}
+<div class="filtered-stats-bar">
+    <div class="row text-center">
+        <div class="col-md-3">
+            <div class="stat-item">
+                <div class="stat-value">{{ filtered_stats.total }}</div>
+                <div class="stat-label">Resultados</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-item">
+                <div class="stat-value">{{ filtered_stats.avg_score|floatformat:1 }}%</div>
+                <div class="stat-label">Score Promedio</div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="risk-distribution-mini">
+                {% for item in filtered_stats.risk_distribution %}
+                <span class="risk-mini-badge risk-{{ item.risk_level|lower }}">
+                    {{ item.risk_level }}: {{ item.count }}
+                </span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Tabla de Results -->
+<div class="admin-table">
+    {% if score_results %}
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Prospect</th>
+                <th>Survey</th>
+                <th>Score</th>
+                <th>Risk Level</th>
+                <th>Paquete Recomendado</th>
+                <th>Calculado</th>
+                <th class="text-center">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for score in score_results %}
+            <tr class="score-row" data-href="{% url 'admin_panel:score_result_detail' score.pk %}">
+                <!-- Prospect Info -->
+                <td>
+                    <div class="prospect-info">
+                        <div class="prospect-avatar">
+                            {{ score.submission.prospect.name|first|upper }}
+                        </div>
+                        <div class="prospect-details">
+                            <div class="prospect-name">{{ score.submission.prospect.name }}</div>
+                            <div class="prospect-email">{{ score.submission.prospect.email }}</div>
+                            {% if score.submission.prospect.company_name %}
+                            <div class="prospect-company">{{ score.submission.prospect.company_name }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </td>
+                
+                <!-- Survey -->
+                <td>
+                    <div class="survey-info">
+                        <div class="survey-title">{{ score.submission.survey.title }}</div>
+                        <small class="text-muted">
+                            <i class="fas fa-calendar me-1"></i>
+                            Completado: {{ score.submission.completed_at|date:"d/m/Y H:i" }}
+                        </small>
+                    </div>
+                </td>
+                
+                <!-- Score -->
+                <td>
+                    <div class="score-display">
+                        <div class="score-percentage">{{ score.score_percentage }}%</div>
+                        <div class="score-points">
+                            {{ score.total_points }}/{{ score.submission.survey.max_score }} puntos
+                        </div>
+                        <div class="score-progress">
+                            <div class="progress" style="height: 4px;">
+                                <div class="progress-bar" role="progressbar" 
+                                     style="width: {{ score.score_percentage }}%"
+                                     aria-valuenow="{{ score.score_percentage }}" 
+                                     aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                
+                <!-- Risk Level -->
+                <td>
+                    <span class="risk-level-badge risk-{{ score.risk_level|lower }}">
+                        <i class="fas fa-shield-alt me-1"></i>
+                        {{ score.get_risk_level_display }}
+                    </span>
+                </td>
+                
+                <!-- Paquete -->
+                <td>
+                    <div class="package-recommendation">
+                        <div class="primary-package">
+                            <i class="fas fa-star me-1"></i>
+                            {{ score.primary_package }}
+                        </div>
+                        {% if score.secondary_package %}
+                        <div class="secondary-package">
+                            <i class="fas fa-plus me-1"></i>
+                            {{ score.secondary_package }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </td>
+                
+                <!-- Fecha -->
+                <td>
+                    <div class="date-info">
+                        <div class="date-primary">{{ score.calculated_at|date:"d/m/Y" }}</div>
+                        <small class="text-muted">{{ score.calculated_at|date:"H:i" }}</small>
+                        {% if score.recalculated_at != score.calculated_at %}
+                        <small class="text-warning d-block">
+                            <i class="fas fa-sync me-1"></i>Recalculado
+                        </small>
+                        {% endif %}
+                    </div>
+                </td>
+                
+                <!-- Acciones -->
+                <td class="text-center">
+                    <div class="action-buttons">
+                        <a href="{% url 'admin_panel:score_result_detail' score.pk %}" 
+                           class="btn btn-sm btn-outline-primary" 
+                           data-bs-toggle="tooltip" title="Ver Detalle">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="{% url 'admin_panel:prospect_detail' score.submission.prospect.pk %}" 
+                           class="btn btn-sm btn-outline-secondary" 
+                           data-bs-toggle="tooltip" title="Ver Prospect">
+                            <i class="fas fa-user"></i>
+                        </a>
+                        <button class="btn btn-sm btn-outline-warning" 
+                                onclick="recalculateScore('{{ score.submission.survey.id }}', '{{ score.submission.prospect.name }}')"
+                                data-bs-toggle="tooltip" title="Recalcular">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <!-- Paginación -->
+    {% if is_paginated %}
+    <div class="admin-pagination">
+        <div class="pagination-info">
+            Mostrando {{ page_obj.start_index }}-{{ page_obj.end_index }} de {{ paginator.count }} resultados
+        </div>
+        <nav aria-label="Navegación de páginas">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ paginator.num_pages }}">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+    
+    {% else %}
+    <!-- Empty State -->
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            <i class="fas fa-chart-line"></i>
+        </div>
+        <h4>No hay resultados de scoring</h4>
+        <p class="text-muted">
+            {% if request.GET %}
+            No se encontraron scores que coincidan con los filtros aplicados.
+            <br>
+            <button class="btn btn-outline-primary mt-2" id="clearFilters">
+                <i class="fas fa-times me-1"></i>Limpiar Filtros
+            </button>
+            {% else %}
+            Aún no se han calculado scores para ninguna submission completada.
+            {% endif %}
+        </p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modal Recalcular -->
+<div class="modal fade" id="recalculateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-sync-alt me-2"></i>Recalcular Scores
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="recalculateForm">
+                    <div class="mb-3">
+                        <label class="form-label">Survey</label>
+                        <select class="form-select" name="survey_id" required>
+                            <option value="">Seleccionar survey...</option>
+                            {% for survey in surveys %}
+                            <option value="{{ survey.id }}">{{ survey.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="force" id="forceRecalculate">
+                        <label class="form-check-label" for="forceRecalculate">
+                            Forzar recálculo (incluso si ya existe score)
+                        </label>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Esto recalculará los scores para todas las submissions completadas del survey seleccionado.
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="executeRecalculation()">
+                    <i class="fas fa-sync-alt me-1"></i>Recalcular
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/scoring.js' %}"></script>
+<script>
+// Export scores function
+function exportScores() {
+    // Construir URL con filtros actuales
+    const form = document.getElementById('filterForm');
+    const formData = new FormData(form);
+    const params = new URLSearchParams(formData);
+    
+    // Redirect to export URL with current filters
+    window.location.href = '{% url "admin_panel:export_scores" %}?' + params.toString();
+}
+
+// Individual score recalculation
+function recalculateScore(surveyId, prospectName) {
+    if (confirm(`¿Recalcular el score para ${prospectName}?`)) {
+        window.scgScoring.recalculateScores(surveyId, false);
+    }
+}
+
+// Execute bulk recalculation
+function executeRecalculation() {
+    const form = document.getElementById('recalculateForm');
+    const formData = new FormData(form);
+    
+    if (!formData.get('survey_id')) {
+        alert('Por favor selecciona un survey');
+        return;
+    }
+    
+    const surveyId = formData.get('survey_id');
+    const force = formData.get('force') === 'on';
+    
+    // Close modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('recalculateModal'));
+    modal.hide();
+    
+    // Execute recalculation
+    window.scgScoring.recalculateScores(surveyId, force);
+}
+</script>
+{% endblock %}
