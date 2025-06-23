@@ -1,0 +1,1189 @@
+/* ====================================
+   SCG SCORING MODULE STYLES
+   ==================================== */
+
+/* Extend base admin variables */
+:root {
+    --scoring-excellent: #28a745;
+    --scoring-good: #20c997;
+    --scoring-moderate: #ffc107;
+    --scoring-high: #fd7e14;
+    --scoring-critical: #dc3545;
+    --scoring-bg-light: #f8fafc;
+    --scoring-shadow: 0 4px 6px -1px rgb(0 45 116 / 0.1);
+}
+
+/* ====================================
+   SCORE HEADER CARD
+   ==================================== */
+
+.score-header-card {
+    background: var(--admin-bg-white);
+    border-radius: 16px;
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--admin-shadow-lg);
+    border: 1px solid var(--admin-border-color);
+}
+
+.prospect-avatar-large {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--admin-primary);
+    color: var(--admin-text-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.score-header-info .prospect-name {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+    margin-bottom: 0.5rem;
+    font-family: 'Inter', sans-serif;
+}
+
+.score-header-info .prospect-email a {
+    color: var(--admin-primary-light);
+    text-decoration: none;
+}
+
+.score-header-info .prospect-email a:hover {
+    text-decoration: underline;
+}
+
+.score-header-info .survey-info {
+    font-size: 1rem;
+    color: var(--admin-text-primary);
+    margin: 0.5rem 0;
+}
+
+/* Score Display */
+.score-header-display {
+    text-align: center;
+}
+
+.main-score-display {
+    margin-bottom: 1.5rem;
+}
+
+.score-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: conic-gradient(
+        var(--admin-primary) 0deg var(--score-angle, 0deg),
+        var(--admin-bg-light) var(--score-angle, 0deg) 360deg
+    );
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    position: relative;
+    padding: 8px;
+}
+
+.score-circle::before {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border-radius: 50%;
+    background: var(--admin-bg-white);
+}
+
+.score-percentage {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--admin-primary);
+    font-family: 'Inter', sans-serif;
+    position: relative;
+    z-index: 1;
+}
+
+.score-points {
+    font-size: 0.8rem;
+    color: var(--admin-text-secondary);
+    font-weight: 600;
+    position: relative;
+    z-index: 1;
+}
+
+/* Risk Level Badges */
+.risk-level-badge-large {
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    font-family: 'Inter', sans-serif;
+}
+
+.risk-level-badge {
+    padding: 0.375rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.25px;
+    display: inline-flex;
+    align-items: center;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Risk Level Colors */
+.risk-excellent,
+.risk-level-badge.risk-excellent,
+.risk-level-badge-large.risk-excellent {
+    background: rgba(40, 167, 69, 0.1);
+    color: var(--scoring-excellent);
+    border: 1px solid rgba(40, 167, 69, 0.2);
+}
+
+.risk-good,
+.risk-level-badge.risk-good,
+.risk-level-badge-large.risk-good {
+    background: rgba(32, 201, 151, 0.1);
+    color: var(--scoring-good);
+    border: 1px solid rgba(32, 201, 151, 0.2);
+}
+
+.risk-moderate,
+.risk-level-badge.risk-moderate,
+.risk-level-badge-large.risk-moderate {
+    background: rgba(255, 193, 7, 0.1);
+    color: var(--scoring-moderate);
+    border: 1px solid rgba(255, 193, 7, 0.2);
+}
+
+.risk-high,
+.risk-level-badge.risk-high,
+.risk-level-badge-large.risk-high {
+    background: rgba(253, 126, 20, 0.1);
+    color: var(--scoring-high);
+    border: 1px solid rgba(253, 126, 20, 0.2);
+}
+
+.risk-critical,
+.risk-level-badge.risk-critical,
+.risk-level-badge-large.risk-critical {
+    background: rgba(220, 53, 69, 0.1);
+    color: var(--scoring-critical);
+    border: 1px solid rgba(220, 53, 69, 0.2);
+}
+
+/* ====================================
+   PACKAGE RECOMMENDATIONS
+   ==================================== */
+
+.package-recommendations {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.primary-package-card,
+.secondary-package-card {
+    background: var(--admin-bg-light);
+    border-radius: 12px;
+    padding: 1.5rem;
+    flex: 1;
+    min-width: 250px;
+    position: relative;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.primary-package-card {
+    border-color: var(--admin-primary);
+    background: linear-gradient(135deg, rgba(0, 45, 116, 0.05) 0%, rgba(58, 141, 222, 0.05) 100%);
+}
+
+.secondary-package-card {
+    border-color: var(--admin-accent);
+    background: linear-gradient(135deg, rgba(106, 191, 75, 0.05) 0%, rgba(32, 201, 151, 0.05) 100%);
+}
+
+.package-badge {
+    position: absolute;
+    top: -8px;
+    left: 1rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: white;
+}
+
+.package-badge.primary {
+    background: var(--admin-primary);
+}
+
+.package-badge.secondary {
+    background: var(--admin-accent);
+}
+
+.package-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+    margin: 0.5rem 0;
+    font-family: 'Inter', sans-serif;
+}
+
+.package-description {
+    font-size: 0.9rem;
+    color: var(--admin-text-secondary);
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Package in tables */
+.package-recommendation {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.primary-package,
+.secondary-package {
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.primary-package {
+    color: var(--admin-primary);
+}
+
+.secondary-package {
+    color: var(--admin-accent);
+    font-size: 0.8rem;
+}
+
+/* ====================================
+   SECTION SCORES
+   ==================================== */
+
+.section-scores-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.section-score-card {
+    background: var(--admin-bg-white);
+    border: 1px solid var(--admin-border-color);
+    border-radius: 12px;
+    padding: 1.25rem;
+    transition: all 0.3s ease;
+}
+
+.section-score-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--admin-shadow-md);
+    border-color: var(--admin-primary-light);
+}
+
+.section-header {
+    display: flex;
+    justify-content: between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    margin: 0;
+    flex: 1;
+}
+
+.section-score {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--admin-primary);
+}
+
+.section-progress {
+    margin-bottom: 0.75rem;
+}
+
+.section-progress .progress {
+    height: 8px;
+    border-radius: 10px;
+    background: var(--admin-bg-light);
+}
+
+.section-progress .progress-bar {
+    background: linear-gradient(90deg, var(--admin-primary) 0%, var(--admin-primary-light) 100%);
+    border-radius: 10px;
+}
+
+.section-points {
+    font-size: 0.85rem;
+    color: var(--admin-text-secondary);
+    font-weight: 500;
+}
+
+/* ====================================
+   RESPONSES ACCORDION
+   ==================================== */
+
+.responses-accordion .accordion-item {
+    border: 1px solid var(--admin-border-color);
+    border-radius: 8px !important;
+    margin-bottom: 0.75rem;
+}
+
+.responses-accordion .accordion-button {
+    background: var(--admin-bg-light);
+    border: none;
+    border-radius: 8px !important;
+    padding: 1rem 1.25rem;
+    font-weight: 600;
+}
+
+.responses-accordion .accordion-button:focus {
+    box-shadow: none;
+    border: none;
+}
+
+.responses-accordion .accordion-button:not(.collapsed) {
+    background: var(--admin-primary-light);
+    color: white;
+}
+
+.section-accordion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.section-name {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.section-stats {
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+
+.responses-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.response-item {
+    background: var(--admin-bg-white);
+    border: 1px solid var(--admin-border-color);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.question-info {
+    margin-bottom: 0.75rem;
+}
+
+.question-text {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.question-number {
+    color: var(--admin-primary);
+    margin-right: 0.5rem;
+}
+
+.question-help {
+    color: var(--admin-text-secondary);
+    font-style: italic;
+    line-height: 1.4;
+}
+
+.response-answer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.selected-option,
+.text-response {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+}
+
+.option-text,
+.response-text {
+    font-weight: 500;
+    color: var(--admin-text-primary);
+}
+
+.response-text {
+    font-style: italic;
+}
+
+.option-points {
+    background: var(--admin-primary);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.no-response {
+    color: var(--admin-text-secondary);
+    font-style: italic;
+}
+
+/* ====================================
+   SCORE METADATA & STATS
+   ==================================== */
+
+.score-metadata {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.metadata-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--admin-border-color);
+}
+
+.metadata-item:last-child {
+    border-bottom: none;
+}
+
+.metadata-item label {
+    font-weight: 600;
+    color: var(--admin-text-secondary);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.metadata-item span {
+    color: var(--admin-text-primary);
+    font-weight: 500;
+}
+
+.survey-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.stat-comparison {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--admin-border-color);
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+}
+
+.stat-item label {
+    font-weight: 600;
+    color: var(--admin-text-secondary);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.stat-value {
+    font-weight: 600;
+    color: var(--admin-text-primary);
+}
+
+/* Score Position Visualization */
+.score-position {
+    background: var(--admin-bg-light);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.position-scale {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--admin-text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.position-track {
+    height: 8px;
+    background: var(--admin-border-color);
+    border-radius: 4px;
+    position: relative;
+}
+
+.position-marker {
+    position: absolute;
+    top: -6px;
+    transform: translateX(-50%);
+    color: var(--admin-primary);
+    font-size: 1.2rem;
+}
+
+/* ====================================
+   RISK CONFIGURATION
+   ==================================== */
+
+.risk-ranges {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.risk-range-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.risk-range-item.critical {
+    background: rgba(220, 53, 69, 0.1);
+    color: var(--scoring-critical);
+}
+
+.risk-range-item.high {
+    background: rgba(253, 126, 20, 0.1);
+    color: var(--scoring-high);
+}
+
+.risk-range-item.moderate {
+    background: rgba(255, 193, 7, 0.1);
+    color: var(--scoring-moderate);
+}
+
+.risk-range-item.good {
+    background: rgba(32, 201, 151, 0.1);
+    color: var(--scoring-good);
+}
+
+.risk-range-item.excellent {
+    background: rgba(40, 167, 69, 0.1);
+    color: var(--scoring-excellent);
+}
+
+.range-label {
+    font-weight: 600;
+}
+
+.range-value {
+    font-weight: 700;
+}
+
+/* ====================================
+   SCORES HISTORY
+   ==================================== */
+
+.scores-history {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.history-item {
+    background: var(--admin-bg-light);
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid var(--admin-border-color);
+}
+
+.history-info {
+    flex: 1;
+}
+
+.history-survey {
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.history-score {
+    text-align: right;
+}
+
+.score-percentage {
+    font-weight: 700;
+    color: var(--admin-primary);
+    margin-right: 0.5rem;
+}
+
+.risk-level-mini {
+    padding: 0.125rem 0.375rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.history-actions {
+    margin-top: 0.75rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* ====================================
+   FILTERED STATS BAR
+   ==================================== */
+
+.filtered-stats-bar {
+    background: var(--admin-bg-white);
+    border: 1px solid var(--admin-border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.filtered-stats-bar .stat-item {
+    padding: 0.5rem;
+}
+
+.filtered-stats-bar .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--admin-primary);
+    margin-bottom: 0.25rem;
+}
+
+.filtered-stats-bar .stat-label {
+    font-size: 0.85rem;
+    color: var(--admin-text-secondary);
+    font-weight: 500;
+}
+
+.risk-distribution-mini {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.risk-mini-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* ====================================
+   TABLE SPECIFIC STYLES
+   ==================================== */
+
+.score-row {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.score-row:hover {
+    background-color: rgba(58, 141, 222, 0.05) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 45, 116, 0.1);
+}
+
+.score-display {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.score-display .score-percentage {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--admin-primary);
+}
+
+.score-display .score-points {
+    font-size: 0.8rem;
+    color: var(--admin-text-secondary);
+}
+
+.score-progress {
+    margin-top: 0.25rem;
+}
+
+.survey-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.survey-title {
+    font-weight: 600;
+    color: var(--admin-text-primary);
+}
+
+.date-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.date-primary {
+    font-weight: 600;
+    color: var(--admin-text-primary);
+}
+
+/* ====================================
+   RESPONSIVE DESIGN
+   ==================================== */
+
+@media (max-width: 768px) {
+    .score-header-card {
+        padding: 1.5rem;
+    }
+    
+    .score-header-card .row {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .prospect-avatar-large {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+        margin: 0 auto 1rem;
+    }
+    
+    .score-header-info .prospect-name {
+        font-size: 1.5rem;
+    }
+    
+    .package-recommendations {
+        flex-direction: column;
+    }
+    
+    .section-scores-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .response-answer {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .filtered-stats-bar .row {
+        text-align: left;
+    }
+    
+    .filtered-stats-bar .stat-item {
+        margin-bottom: 1rem;
+    }
+    
+    .risk-distribution-mini {
+        justify-content: flex-start;
+        margin-top: 0.5rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .score-circle {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .score-percentage {
+        font-size: 1.5rem;
+    }
+}
+
+/* ====================================
+   UTILITY CLASSES
+   ==================================== */
+
+.btn-xs {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    border-radius: 4px;
+}
+
+.text-scoring-excellent {
+    color: var(--scoring-excellent) !important;
+}
+
+.text-scoring-good {
+    color: var(--scoring-good) !important;
+}
+
+.text-scoring-moderate {
+    color: var(--scoring-moderate) !important;
+}
+
+.text-scoring-high {
+    color: var(--scoring-high) !important;
+}
+
+.text-scoring-critical {
+    color: var(--scoring-critical) !important;
+}
+
+/* ====================================
+   RISK CONFIG DETAIL STYLES
+   ==================================== */
+
+   .risk-config-header-card {
+    background: var(--admin-bg-white);
+    border-radius: 16px;
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--admin-shadow-lg);
+    border: 1px solid var(--admin-border-color);
+}
+
+.config-header-info .survey-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+    margin-bottom: 0.75rem;
+    font-family: 'Inter', sans-serif;
+}
+
+.survey-meta {
+    font-size: 1rem;
+    color: var(--admin-text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.survey-description {
+    font-size: 1rem;
+    color: var(--admin-text-primary);
+    font-style: italic;
+    margin: 0;
+}
+
+/* Risk Ranges Visual */
+.risk-ranges-visual {
+    background: var(--admin-bg-light);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.range-scale {
+    display: flex;
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.range-segment {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-align: center;
+    position: relative;
+}
+
+.range-segment.critical { background: var(--scoring-critical); }
+.range-segment.high { background: var(--scoring-high); }
+.range-segment.moderate { background: var(--scoring-moderate); color: #000; }
+.range-segment.good { background: var(--scoring-good); }
+.range-segment.excellent { background: var(--scoring-excellent); }
+
+.range-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+}
+
+.range-values {
+    font-size: 0.75rem;
+    opacity: 0.9;
+}
+
+/* Config Details Table */
+.config-details-table .table {
+    margin: 0;
+}
+
+.config-details-table th {
+    border-bottom: 2px solid var(--admin-border-color);
+    color: var(--admin-text-primary);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.config-details-table td {
+    border-bottom: 1px solid var(--admin-border-color);
+    vertical-align: middle;
+}
+
+.color-indicator {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.color-indicator.critical { background: var(--scoring-critical); }
+.color-indicator.high { background: var(--scoring-high); }
+.color-indicator.moderate { background: var(--scoring-moderate); }
+.color-indicator.good { background: var(--scoring-good); }
+.color-indicator.excellent { background: var(--scoring-excellent); }
+
+/* Package Recommendations Grid */
+.package-recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.package-recommendation-item {
+    background: var(--admin-bg-light);
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid var(--admin-border-color);
+}
+
+.package-header {
+    margin-bottom: 0.75rem;
+}
+
+.package-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.package-details label {
+    font-size: 0.8rem;
+    color: var(--admin-text-secondary);
+    font-weight: 600;
+    margin: 0;
+}
+
+.package-name {
+    font-weight: 600;
+    color: var(--admin-text-primary);
+}
+
+/* Config Actions */
+.config-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.action-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: var(--admin-bg-light);
+    border-radius: 8px;
+    border: 1px solid var(--admin-border-color);
+}
+
+.action-item.danger-action {
+    background: rgba(220, 53, 69, 0.05);
+    border-color: rgba(220, 53, 69, 0.2);
+}
+
+.action-info {
+    flex: 1;
+    margin-right: 1rem;
+}
+
+.action-info h6 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.action-info p {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.3;
+}
+
+/* Risk Distribution Stats */
+.risk-distribution-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.risk-stat-item {
+    background: var(--admin-bg-light);
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid var(--admin-border-color);
+}
+
+.risk-stat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.risk-count {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--admin-primary);
+}
+
+.stat-bar {
+    height: 6px;
+    background: var(--admin-border-color);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 0.25rem;
+}
+
+.stat-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s ease;
+}
+
+.stat-fill.risk-critical { background: var(--scoring-critical); }
+.stat-fill.risk-high { background: var(--scoring-high); }
+.stat-fill.risk-moderate { background: var(--scoring-moderate); }
+.stat-fill.risk-good { background: var(--scoring-good); }
+.stat-fill.risk-excellent { background: var(--scoring-excellent); }
+
+/* Recent Submissions */
+.recent-submissions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.submission-item {
+    background: var(--admin-bg-light);
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid var(--admin-border-color);
+}
+
+.submission-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+}
+
+.prospect-name {
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    margin-bottom: 0.125rem;
+}
+
+.submission-score {
+    text-align: right;
+}
+
+.score-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--admin-primary);
+    margin-right: 0.5rem;
+}
+
+.submission-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .risk-config-header-card {
+        padding: 1.5rem;
+    }
+    
+    .config-header-info .survey-title {
+        font-size: 1.5rem;
+    }
+    
+    .range-scale {
+        flex-direction: column;
+        height: auto;
+    }
+    
+    .range-segment {
+        height: 50px;
+        justify-content: center;
+    }
+    
+    .package-recommendations-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .action-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .action-info {
+        margin-right: 0;
+    }
+    
+    .submission-header {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .submission-score {
+        text-align: left;
+    }
+}

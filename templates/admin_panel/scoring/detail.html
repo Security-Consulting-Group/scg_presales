@@ -205,7 +205,7 @@
                                         {{ responses|length }} pregunta{{ responses|length|pluralize }}
                                         {% if score_result.section_scores %}
                                         {% with section_key="section_"|add:section.order %}
-                                        - {{ score_result.section_scores|default_if_none:"{}"|lookup:section_key.percentage|default:"0" }}%
+                                        - {{ section.percentage|default:"0" }}%
                                         {% endwith %}
                                         {% endif %}
                                     </span>
@@ -232,6 +232,7 @@
                                         
                                         <div class="response-answer">
                                             {% if response.selected_option %}
+                                            <!-- Single choice response -->
                                             <div class="selected-option">
                                                 <span class="option-text">{{ response.selected_option.option_text }}</span>
                                                 <span class="option-points">
@@ -239,7 +240,24 @@
                                                     {{ response.points_earned }} punto{{ response.points_earned|pluralize }}
                                                 </span>
                                             </div>
+                                            {% elif response.selected_options.exists %}
+                                            <!-- Multiple choice response -->
+                                            <div class="multiple-options">
+                                                {% for option in response.selected_options.all %}
+                                                <div class="selected-option">
+                                                    <span class="option-text">{{ option.option_text }}</span>
+                                                    <span class="option-points">
+                                                        <i class="fas fa-coins me-1"></i>
+                                                        {{ option.points }} punto{{ option.points|pluralize }}
+                                                    </span>
+                                                </div>
+                                                {% endfor %}
+                                                <div class="total-points">
+                                                    <strong>Total: {{ response.points_earned }} punto{{ response.points_earned|pluralize }}</strong>
+                                                </div>
+                                            </div>
                                             {% elif response.text_response %}
+                                            <!-- Text response -->
                                             <div class="text-response">
                                                 <span class="response-text">"{{ response.text_response }}"</span>
                                                 <span class="option-points">
@@ -248,6 +266,7 @@
                                                 </span>
                                             </div>
                                             {% else %}
+                                            <!-- No response -->
                                             <div class="no-response">
                                                 <span class="text-muted">Sin respuesta</span>
                                             </div>
@@ -363,7 +382,7 @@
                             </div>
                             <div class="position-track">
                                 <div class="position-marker" 
-                                     style="left: {{ score_result.score_percentage|mul:100|div:same_survey_stats.max_score }}%">
+                                    style="left: {{ score_marker_position }}%">
                                     <i class="fas fa-map-marker-alt"></i>
                                 </div>
                             </div>

@@ -47,19 +47,22 @@ urlpatterns = [
     # ====================================
     # SCORING URLS
     # ====================================
-    
-    # Scoring Dashboard
-    path('scoring/', views.ScoringDashboardView.as_view(), name='scoring_dashboard'),
-    
+
+    # Scoring principal (lista)
+    path('scoring/', views.ScoreResultListView.as_view(), name='scoring_list'),
+
     # Score Results CRUD
     path('scoring/results/', views.ScoreResultListView.as_view(), name='score_results_list'),
     path('scoring/results/<int:pk>/', views.ScoreResultDetailView.as_view(), name='score_result_detail'),
     path('scoring/results/export/', views.ExportScoresView.as_view(), name='export_scores'),
-    
+
     # Risk Configuration Management
+    path('scoring/risk-configs/create/', views.SurveyRiskConfigCreateView.as_view(), name='risk_config_create'),
+    path('scoring/risk-configs/<int:pk>/edit/', views.SurveyRiskConfigUpdateView.as_view(), name='risk_config_edit'),
+    path('scoring/risk-configs/quick-create/', views.QuickRiskConfigCreateView.as_view(), name='risk_config_quick_create'),
     path('scoring/risk-configs/', views.SurveyRiskConfigListView.as_view(), name='risk_configs_list'),
     path('scoring/risk-configs/<int:pk>/', views.SurveyRiskConfigDetailView.as_view(), name='risk_config_detail'),
-    
+
     # AJAX Actions for Scoring
     path('ajax/scoring/recalculate/', views.RecalculateScoresView.as_view(), name='recalculate_scores'),
 ]

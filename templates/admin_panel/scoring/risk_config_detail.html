@@ -1,0 +1,423 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}{{ risk_config.survey.title }} - Risk Configuration{% endblock %}
+{% block page_title %}Configuración de Riesgo - {{ risk_config.survey.title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/scoring.css' %}">
+{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex gap-2">
+    <a href="{% url 'admin_panel:risk_configs_list' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="fas fa-arrow-left me-1"></i>Volver a Lista
+    </a>
+    <a href="{% url 'admin_panel:survey_detail' risk_config.survey.code %}" class="btn btn-outline-primary btn-sm">
+        <i class="fas fa-clipboard-list me-1"></i>Ver Survey
+    </a>
+    <button class="btn btn-warning btn-sm" onclick="recalculateAllScores()">
+        <i class="fas fa-sync-alt me-1"></i>Recalcular Todos
+    </button>
+    <div class="dropdown">
+        <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <i class="fas fa-ellipsis-v"></i>
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#" onclick="exportRiskConfig()">
+                <i class="fas fa-download me-2"></i>Exportar Config
+            </a></li>
+            <li><a class="dropdown-item" href="{% url 'admin_panel:score_results_list' %}?survey={{ risk_config.survey.id }}">
+                <i class="fas fa-chart-line me-2"></i>Ver Scores
+            </a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-warning" href="#" onclick="resetConfiguration()">
+                <i class="fas fa-undo me-2"></i>Reset a Defaults
+            </a></li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Risk Config Header -->
+<div class="risk-config-header-card">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <div class="config-header-info">
+                <h2 class="survey-title">{{ risk_config.survey.title }}</h2>
+                <p class="survey-meta">
+                    <i class="fas fa-code me-2"></i>
+                    <strong>Código:</strong> {{ risk_config.survey.code }}
+                    <span class="mx-3">|</span>
+                    <i class="fas fa-star me-2"></i>
+                    <strong>Score Máximo:</strong> {{ risk_config.survey.max_score }} puntos
+                    <span class="mx-3">|</span>
+                    <i class="fas fa-calendar me-2"></i>
+                    <strong>Configurado:</strong> {{ risk_config.created_at|date:"d/m/Y" }}
+                </p>
+                {% if risk_config.survey.description %}
+                <p class="survey-description">{{ risk_config.survey.description }}</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-md-4 text-end">
+            <div class="config-status">
+                {% if risk_config.is_active %}
+                <span class="status-badge status-active">
+                    <i class="fas fa-check-circle me-1"></i>Activa
+                </span>
+                {% else %}
+                <span class="status-badge status-inactive">
+                    <i class="fas fa-times-circle me-1"></i>Inactiva
+                </span>
+                {% endif %}
+                <div class="config-meta mt-2">
+                    <small class="text-muted">
+                        Última actualización:<br>
+                        {{ risk_config.updated_at|date:"d/m/Y H:i" }}
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="row">
+    <!-- Left Column: Risk Ranges Configuration -->
+    <div class="col-lg-7">
+        <!-- Risk Ranges Visualization -->
+        <div class="admin-card mb-4">
+            <div class="admin-card-header">
+                <h3 class="admin-card-title">
+                    <i class="fas fa-chart-bar me-2"></i>Rangos de Riesgo Configurados
+                </h3>
+            </div>
+            <div class="admin-card-body">
+                <!-- Visual Range Display -->
+                <div class="risk-ranges-visual mb-4">
+                    <div class="range-scale">
+                        <div class="range-segment critical" style="width: {{ range_widths.critical }}%">
+                            <div class="range-label">CRÍTICO</div>
+                            <div class="range-values">{{ risk_ranges.critical.percent_min }}% - {{ risk_ranges.critical.percent_max }}%</div>
+                        </div>
+                        <div class="range-segment high" style="width: {{ range_widths.high }}%">
+                            <div class="range-label">ALTO</div>
+                            <div class="range-values">{{ risk_ranges.high.percent_min }}% - {{ risk_ranges.high.percent_max }}%</div>
+                        </div>
+                        <div class="range-segment moderate" style="width: {{ range_widths.moderate }}%">
+                            <div class="range-label">MODERADO</div>
+                            <div class="range-values">{{ risk_ranges.moderate.percent_min }}% - {{ risk_ranges.moderate.percent_max }}%</div>
+                        </div>
+                        <div class="range-segment good" style="width: {{ range_widths.good }}%">
+                            <div class="range-label">BUENO</div>
+                            <div class="range-values">{{ risk_ranges.good.percent_min }}% - {{ risk_ranges.good.percent_max }}%</div>
+                        </div>
+                        <div class="range-segment excellent" style="width: {{ range_widths.excellent }}%">
+                            <div class="range-label">EXCELENTE</div>
+                            <div class="range-values">{{ risk_ranges.excellent.percent_min }}% - {{ risk_ranges.excellent.percent_max }}%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Detailed Configuration Table -->
+                <div class="config-details-table">
+                    <table class="table table-borderless">
+                        <thead>
+                            <tr>
+                                <th>Risk Level</th>
+                                <th>Rango (%)</th>
+                                <th>Rango (Puntos)</th>
+                                <th>Color</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="risk-row critical">
+                                <td>
+                                    <span class="risk-level-badge risk-critical">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                        Estado Crítico
+                                    </span>
+                                </td>
+                                <td><strong>{{ risk_ranges.critical.percent_min }}% - {{ risk_ranges.critical.percent_max }}%</strong></td>
+                                <td>{{ risk_ranges.critical.points_min }} - {{ risk_ranges.critical.points_max }} puntos</td>
+                                <td><div class="color-indicator critical"></div></td>
+                            </tr>
+                            <tr class="risk-row high">
+                                <td>
+                                    <span class="risk-level-badge risk-high">
+                                        <i class="fas fa-exclamation-circle me-1"></i>
+                                        Riesgos Significativos
+                                    </span>
+                                </td>
+                                <td><strong>{{ risk_ranges.high.percent_min }}% - {{ risk_ranges.high.percent_max }}%</strong></td>
+                                <td>{{ risk_ranges.high.points_min }} - {{ risk_ranges.high.points_max }} puntos</td>
+                                <td><div class="color-indicator high"></div></td>
+                            </tr>
+                            <tr class="risk-row moderate">
+                                <td>
+                                    <span class="risk-level-badge risk-moderate">
+                                        <i class="fas fa-minus-circle me-1"></i>
+                                        Vulnerabilidades Moderadas
+                                    </span>
+                                </td>
+                                <td><strong>{{ risk_ranges.moderate.percent_min }}% - {{ risk_ranges.moderate.percent_max }}%</strong></td>
+                                <td>{{ risk_ranges.moderate.points_min }} - {{ risk_ranges.moderate.points_max }} puntos</td>
+                                <td><div class="color-indicator moderate"></div></td>
+                            </tr>
+                            <tr class="risk-row good">
+                                <td>
+                                    <span class="risk-level-badge risk-good">
+                                        <i class="fas fa-check-circle me-1"></i>
+                                        Buena Base
+                                    </span>
+                                </td>
+                                <td><strong>{{ risk_ranges.good.percent_min }}% - {{ risk_ranges.good.percent_max }}%</strong></td>
+                                <td>{{ risk_ranges.good.points_min }} - {{ risk_ranges.good.points_max }} puntos</td>
+                                <td><div class="color-indicator good"></div></td>
+                            </tr>
+                            <tr class="risk-row excellent">
+                                <td>
+                                    <span class="risk-level-badge risk-excellent">
+                                        <i class="fas fa-star me-1"></i>
+                                        Postura Sólida
+                                    </span>
+                                </td>
+                                <td><strong>{{ risk_ranges.excellent.percent_min }}% - {{ risk_ranges.excellent.percent_max }}%</strong></td>
+                                <td>{{ risk_ranges.excellent.points_min }} - {{ risk_ranges.excellent.points_max }} puntos</td>
+                                <td><div class="color-indicator excellent"></div></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Package Recommendations -->
+        {% if package_recommendations %}
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h3 class="admin-card-title">
+                    <i class="fas fa-star me-2"></i>Recomendaciones de Paquetes
+                </h3>
+            </div>
+            <div class="admin-card-body">
+                <div class="package-recommendations-grid">
+                    {% for recommendation in package_recommendations %}
+                    <div class="package-recommendation-item">
+                        <div class="package-header">
+                            <span class="risk-level-badge risk-{{ recommendation.risk_level|lower }}">
+                                {{ recommendation.get_risk_level_display }}
+                            </span>
+                        </div>
+                        <div class="package-details">
+                            <div class="primary-package">
+                                <label>Paquete Primario:</label>
+                                <span class="package-name">{{ recommendation.primary_package }}</span>
+                            </div>
+                            {% if recommendation.secondary_package %}
+                            <div class="secondary-package">
+                                <label>Paquete Secundario:</label>
+                                <span class="package-name">{{ recommendation.secondary_package }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Right Column: Statistics & Actions -->
+    <div class="col-lg-5">
+        <!-- Score Statistics -->
+        {% if scores_stats %}
+        <div class="admin-card mb-4">
+            <div class="admin-card-header">
+                <h5 class="admin-card-title">
+                    <i class="fas fa-chart-pie me-2"></i>Distribución de Scores
+                </h5>
+            </div>
+            <div class="admin-card-body">
+                <div class="risk-distribution-stats">
+                    {% for stat in scores_stats %}
+                    <div class="risk-stat-item">
+                        <div class="risk-stat-header">
+                            <span class="risk-level-badge risk-{{ stat.risk_level|lower }}">
+                                {{ stat.risk_level }}
+                            </span>
+                            <span class="risk-count">{{ stat.count }}</span>
+                        </div>
+                        <div class="risk-stat-details">
+                            <div class="stat-bar">
+                                <div class="stat-fill risk-{{ stat.risk_level|lower }}" 
+                                     style="width: {{ stat.percentage_width }}%"></div>
+                            </div>
+                            <small class="text-muted">
+                                Promedio: {{ stat.avg_score|floatformat:1 }}%
+                            </small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Recent Submissions -->
+        {% if recent_submissions %}
+        <div class="admin-card mb-4">
+            <div class="admin-card-header">
+                <h5 class="admin-card-title">
+                    <i class="fas fa-history me-2"></i>Submissions Recientes
+                </h5>
+            </div>
+            <div class="admin-card-body">
+                <div class="recent-submissions-list">
+                    {% for submission in recent_submissions %}
+                    <div class="submission-item">
+                        <div class="submission-header">
+                            <div class="prospect-info">
+                                <div class="prospect-name">{{ submission.submission.prospect.name }}</div>
+                                <small class="text-muted">{{ submission.submission.prospect.email }}</small>
+                            </div>
+                            <div class="submission-score">
+                                <span class="score-value">{{ submission.score_percentage }}%</span>
+                                <span class="risk-level-mini risk-{{ submission.risk_level|lower }}">
+                                    {{ submission.risk_level }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="submission-meta">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>
+                                {{ submission.calculated_at|date:"d/m/Y H:i" }}
+                            </small>
+                            <a href="{% url 'admin_panel:score_result_detail' submission.pk %}" 
+                               class="btn btn-xs btn-outline-primary">
+                                Ver Detalle
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="text-center mt-3">
+                    <a href="{% url 'admin_panel:score_results_list' %}?survey={{ risk_config.survey.id }}" 
+                       class="btn btn-sm btn-outline-primary">
+                        Ver Todos los Scores
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Configuration Actions -->
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h5 class="admin-card-title">
+                    <i class="fas fa-cog me-2"></i>Acciones de Configuración
+                </h5>
+            </div>
+            <div class="admin-card-body">
+                <div class="config-actions">
+                    <div class="action-item">
+                        <div class="action-info">
+                            <h6>Recalcular Scores</h6>
+                            <p class="text-muted">Recalcula todos los scores usando esta configuración</p>
+                        </div>
+                        <button class="btn btn-warning btn-sm" onclick="recalculateAllScores()">
+                            <i class="fas fa-sync-alt me-1"></i>Recalcular
+                        </button>
+                    </div>
+                    
+                    <div class="action-item">
+                        <div class="action-info">
+                            <h6>Exportar Configuración</h6>
+                            <p class="text-muted">Descargar configuración en formato JSON</p>
+                        </div>
+                        <button class="btn btn-outline-primary btn-sm" onclick="exportRiskConfig()">
+                            <i class="fas fa-download me-1"></i>Exportar
+                        </button>
+                    </div>
+                    
+                    <div class="action-item">
+                        <div class="action-info">
+                            <h6>Duplicar Configuración</h6>
+                            <p class="text-muted">Aplicar esta configuración a otro survey</p>
+                        </div>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="duplicateConfig()">
+                            <i class="fas fa-copy me-1"></i>Duplicar
+                        </button>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="action-item danger-action">
+                        <div class="action-info">
+                            <h6 class="text-danger">Reset a Defaults</h6>
+                            <p class="text-muted">Restaurar configuración por defecto</p>
+                        </div>
+                        <button class="btn btn-outline-danger btn-sm" onclick="resetConfiguration()">
+                            <i class="fas fa-undo me-1"></i>Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/scoring.js' %}"></script>
+<script>
+function recalculateAllScores() {
+    if (confirm('¿Recalcular TODOS los scores para el survey "{{ risk_config.survey.title }}"?\n\nEsto puede tomar varios minutos.')) {
+        window.scgScoring.recalculateScores('{{ risk_config.survey.id }}', true);
+    }
+}
+
+function exportRiskConfig() {
+    const config = {
+        survey: '{{ risk_config.survey.title }}',
+        survey_code: '{{ risk_config.survey.code }}',
+        critical_max: {{ risk_config.critical_max }},
+        high_max: {{ risk_config.high_max }},
+        moderate_max: {{ risk_config.moderate_max }},
+        good_max: {{ risk_config.good_max }},
+        created_at: '{{ risk_config.created_at|date:"c" }}',
+        is_active: {{ risk_config.is_active|yesno:"true,false" }}
+    };
+    
+    const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `risk_config_{{ risk_config.survey.code }}_{{ risk_config.created_at|date:"Y-m-d" }}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    window.scgAdmin.showNotification('Configuración exportada', 'success');
+}
+
+function duplicateConfig() {
+    window.scgAdmin.showNotification('Función de duplicación en desarrollo', 'info');
+}
+
+function resetConfiguration() {
+    if (confirm('¿Restaurar la configuración por defecto?\n\nEsto sobrescribirá los valores actuales:\n- Crítico: 0-20%\n- Alto: 21-40%\n- Moderado: 41-60%\n- Bueno: 61-80%\n- Excelente: 81-100%')) {
+        window.scgAdmin.showNotification('Función de reset en desarrollo', 'info');
+    }
+}
+
+// Initialize score circle animations on load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Risk Config Detail page loaded for {{ risk_config.survey.title }}');
+});
+</script>
+{% endblock %}

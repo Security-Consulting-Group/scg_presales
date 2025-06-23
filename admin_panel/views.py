@@ -724,68 +724,6 @@ class OptionBulkSaveView(LoginRequiredMixin, View):
 # SCORING VIEWS
 # ====================================
 
-class ScoringDashboardView(LoginRequiredMixin, TemplateView):
-    """Dashboard principal del módulo de scoring"""
-    template_name = 'admin_panel/scoring/dashboard.html'
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        
-        # Estadísticas generales
-        total_scores = ScoreResult.objects.count()
-        recent_scores = ScoreResult.objects.filter(
-            calculated_at__gte=timezone.now() - timedelta(days=7)
-        ).count()
-        
-        # Distribución por risk level
-        risk_distribution = ScoreResult.objects.values('risk_level').annotate(
-            count=Count('id')
-        ).order_by('risk_level')
-        
-        # Scores por survey
-        scores_by_survey = ScoreResult.objects.select_related('submission__survey').values(
-            'submission__survey__title'
-        ).annotate(
-            count=Count('id'),
-            avg_score=Avg('score_percentage')
-        ).order_by('-count')[:5]
-        
-        # Risk levels más recientes
-        recent_critical = ScoreResult.objects.filter(
-            risk_level='CRITICAL'
-        ).select_related('submission__prospect').order_by('-calculated_at')[:5]
-        
-        # Surveys sin configuración de riesgo
-        surveys_without_config = Survey.objects.filter(
-            risk_config__isnull=True,
-            is_active=True
-        ).count()
-        
-        # Prospectos con scores más altos
-        top_prospects = ScoreResult.objects.filter(
-            risk_level__in=['EXCELLENT', 'GOOD']
-        ).select_related('submission__prospect').order_by('-score_percentage')[:10]
-        
-        context.update({
-            'total_scores': total_scores,
-            'recent_scores': recent_scores,
-            'risk_distribution': risk_distribution,
-            'scores_by_survey': scores_by_survey,
-            'recent_critical': recent_critical,
-            'surveys_without_config': surveys_without_config,
-            'top_prospects': top_prospects,
-            'risk_level_colors': {
-                'CRITICAL': '#dc3545',
-                'HIGH': '#fd7e14', 
-                'MODERATE': '#ffc107',
-                'GOOD': '#20c997',
-                'EXCELLENT': '#28a745'
-            }
-        })
-        
-        return context
-
-
 class ScoreResultListView(LoginRequiredMixin, ListView):
     """Lista todos los resultados de scoring con filtros"""
     model = ScoreResult
@@ -886,62 +824,91 @@ class ScoreResultDetailView(LoginRequiredMixin, DetailView):
     model = ScoreResult
     template_name = 'admin_panel/scoring/detail.html'
     context_object_name = 'score_result'
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
+        # Obtener el score_result (self.object)
         score_result = self.object
-        submission = score_result.submission
         
-        # Información del prospect y survey
-        context['prospect'] = submission.prospect
-        context['survey'] = submission.survey
-        context['submission'] = submission
+        # Obtener survey a través de la relación submission
+        survey = score_result.submission.survey
         
-        # Responses del survey agrupadas por sección
-        responses = submission.responses.select_related(
-            'question__section', 
-            'selected_option'
-        ).order_by('question__section__order', 'question__order')
-        
-        responses_by_section = {}
-        for response in responses:
-            section = response.question.section
-            if section not in responses_by_section:
-                responses_by_section[section] = []
-            responses_by_section[section].append(response)
-        
-        context['responses_by_section'] = responses_by_section
-        
-        # Configuración de riesgo del survey
+        # Obtener la configuración de riesgo del survey
         try:
-            risk_config = submission.survey.risk_config
-            context['risk_config'] = risk_config
+            risk_config = SurveyRiskConfiguration.objects.get(survey=survey)
         except SurveyRiskConfiguration.DoesNotExist:
-            context['risk_config'] = None
+            risk_config = None
         
-        # Recomendaciones de paquetes
-        try:
-            package_recommendation = RiskLevelPackageRecommendation.objects.get(
-                survey=submission.survey,
-                risk_level=score_result.risk_level
-            )
-            context['package_recommendation'] = package_recommendation
-        except RiskLevelPackageRecommendation.DoesNotExist:
-            context['package_recommendation'] = None
+        # Agregar datos básicos al contexto
+        context.update({
+            'survey': survey,
+            'submission': score_result.submission,
+            'prospect': score_result.submission.prospect,
+            'risk_config': risk_config,
+        })
         
-        # Historial de scores del mismo prospect (otros surveys)
-        other_scores = ScoreResult.objects.filter(
-            submission__prospect=submission.prospect
-        ).exclude(
-            id=score_result.id
-        ).select_related('submission__survey').order_by('-calculated_at')[:5]
+        # Solo proceder con cálculos si existe configuración de riesgo
+        if risk_config:
+            # Calcular rangos en puntos para evitar usar filtros mul/div en template
+            max_score = survey.max_score
+            
+            # Calcular puntos para cada rango
+            critical_points_max = int((risk_config.critical_max / 100) * max_score)
+            high_points_min = critical_points_max + 1
+            high_points_max = int((risk_config.high_max / 100) * max_score)
+            moderate_points_min = high_points_max + 1
+            moderate_points_max = int((risk_config.moderate_max / 100) * max_score)
+            good_points_min = moderate_points_max + 1
+            good_points_max = int((risk_config.good_max / 100) * max_score)
+            excellent_points_min = good_points_max + 1
+            
+            # Preparar datos de rangos para el template
+            context['risk_ranges'] = {
+                'critical': {
+                    'percent_min': 0,
+                    'percent_max': risk_config.critical_max,
+                    'points_min': 0,
+                    'points_max': critical_points_max,
+                },
+                'high': {
+                    'percent_min': risk_config.critical_max + 1,
+                    'percent_max': risk_config.high_max,
+                    'points_min': high_points_min,
+                    'points_max': high_points_max,
+                },
+                'moderate': {
+                    'percent_min': risk_config.high_max + 1,
+                    'percent_max': risk_config.moderate_max,
+                    'points_min': moderate_points_min,
+                    'points_max': moderate_points_max,
+                },
+                'good': {
+                    'percent_min': risk_config.moderate_max + 1,
+                    'percent_max': risk_config.good_max,
+                    'points_min': good_points_min,
+                    'points_max': good_points_max,
+                },
+                'excellent': {
+                    'percent_min': risk_config.good_max + 1,
+                    'percent_max': 100,
+                    'points_min': excellent_points_min,
+                    'points_max': max_score,
+                }
+            }
+            
+            # Calcular anchos para la visualización
+            context['range_widths'] = {
+                'critical': risk_config.critical_max,
+                'high': risk_config.high_max - risk_config.critical_max,
+                'moderate': risk_config.moderate_max - risk_config.high_max,
+                'good': risk_config.good_max - risk_config.moderate_max,
+                'excellent': 100 - risk_config.good_max,
+            }
         
-        context['other_scores'] = other_scores
-        
-        # Comparación con otros scores del mismo survey
+        # Estadísticas del mismo survey
         same_survey_stats = ScoreResult.objects.filter(
-            submission__survey=submission.survey
+            submission__survey=survey
         ).aggregate(
             avg_score=Avg('score_percentage'),
             min_score=Min('score_percentage'),
@@ -949,23 +916,75 @@ class ScoreResultDetailView(LoginRequiredMixin, DetailView):
             total_count=Count('id')
         )
         
-        context['same_survey_stats'] = same_survey_stats
-        
-        # Percentil del score actual
-        if same_survey_stats['total_count'] > 1:
-            better_scores = ScoreResult.objects.filter(
-                submission__survey=submission.survey,
-                score_percentage__gt=score_result.score_percentage
+        if same_survey_stats['total_count'] > 0:
+            context['same_survey_stats'] = same_survey_stats
+            
+            # Calcular percentil (posición relativa)
+            lower_scores_count = ScoreResult.objects.filter(
+                submission__survey=survey,
+                score_percentage__lt=score_result.score_percentage
             ).count()
             
-            percentile = ((same_survey_stats['total_count'] - better_scores) / 
-                         same_survey_stats['total_count']) * 100
-            context['score_percentile'] = round(percentile, 1)
-        else:
-            context['score_percentile'] = None
+            if same_survey_stats['total_count'] > 1:
+                percentile = round((lower_scores_count / (same_survey_stats['total_count'] - 1)) * 100)
+                context['score_percentile'] = percentile
+                
+                # Calcular posición del marcador para visualización
+                score_range = same_survey_stats['max_score'] - same_survey_stats['min_score']
+                if score_range > 0:
+                    marker_position = ((score_result.score_percentage - same_survey_stats['min_score']) / score_range) * 100
+                    context['score_marker_position'] = marker_position
+        
+        # Obtener recomendación de paquete si existe
+        if risk_config:
+            try:
+                package_recommendation = RiskLevelPackageRecommendation.objects.get(
+                    survey=survey,
+                    risk_level=score_result.risk_level
+                )
+                context['package_recommendation'] = package_recommendation
+            except RiskLevelPackageRecommendation.DoesNotExist:
+                pass
+        
+        # Obtener respuestas del survey organizadas por sección
+        try:
+            from surveys.models import Response
+            
+            responses = Response.objects.filter(
+                submission=score_result.submission
+            ).select_related('question__section', 'selected_option').prefetch_related(
+                'selected_options'  # Para preguntas de múltiple selección
+            ).order_by('question__section__order', 'question__order')
+            
+            # Organizar respuestas por sección
+            if responses.exists():
+                responses_by_section = {}
+                for response in responses:
+                    section = response.question.section
+                    if section not in responses_by_section:
+                        responses_by_section[section] = []
+                    responses_by_section[section].append(response)
+                
+                context['responses_by_section'] = responses_by_section
+            
+        except Exception as e:
+            # Si hay cualquier error, simplemente no mostrar respuestas
+            logger.warning(f"No se pudieron cargar las respuestas del survey: {e}")
+            pass
+        
+        # Otros scores del mismo prospect
+        other_scores = ScoreResult.objects.filter(
+            submission__prospect=score_result.submission.prospect
+        ).exclude(
+            id=score_result.id
+        ).select_related(
+            'submission__survey'
+        ).order_by('-calculated_at')[:5]
+        
+        if other_scores.exists():
+            context['other_scores'] = other_scores
         
         return context
-
 
 class SurveyRiskConfigListView(LoginRequiredMixin, ListView):
     """Lista las configuraciones de riesgo por survey"""
@@ -1003,15 +1022,96 @@ class SurveyRiskConfigDetailView(LoginRequiredMixin, DetailView):
         risk_config = self.object
         survey = risk_config.survey
         
+        # Calcular rangos en puntos para evitar usar filtros mul/div en template
+        max_score = survey.max_score
+        
+        # Calcular puntos para cada rango
+        critical_points_max = int((risk_config.critical_max / 100) * max_score)
+        high_points_min = critical_points_max + 1
+        high_points_max = int((risk_config.high_max / 100) * max_score)
+        moderate_points_min = high_points_max + 1
+        moderate_points_max = int((risk_config.moderate_max / 100) * max_score)
+        good_points_min = moderate_points_max + 1
+        good_points_max = int((risk_config.good_max / 100) * max_score)
+        excellent_points_min = good_points_max + 1
+        
+        # Preparar datos de rangos para el template
+        context['risk_ranges'] = {
+            'critical': {
+                'percent_min': 0,
+                'percent_max': risk_config.critical_max,
+                'points_min': 0,
+                'points_max': critical_points_max,
+            },
+            'high': {
+                'percent_min': risk_config.critical_max + 1,
+                'percent_max': risk_config.high_max,
+                'points_min': high_points_min,
+                'points_max': high_points_max,
+            },
+            'moderate': {
+                'percent_min': risk_config.high_max + 1,
+                'percent_max': risk_config.moderate_max,
+                'points_min': moderate_points_min,
+                'points_max': moderate_points_max,
+            },
+            'good': {
+                'percent_min': risk_config.moderate_max + 1,
+                'percent_max': risk_config.good_max,
+                'points_min': good_points_min,
+                'points_max': good_points_max,
+            },
+            'excellent': {
+                'percent_min': risk_config.good_max + 1,
+                'percent_max': 100,
+                'points_min': excellent_points_min,
+                'points_max': max_score,
+            }
+        }
+        
+        # Calcular anchos para la visualización (corregido)
+        context['range_widths'] = {
+            'critical': risk_config.critical_max,  # 0 to critical_max
+            'high': risk_config.high_max - risk_config.critical_max,  # critical_max to high_max
+            'moderate': risk_config.moderate_max - risk_config.high_max,  # high_max to moderate_max
+            'good': risk_config.good_max - risk_config.moderate_max,  # moderate_max to good_max
+            'excellent': 100 - risk_config.good_max,  # good_max to 100
+        }
+        
+        # Debug: imprimir para verificar
+        print("🔍 Range widths:", context['range_widths'])
+        print("🔍 Risk config values:", {
+            'critical_max': risk_config.critical_max,
+            'high_max': risk_config.high_max,
+            'moderate_max': risk_config.moderate_max,
+            'good_max': risk_config.good_max,
+        })
+        
         # Estadísticas de scores con esta configuración
-        scores_stats = ScoreResult.objects.filter(
+        scores_stats_queryset = ScoreResult.objects.filter(
             submission__survey=survey
         ).values('risk_level').annotate(
             count=Count('id'),
             avg_score=Avg('score_percentage')
         ).order_by('risk_level')
         
-        context['scores_stats'] = scores_stats
+        # Convertir queryset a lista
+        scores_stats = list(scores_stats_queryset)
+        
+        # Calcular porcentajes para las barras de estadísticas
+        total_scores = sum(stat['count'] for stat in scores_stats)
+        scores_stats_with_percentages = []
+        for stat in scores_stats:
+            stat_copy = dict(stat)
+            if total_scores > 0:
+                stat_copy['percentage_width'] = round((stat['count'] / total_scores) * 100, 1)
+            else:
+                stat_copy['percentage_width'] = 0
+            scores_stats_with_percentages.append(stat_copy)
+        
+        print("🔍 Scores stats:", scores_stats_with_percentages)
+        
+        context['scores_stats'] = scores_stats_with_percentages
         
         # Recomendaciones de paquetes para este survey
         package_recommendations = RiskLevelPackageRecommendation.objects.filter(
@@ -1140,3 +1240,123 @@ class ExportScoresView(LoginRequiredMixin, View):
             ])
         
         return response
+    
+    
+# ====================================
+# SCORING CONFIG
+# ====================================
+
+class SurveyRiskConfigCreateView(LoginRequiredMixin, CreateView):
+    """Crear nueva configuración de riesgo para un survey"""
+    model = SurveyRiskConfiguration
+    template_name = 'admin_panel/scoring/risk_config_form.html'
+    fields = [
+        'survey', 'critical_max', 'high_max', 'moderate_max', 'good_max', 'is_active'
+    ]
+    success_url = reverse_lazy('admin_panel:risk_configs_list')
+    
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        # Solo mostrar surveys que no tengan configuración de riesgo
+        surveys_without_config = Survey.objects.filter(
+            risk_config__isnull=True,
+            is_active=True
+        ).order_by('title')
+        form.fields['survey'].queryset = surveys_without_config
+        
+        # Valores por defecto para rangos
+        form.fields['critical_max'].initial = 20
+        form.fields['high_max'].initial = 40
+        form.fields['moderate_max'].initial = 60
+        form.fields['good_max'].initial = 80
+        
+        return form
+    
+    def form_valid(self, form):
+        messages.success(
+            self.request, 
+            f'Configuración de riesgo creada para "{form.instance.survey.title}"'
+        )
+        return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Crear Configuración de Riesgo'
+        context['action'] = 'create'
+        return context
+
+
+class SurveyRiskConfigUpdateView(LoginRequiredMixin, UpdateView):
+    """Editar configuración de riesgo existente"""
+    model = SurveyRiskConfiguration
+    template_name = 'admin_panel/scoring/risk_config_form.html'
+    fields = [
+        'critical_max', 'high_max', 'moderate_max', 'good_max', 'is_active'
+    ]
+    
+    def get_success_url(self):
+        messages.success(
+            self.request, 
+            f'Configuración de riesgo actualizada para "{self.object.survey.title}"'
+        )
+        return reverse_lazy('admin_panel:risk_config_detail', kwargs={'pk': self.object.pk})
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = f'Editar Configuración - {self.object.survey.title}'
+        context['action'] = 'edit'
+        return context
+
+
+class QuickRiskConfigCreateView(LoginRequiredMixin, View):
+    """Crear configuración de riesgo rápida con valores por defecto"""
+    
+    def post(self, request):
+        survey_id = request.POST.get('survey_id')
+        
+        if not survey_id:
+            return JsonResponse({
+                'success': False,
+                'message': 'ID del survey es requerido'
+            }, status=400)
+        
+        try:
+            survey = Survey.objects.get(id=survey_id)
+        except Survey.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'message': 'Survey no encontrado'
+            }, status=404)
+        
+        # Verificar si ya existe configuración
+        if hasattr(survey, 'risk_config'):
+            return JsonResponse({
+                'success': False,
+                'message': f'El survey "{survey.title}" ya tiene configuración de riesgo'
+            }, status=400)
+        
+        try:
+            # Crear configuración con valores por defecto
+            risk_config = SurveyRiskConfiguration.objects.create(
+                survey=survey,
+                critical_max=20,  # 0-20%
+                high_max=40,      # 21-40%
+                moderate_max=60,  # 41-60%
+                good_max=80,      # 61-80%
+                # excellent: 81-100%
+                is_active=True
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'message': f'Configuración de riesgo creada para "{survey.title}" con valores por defecto',
+                'config_id': risk_config.id,
+                'redirect_url': reverse_lazy('admin_panel:risk_config_detail', kwargs={'pk': risk_config.pk})
+            })
+            
+        except Exception as e:
+            logger.error(f"Error creando configuración de riesgo: {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'message': f'Error creando configuración: {str(e)}'
+            }, status=500)
