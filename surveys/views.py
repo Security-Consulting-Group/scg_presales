@@ -8,6 +8,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from prospects.models import Prospect
 from .models import Survey, SurveySubmission, Response, Question, QuestionOption
+from scoring.models import ScoreResult  # NUEVO IMPORT
 import logging
 import json
 
@@ -145,13 +146,53 @@ class SurveySubmitView(View):
                 # Procesar respuestas
                 self.process_responses(submission, responses_data)
                 
+                # 🎯 NUEVO: Calcular scoring automáticamente
+                try:
+                    score_result = ScoreResult.calculate_for_submission(submission)
+                    logger.info(f"Score calculated - Total: {score_result.total_points}, Percentage: {score_result.score_percentage}%, Risk: {score_result.risk_level}")
+                    
+                    # Incluir información del scoring en la respuesta
+                    scoring_info = {
+                        'total_points': score_result.total_points,
+                        'score_percentage': float(score_result.score_percentage),
+                        'risk_level': score_result.risk_level,
+                        'risk_level_display': score_result.get_risk_level_display(),
+                        'primary_package': score_result.primary_package,
+                        'secondary_package': score_result.secondary_package,
+                        'description': score_result.get_risk_level_display_with_description()
+                    }
+                    
+                except Exception as scoring_error:
+                    logger.error(f"Error calculating score: {str(scoring_error)}", exc_info=True)
+                    # No fallar la submission por error de scoring
+                    scoring_info = None
+                
                 logger.info(f"Survey submission completed - ID: {submission.id}")
             
-            # Respuesta exitosa
-            return JsonResponse({
+            # Respuesta exitosa con información de scoring
+            response_data = {
                 'success': True,
                 'message': '¡Gracias por completar nuestro diagnóstico de ciberseguridad! Nuestro equipo analizará sus respuestas y se pondrá en contacto en las próximas 24 horas para agendar una consulta personalizada donde revisaremos los resultados juntos.'
-            })
+            }
+            
+            # Agregar información de scoring si está disponible
+            if scoring_info:
+                response_data['scoring'] = scoring_info
+                
+                # Personalizar mensaje según risk level
+                risk_messages = {
+                    'CRITICAL': '¡Gracias por completar nuestro diagnóstico! Los resultados muestran áreas que requieren atención inmediata. Nuestro equipo se pondrá en contacto hoy mismo para agendar una consulta urgente.',
+                    'HIGH': '¡Gracias por completar nuestro diagnóstico! Identificamos riesgos significativos que debemos abordar pronto. Nos comunicaremos en las próximas 24 horas.',
+                    'MODERATE': '¡Gracias por completar nuestro diagnóstico! Su empresa tiene una base sólida con algunas áreas de mejora. Nos pondremos en contacto para revisar las oportunidades de optimización.',
+                    'GOOD': '¡Gracias por completar nuestro diagnóstico! Su empresa mantiene buenas prácticas de seguridad. Nos comunicaremos para mostrarle cómo optimizar aún más su postura.',
+                    'EXCELLENT': '¡Felicitaciones! Su empresa mantiene excelentes prácticas de seguridad. Nos pondremos en contacto para discutir estrategias de mantenimiento y optimización continua.'
+                }
+                
+                custom_message = risk_messages.get(scoring_info['risk_level'])
+                if custom_message:
+                    response_data['message'] = custom_message
+            
+            return JsonResponse(response_data)
             
         except json.JSONDecodeError:
             logger.error("Error parsing JSON data")
@@ -175,84 +216,108 @@ class SurveySubmitView(View):
             }, status=500)
     
     def process_responses(self, submission, responses_data):
-        """Procesar y guardar las respuestas del survey"""
-        for question_id, response_data in responses_data.items():
-            try:
-                question = Question.objects.get(
-                    id=question_id,
-                    survey=submission.survey,
-                    is_active=True
-                )
-                
-                # Crear la respuesta
-                response = Response.objects.create(
-                    submission=submission,
-                    question=question
-                )
-                
-                # Procesar según el tipo de pregunta
-                if question.question_type == 'SINGLE_CHOICE':
-                    option_id = response_data.get('option_id')
-                    if option_id:
-                        option = QuestionOption.objects.get(
-                            id=option_id,
-                            question=question,
-                            is_active=True
-                        )
-                        response.selected_option = option
-                        response.points_earned = option.points
-                        response.save()
-                
-                elif question.question_type == 'MULTIPLE_CHOICE':
-                    option_ids = response_data.get('option_ids', [])
-                    if option_ids:
-                        options = QuestionOption.objects.filter(
-                            id__in=option_ids,
-                            question=question,
-                            is_active=True
-                        )
-                        response.save()  # Guardar primero para poder usar M2M
-                        response.selected_options.set(options)
-                        
-                        # FIXED: Handle special scoring for question 3 (sensitive data question)
-                        if question.order == 3 and question.section.order == 1:
-                            # Special logic for question 3: count types of sensitive data
-                            num_selected = len(option_ids)
+            """Procesar y guardar las respuestas del survey"""
+            for question_id, response_data in responses_data.items():
+                try:
+                    question = Question.objects.get(
+                        id=question_id,
+                        survey=submission.survey,
+                        is_active=True
+                    )
+                    
+                    # Crear la respuesta
+                    response = Response.objects.create(
+                        submission=submission,
+                        question=question
+                    )
+                    
+                    # Procesar según el tipo de pregunta
+                    if question.question_type == 'SINGLE_CHOICE':
+                        option_id = response_data.get('option_id')
+                        if option_id:
+                            option = QuestionOption.objects.get(
+                                id=option_id,
+                                question=question,
+                                is_active=True
+                            )
+                            response.selected_option = option
+                            response.points_earned = option.points
+                            response.save()
+                    
+                    elif question.question_type == 'MULTIPLE_CHOICE':
+                        option_ids = response_data.get('option_ids', [])
+                        if option_ids:
+                            options = QuestionOption.objects.filter(
+                                id__in=option_ids,
+                                question=question,
+                                is_active=True
+                            )
+                            response.save()  # Guardar primero para poder usar M2M
+                            response.selected_options.set(options)
                             
-                            # Check if "No manejamos información sensible" was selected
-                            no_sensitive_option = options.filter(
-                                option_text__icontains="No manejamos información sensible"
-                            ).first()
-                            
-                            if no_sensitive_option:
-                                # If "No sensitive data" was selected, award 5 points
-                                response.points_earned = 5
-                            else:
-                                # Award points inversely based on number of sensitive data types
-                                scoring_map = {0: 5, 1: 4, 2: 3, 3: 2, 4: 1}
-                                response.points_earned = scoring_map.get(num_selected, 1)
-                        else:
-                            # Regular multiple choice: sum all points
-                            response.points_earned = sum(opt.points for opt in options)
-                        
+                            # NUEVA LÓGICA FLEXIBLE: Calcular puntos para multiple choice
+                            response.points_earned = self._calculate_multiple_choice_points(options)
+                            response.save()
+                    
+                    elif question.question_type in ['TEXT', 'EMAIL']:
+                        text_value = response_data.get('text', '').strip()
+                        response.text_response = text_value
                         response.save()
+                    
+                    logger.info(f"Response saved for question {question.id}: {response_data}")
+                    
+                except Question.DoesNotExist:
+                    logger.warning(f"Question {question_id} not found or inactive")
+                    continue
+                except QuestionOption.DoesNotExist:
+                    logger.warning(f"Option not found for question {question_id}")
+                    continue
+                except Exception as e:
+                    logger.error(f"Error processing response for question {question_id}: {str(e)}")
+                    continue
+    
+    def _calculate_multiple_choice_points(self, selected_options):
+        """
+        Calcula puntos para preguntas de multiple choice con lógica flexible.
+        
+        Lógica:
+        1. Si hay opciones exclusivas seleccionadas, solo contar esas
+        2. Si no hay exclusivas, sumar todas las opciones normalmente
+        3. Manejar casos especiales como la pregunta de datos sensibles
+        """
+        exclusive_options = [opt for opt in selected_options if opt.is_exclusive]
+        non_exclusive_options = [opt for opt in selected_options if not opt.is_exclusive]
+        
+        # Si hay opciones exclusivas seleccionadas
+        if exclusive_options:
+            # Solo contar las opciones exclusivas (ignorar las demás)
+            total_points = sum(opt.points for opt in exclusive_options)
+            logger.info(f"Exclusive options selected, using only exclusive points: {total_points}")
+            return total_points
+        
+        # Si no hay opciones exclusivas, usar lógica normal o especial
+        elif non_exclusive_options:
+            # Detectar si es la pregunta especial de datos sensibles (pregunta 3, sección 1)
+            first_option = non_exclusive_options[0]
+            question = first_option.question
+            
+            if (question.order == 3 and 
+                question.section.order == 1 and 
+                any("información sensible" in opt.option_text.lower() for opt in question.options.all())):
                 
-                elif question.question_type in ['TEXT', 'EMAIL']:
-                    text_value = response_data.get('text', '').strip()
-                    response.text_response = text_value
-                    response.save()
-                
-                logger.info(f"Response saved for question {question.id}: {response_data}")
-                
-            except Question.DoesNotExist:
-                logger.warning(f"Question {question_id} not found or inactive")
-                continue
-            except QuestionOption.DoesNotExist:
-                logger.warning(f"Option not found for question {question_id}")
-                continue
-            except Exception as e:
-                logger.error(f"Error processing response for question {question_id}: {str(e)}")
-                continue
+                # Lógica especial para pregunta de datos sensibles
+                num_selected = len(non_exclusive_options)
+                scoring_map = {0: 5, 1: 4, 2: 3, 3: 2, 4: 1}
+                points = scoring_map.get(num_selected, 1)
+                logger.info(f"Special sensitive data scoring: {num_selected} types selected = {points} points")
+                return points
+            else:
+                # Lógica normal: sumar todos los puntos
+                total_points = sum(opt.points for opt in non_exclusive_options)
+                logger.info(f"Normal multiple choice scoring: {total_points} points")
+                return total_points
+        
+        return 0
     
     def get_client_ip(self, request):
         """Obtener la IP del cliente"""

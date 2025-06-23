@@ -10,32 +10,44 @@ class SCGSurvey {
         this.responses = {};
         this.surveyCode = this.getSurveyCode();
         this.csrfToken = this.getCSRFToken();
+        this.exclusiveOptions = this.getExclusiveOptions();
         
         this.init();
     }
 
     init() {
-        console.log('🎯 Inicializando SCG Survey...');
         this.setupEventListeners();
-        // NO llamar updateProgress() aquí - debe empezar en 0%
         this.validateCurrentGroup();
-        console.log('✅ Survey inicializado correctamente!');
     }
 
     getSurveyCode() {
-        // Extraer código del survey de la URL
         const pathParts = window.location.pathname.split('/');
         return pathParts[pathParts.indexOf('survey') + 1];
     }
 
     getCSRFToken() {
-        // Obtener CSRF token del meta tag
         const csrfMeta = document.querySelector('meta[name="csrf-token"]');
         return csrfMeta ? csrfMeta.getAttribute('content') : '';
     }
 
+    getExclusiveOptions() {
+        const exclusiveOptions = {};
+        
+        // Encontrar todas las opciones marcadas como exclusivas
+        document.querySelectorAll('input[data-exclusive="true"]').forEach(input => {
+            const questionId = input.getAttribute('data-question');
+            const optionId = input.value;
+            
+            if (!exclusiveOptions[questionId]) {
+                exclusiveOptions[questionId] = [];
+            }
+            exclusiveOptions[questionId].push(optionId);
+        });
+        
+        return exclusiveOptions;
+    }
+
     setupEventListeners() {
-        // Navegación entre grupos
         document.addEventListener('click', (e) => {
             if (e.target.id === 'nextBtn' || e.target.closest('#nextBtn')) {
                 e.preventDefault();
@@ -58,21 +70,18 @@ class SCGSurvey {
             }
         });
 
-        // Capturar respuestas en tiempo real
         document.addEventListener('change', (e) => {
             if (e.target.hasAttribute('data-question')) {
                 this.captureResponse(e.target);
                 
-                // Validación especial para pregunta 3 (datos sensibles)
                 if (e.target.getAttribute('data-type') === 'multiple') {
-                    this.handleSensitiveDataLogic(e.target);
+                    this.handleExclusiveLogic(e.target);
                 }
                 
                 this.validateCurrentGroup();
             }
         });
 
-        // Envío del formulario
         const surveyForm = document.getElementById('surveyForm');
         if (surveyForm) {
             surveyForm.addEventListener('submit', (e) => {
@@ -128,10 +137,32 @@ class SCGSurvey {
                 break;
         }
 
-        console.log('📝 Respuesta capturada:', questionId, this.responses[questionId]);
-        
-        // Actualizar progreso cada vez que se responde una pregunta
         this.updateProgress();
+    }
+
+    handleExclusiveLogic(changedElement) {
+        const questionId = changedElement.getAttribute('data-question');
+        const changedOptionId = changedElement.value;
+        const isExclusive = changedElement.getAttribute('data-exclusive') === 'true';
+        
+        // Obtener todas las opciones de esta pregunta
+        const allCheckboxes = document.querySelectorAll(`input[data-question="${questionId}"][type="checkbox"]`);
+        
+        if (isExclusive && changedElement.checked) {
+            // Si se seleccionó una opción exclusiva, deseleccionar todas las demás
+            allCheckboxes.forEach(checkbox => {
+                if (checkbox !== changedElement) {
+                    checkbox.checked = false;
+                }
+            });
+        } else if (!isExclusive && changedElement.checked) {
+            // Si se seleccionó una opción no exclusiva, deseleccionar todas las exclusivas
+            allCheckboxes.forEach(checkbox => {
+                if (checkbox.getAttribute('data-exclusive') === 'true') {
+                    checkbox.checked = false;
+                }
+            });
+        }
     }
 
     validateCurrentGroup() {
@@ -146,22 +177,18 @@ class SCGSurvey {
             const type = input.getAttribute('data-type');
 
             if (type === 'single') {
-                // Para radio buttons, verificar si alguno está seleccionado
                 const radioGroup = currentGroupElement.querySelectorAll(`input[data-question="${questionId}"]`);
                 const isChecked = Array.from(radioGroup).some(radio => radio.checked);
                 if (!isChecked) isValid = false;
             } else if (type === 'multiple') {
-                // Para checkboxes, verificar si al menos uno está seleccionado
                 const checkboxGroup = currentGroupElement.querySelectorAll(`input[data-question="${questionId}"]`);
                 const isChecked = Array.from(checkboxGroup).some(checkbox => checkbox.checked);
                 if (!isChecked) isValid = false;
             } else if (type === 'text' || type === 'email') {
-                // Para text/email, verificar si hay contenido
                 if (!input.value.trim()) isValid = false;
             }
         });
 
-        // Habilitar/deshabilitar botón Next
         const nextBtn = currentGroupElement.querySelector('#nextBtn, #showContactBtn');
         if (nextBtn) {
             nextBtn.disabled = !isValid;
@@ -204,33 +231,27 @@ class SCGSurvey {
             return;
         }
 
-        // Ocultar último grupo de preguntas
         this.hideGroup(this.currentGroup);
         
-        // Mostrar formulario de contacto
         const contactGroup = document.getElementById('contact-group');
         if (contactGroup) {
             contactGroup.style.display = 'block';
             
-            // Scroll hacia arriba para mostrar el título
             window.scrollTo({
                 top: 0,
                 behavior: 'smooth'
             });
         }
 
-        // Actualizar progress a 90% (casi terminado)
         this.updateProgress(90);
     }
 
     backToSurvey() {
-        // Ocultar formulario de contacto
         const contactGroup = document.getElementById('contact-group');
         if (contactGroup) {
             contactGroup.style.display = 'none';
         }
 
-        // Mostrar último grupo de preguntas
         this.showGroup(this.currentGroup);
         this.updateProgress();
     }
@@ -247,16 +268,14 @@ class SCGSurvey {
         if (group) {
             group.style.display = 'block';
             
-            // Scroll hacia arriba para mostrar el título del survey
             window.scrollTo({
                 top: 0,
                 behavior: 'smooth'
             });
             
-            // Revalidar el grupo actual después del scroll
             setTimeout(() => {
                 this.validateCurrentGroup();
-            }, 500); // Esperar un poco más para que termine el scroll
+            }, 500);
         }
     }
 
@@ -266,9 +285,8 @@ class SCGSurvey {
         if (customPercent !== null) {
             percentage = customPercent;
         } else {
-            // Calcular progreso basado en preguntas respondidas
             const answeredQuestions = Object.keys(this.responses).length;
-            percentage = Math.round((answeredQuestions / this.totalQuestions) * 85); // 85% máximo para las preguntas
+            percentage = Math.round((answeredQuestions / this.totalQuestions) * 85);
         }
 
         const progressBar = document.querySelector('#surveyProgress');
@@ -291,7 +309,6 @@ class SCGSurvey {
             currentStep.textContent = '¡Completado!';
         }
         
-        // También actualizar la barra fija si existe
         const fixedCurrentStep = document.querySelector('.progress-info-fixed .current-step');
         if (fixedCurrentStep) {
             if (customPercent === null) {
@@ -305,7 +322,6 @@ class SCGSurvey {
     }
 
     showValidationMessage(message) {
-        // Crear notificación temporal
         const notification = document.createElement('div');
         notification.className = 'alert alert-warning alert-dismissible fade show';
         notification.style.cssText = `
@@ -316,15 +332,21 @@ class SCGSurvey {
             min-width: 350px;
             box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
         `;
-        notification.innerHTML = `
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            ${message}
-            <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
-        `;
+        
+        const closeButton = document.createElement('button');
+        closeButton.type = 'button';
+        closeButton.className = 'btn-close';
+        closeButton.onclick = () => notification.remove();
+        
+        const icon = document.createElement('i');
+        icon.className = 'fas fa-exclamation-triangle me-2';
+        
+        notification.appendChild(icon);
+        notification.appendChild(document.createTextNode(message));
+        notification.appendChild(closeButton);
 
         document.body.appendChild(notification);
 
-        // Auto remove después de 5 segundos
         setTimeout(() => {
             if (notification.parentElement) {
                 notification.remove();
@@ -333,7 +355,6 @@ class SCGSurvey {
     }
 
     async submitSurvey() {
-        // Validar datos del prospect
         const prospectName = document.getElementById('prospectName').value.trim();
         const prospectCompany = document.getElementById('prospectCompany').value.trim();
         const prospectEmail = document.getElementById('prospectEmail').value.trim();
@@ -343,13 +364,11 @@ class SCGSurvey {
             return;
         }
 
-        // Validar email básico
         if (!this.validateEmail(prospectEmail)) {
             this.showValidationMessage('Por favor ingrese un email válido.');
             return;
         }
 
-        // Preparar datos para envío
         const submitData = {
             responses: this.responses,
             prospect: {
@@ -359,12 +378,14 @@ class SCGSurvey {
             }
         };
 
-        console.log('📤 Enviando survey:', submitData);
-
-        // Mostrar loading en botón
         const submitBtn = document.getElementById('submitSurveyBtn');
         const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
+        const spinner = document.createElement('i');
+        spinner.className = 'fas fa-spinner fa-spin me-2';
+        
+        submitBtn.innerHTML = '';
+        submitBtn.appendChild(spinner);
+        submitBtn.appendChild(document.createTextNode('Enviando...'));
         submitBtn.disabled = true;
 
         try {
@@ -381,43 +402,35 @@ class SCGSurvey {
             const result = await response.json();
 
             if (result.success) {
-                console.log('✅ Survey enviado exitosamente');
                 this.showThankYouMessage();
             } else {
-                console.error('❌ Error del servidor:', result.message);
                 this.showValidationMessage(result.message || 'Error procesando su solicitud.');
             }
 
         } catch (error) {
-            console.error('❌ Error de red:', error);
             this.showValidationMessage('Error de conexión. Por favor intente nuevamente.');
         } finally {
-            // Restaurar botón
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
         }
     }
 
     showThankYouMessage() {
-        // Ocultar formulario de contacto
         const contactGroup = document.getElementById('contact-group');
         if (contactGroup) {
             contactGroup.style.display = 'none';
         }
 
-        // Mostrar mensaje de agradecimiento
         const thankYouMessage = document.getElementById('thankYouMessage');
         if (thankYouMessage) {
             thankYouMessage.style.display = 'block';
             
-            // Scroll hacia arriba para mostrar el mensaje completo
             window.scrollTo({
                 top: 0,
                 behavior: 'smooth'
             });
         }
 
-        // Progress a 100%
         this.updateProgress(100);
     }
 
@@ -425,43 +438,8 @@ class SCGSurvey {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
     }
-    
-    handleSensitiveDataLogic(changedElement) {
-        const questionId = changedElement.getAttribute('data-question');
-        const allCheckboxes = document.querySelectorAll(`input[data-question="${questionId}"][type="checkbox"]`);
-        
-        // Buscar la opción "No manejamos información sensible" (la que tiene valor más alto)
-        let noSensitiveDataOption = null;
-        let maxOptionId = 0;
-        
-        allCheckboxes.forEach(checkbox => {
-            const optionId = parseInt(checkbox.value);
-            if (optionId > maxOptionId) {
-                maxOptionId = optionId;
-                noSensitiveDataOption = checkbox;
-            }
-        });
-        
-        if (noSensitiveDataOption && changedElement === noSensitiveDataOption) {
-            // Si seleccionó "No manejamos información sensible", deseleccionar todos los demás
-            if (changedElement.checked) {
-                allCheckboxes.forEach(checkbox => {
-                    if (checkbox !== noSensitiveDataOption) {
-                        checkbox.checked = false;
-                    }
-                });
-            }
-        } else {
-            // Si seleccionó cualquier otro tipo de dato, deseleccionar "No manejamos información sensible"
-            if (changedElement.checked && noSensitiveDataOption) {
-                noSensitiveDataOption.checked = false;
-            }
-        }
-    }
 }
 
-// Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🎯 Inicializando SCG Survey...');
     window.scgSurvey = new SCGSurvey();
 });

@@ -98,11 +98,12 @@
                                         {% for option in question.options.all %}
                                         <div class="option-item">
                                             <input type="checkbox" 
-                                                   id="q{{ question.id }}_{{ option.id }}" 
-                                                   name="question_{{ question.id }}" 
-                                                   value="{{ option.id }}"
-                                                   data-question="{{ question.id }}"
-                                                   data-type="multiple">
+                                                id="q{{ question.id }}_{{ option.id }}" 
+                                                name="question_{{ question.id }}" 
+                                                value="{{ option.id }}"
+                                                data-question="{{ question.id }}"
+                                                data-type="multiple"
+                                                {% if option.is_exclusive %}data-exclusive="true"{% else %}data-exclusive="false"{% endif %}>
                                             <label for="q{{ question.id }}_{{ option.id }}" class="option-label">
                                                 {{ option.option_text }}
                                             </label>

@@ -257,6 +257,12 @@ class QuestionOption(models.Model):
         help_text="Is this option currently active?"
     )
     
+    # NUEVO CAMPO:
+    is_exclusive = models.BooleanField(
+        default=False,
+        help_text="If true, selecting this option will deselect all other options (for multiple choice questions)"
+    )
+    
     class Meta:
         ordering = ['order']
         verbose_name = 'Question Option'
@@ -264,8 +270,9 @@ class QuestionOption(models.Model):
         unique_together = ['question', 'order']
     
     def __str__(self):
-        return f"{self.question.question_text[:30]}... - {self.option_text[:30]}..."
-
+        exclusive_indicator = " [EXCLUSIVE]" if self.is_exclusive else ""
+        return f"{self.question.question_text[:30]}... - {self.option_text[:30]}...{exclusive_indicator}"
+        
 
 class SurveySubmissionStatus(models.TextChoices):
     """Status of survey submissions."""

@@ -108,7 +108,7 @@ class SurveySectionAdmin(admin.ModelAdmin):
 class QuestionOptionInline(admin.TabularInline):
     model = QuestionOption
     extra = 1
-    fields = ['order', 'option_text', 'points', 'is_active']
+    fields = ['order', 'option_text', 'points', 'is_exclusive', 'is_active']
     ordering = ['order']
 
 
