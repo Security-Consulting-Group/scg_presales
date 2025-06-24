@@ -5,10 +5,20 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
+    # Admin
     path('admin/', admin.site.urls),
+    
+    # Landing page
     path('', include('landing.urls')),
-    path('', include('surveys.urls')),
+    
+    # Surveys
+    path('survey/', include('surveys.urls')),
+    
+    # Admin panel
     path('admin-panel/', include('admin_panel.urls')),
+    
+    # Reports (NEW)
+    path('reports/', include('reports.urls')),
 ]
 
 # Serve media files in development

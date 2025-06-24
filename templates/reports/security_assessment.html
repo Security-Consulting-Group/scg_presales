@@ -1,0 +1,293 @@
+<!-- templates/reports/security_assessment.html -->
+<!-- REPORTE COMPLETO CON ESTILOS Y CONFIGURACIÓN INCLUIDA -->
+
+<!-- CONFIGURACIÓN DEL DOCUMENTO -->
+<document_config>
+    <title>REPORTE DE EVALUACIÓN DE CIBERSEGURIDAD</title>
+    <header_text>SECURITY CONSULTING GROUP</header_text>
+    <contact_info>services@securitygroupcr.com | +506 1234-5678 | www.securitygroupcr.com</contact_info>
+    <tagline>Su socio estratégico en ciberseguridad</tagline>
+    <show_header_on_cover>false</show_header_on_cover>
+  </document_config>
+  
+  <!-- ESTILOS CSS PARA PDF -->
+  <pdf_styles>
+    <colors>
+      <primary>#002d74</primary>
+      <primary_light>#3a8dde</primary_light>
+      <accent>#6abf4b</accent>
+      <critical>#DC2626</critical>
+      <black>#000000</black>
+      <light_gray>#f8fafc</light_gray>
+    </colors>
+    
+    <fonts>
+      <main>Helvetica</main>
+      <bold>Helvetica-Bold</bold>
+    </fonts>
+    
+    <styles>
+      <h1 style="font-size:24px; color:primary; font-weight:bold; text-align:center; margin-bottom:30px;"></h1>
+      <h2 style="font-size:18px; color:primary; font-weight:bold; margin-bottom:15px; margin-top:25px;"></h2>
+      <h3 style="font-size:14px; color:primary_light; text-align:center; margin-bottom:20px;"></h3>
+      <p style="font-size:11px; color:black; margin-bottom:8px;"></p>
+      <p.critical style="font-size:12px; color:critical; font-weight:bold; margin-bottom:10px;"></p.critical>
+      <p.stat style="font-size:11px; color:primary; margin-bottom:8px;"></p.stat>
+      <li style="font-size:11px; color:black; margin-bottom:4px;"></li>
+    </styles>
+    
+    <page_settings>
+      <margins top="100" bottom="80" left="50" right="50"></margins>
+      <page_size>letter</page_size>
+    </page_settings>
+  </pdf_styles>
+  
+  <!-- ==================== PÁGINA 1: PORTADA ==================== -->
+  <page id="cover">
+    <spacer height="100"></spacer>
+    
+    <img placeholder="HERO_CYBERSECURITY_IMAGE" 
+         alt="Fondo corporativo con elementos de ciberseguridad, gradiente azul SCG, dispositivos digitales protegidos"></img>
+    
+    <spacer height="50"></spacer>
+    
+    <h1>REPORTE DE EVALUACIÓN DE CIBERSEGURIDAD</h1>
+    
+    <spacer height="30"></spacer>
+    
+    <h2 style="text-align:center;"><strong>{{ company_name }}</strong></h2>
+    <h3>Análisis de Vulnerabilidades y Recomendaciones Estratégicas</h3>
+    
+    <spacer height="50"></spacer>
+    
+    <p style="text-align:center;">
+      Fecha: {{ fecha_actual }}<br/>
+      Preparado por: Security Consulting Group
+    </p>
+  </page>
+  
+  <!-- ==================== PÁGINA 2: RESULTADOS ==================== -->
+  <page id="results">
+    <h2>SUS RESULTADOS DE CIBERSEGURIDAD</h2>
+    
+    <!-- TABLA DE RESULTADOS -->
+    <table id="score-table" style="background:light_gray; border:1px solid primary_light; width:100%; margin-bottom:30px;">
+      <tr>
+        <td style="font-weight:bold; color:primary; padding:8px;">Puntuación Obtenida:</td>
+        <td style="font-weight:bold; color:primary; padding:8px;">{{ score_result.score_percentage }}%</td>
+      </tr>
+      <tr>
+        <td style="font-weight:bold; color:primary; padding:8px;">Puntos Totales:</td>
+        <td style="font-weight:bold; color:primary; padding:8px;">{{ score_result.total_points }}/{{ score_result.submission.survey.max_score }}</td>
+      </tr>
+      <tr>
+        <td style="font-weight:bold; color:primary; padding:8px;">Nivel de Riesgo:</td>
+        <td style="font-weight:bold; color:primary; padding:8px;">{{ risk_level_display }}</td>
+      </tr>
+    </table>
+    
+    <p class="critical">{{ risk_content.title }}</p>
+    <spacer height="15"></spacer>
+    
+    <p>{{ risk_content.description }}</p>
+    <spacer height="20"></spacer>
+    
+    <p><strong>{{ risk_content.threats_title }}</strong></p>
+    <spacer height="10"></spacer>
+    
+    <ul>
+      {% for threat in risk_content.threats %}
+      <li>{{ threat }}</li>
+      {% endfor %}
+    </ul>
+    
+    <spacer height="20"></spacer>
+    
+    <p class="stat">{{ risk_content.statistic }}</p>
+  </page>
+  
+  <!-- ==================== PÁGINA 3: ESTADÍSTICAS ==================== -->
+  <page id="statistics">
+    <h2>LA CIBERSEGURIDAD: UNA CRISIS EMPRESARIAL GLOBAL</h2>
+    
+    <img placeholder="GLOBAL_CYBER_THREATS" 
+         alt="Mapa mundial con indicadores de ataques, infografía de amenazas globales, colores corporativos SCG"></img>
+    
+    <spacer height="20"></spacer>
+    
+    <p><strong>🌍 PANORAMA MUNDIAL 2024:</strong></p>
+    <spacer height="10"></spacer>
+    
+    {% for stat in global_stats.world %}
+    <p class="stat">{{ stat }}</p>
+    {% endfor %}
+    
+    <spacer height="15"></spacer>
+    
+    <p><strong>💰 IMPACTO FINANCIERO DEVASTADOR:</strong></p>
+    <spacer height="5"></spacer>
+    
+    {% for stat in global_stats.financial %}
+    <p class="stat">{{ stat }}</p>
+    {% endfor %}
+    
+    <spacer height="15"></spacer>
+    
+    <p><strong>🇨🇷 REALIDAD EN COSTA RICA:</strong></p>
+    <spacer height="5"></spacer>
+    
+    {% for stat in global_stats.costa_rica %}
+    <p class="stat">{{ stat }}</p>
+    {% endfor %}
+    
+    <spacer height="20"></spacer>
+    
+    <p class="critical">
+      <strong>💡 LA CONCLUSIÓN ES CLARA:</strong><br/>
+      "No es cuestión de SI su empresa será atacada, sino CUÁNDO"
+    </p>
+  </page>
+  
+  <!-- ==================== PÁGINA 4: VULNERABILIDADES ==================== -->
+  <page id="vulnerabilities">
+    <h2>VULNERABILIDADES DETECTADAS EN SU ORGANIZACIÓN</h2>
+    
+    <img placeholder="VULNERABILITY_ANALYSIS" 
+         alt="Análisis de vulnerabilidades empresariales, oficina corporativa con elementos de seguridad digital"></img>
+    
+    <spacer height="20"></spacer>
+    
+    <p>
+      Basado en nuestra evaluación integral, identificamos oportunidades críticas 
+      de fortalecimiento en su organización:
+    </p>
+    <spacer height="15"></spacer>
+    
+    {% for vuln in vulnerabilities %}
+    <div class="vulnerability-item">
+      <p class="critical"><strong>{{ vuln.level }} - {{ vuln.title }}</strong></p>
+      <p>{{ vuln.description }}</p>
+      <p><strong>IMPACTO EJECUTIVO:</strong> {{ vuln.impact }}</p>
+      <spacer height="15"></spacer>
+    </div>
+    {% endfor %}
+    
+    <div class="strategic-section">
+      <p><strong>💼 PERSPECTIVA ESTRATÉGICA PARA LA JUNTA DIRECTIVA:</strong></p>
+      <p class="stat">
+        "Las vulnerabilidades identificadas no son fallas técnicas aisladas, 
+        son riesgos empresariales que amenazan directamente su ventaja competitiva, 
+        ROI, crecimiento futuro y cumplimiento regulatorio."
+      </p>
+    </div>
+  </page>
+  
+  <!-- ==================== PÁGINA 5: SOLUCIONES ==================== -->
+  <page id="solutions">
+    <h2>TRANSFORMAMOS SU MAYOR VULNERABILIDAD EN SU VENTAJA COMPETITIVA</h2>
+    
+    <img placeholder="SECURITY_SOLUTIONS" 
+         alt="Soluciones de ciberseguridad, equipo profesional implementando medidas de seguridad, colores SCG"></img>
+    
+    <spacer height="20"></spacer>
+    
+    <p>
+      Como líderes ejecutivos, ustedes entienden que la ciberseguridad no es un 
+      costo operativo—es una inversión estratégica en la continuidad y crecimiento 
+      de su organización.
+    </p>
+    <spacer height="20"></spacer>
+    
+    <!-- PAQUETE RECOMENDADO -->
+    <div class="recommended-package">
+      <p class="critical">
+        <strong>🏆 RECOMENDADO PARA SU NIVEL DE RIESGO: {{ recommended_package.name }}</strong>
+      </p>
+      <p>{{ recommended_package.subtitle }}</p>
+      <spacer height="10"></spacer>
+      
+      <ul>
+        {% for feature in recommended_package.features %}
+        <li>✓ {{ feature }}</li>
+        {% endfor %}
+      </ul>
+      
+      <p><strong>IDEAL PARA:</strong> {{ recommended_package.ideal }}</p>
+    </div>
+    
+    <spacer height="20"></spacer>
+    
+    <!-- OTROS PAQUETES -->
+    <div class="other-packages">
+      <p><strong>OTROS PAQUETES DISPONIBLES:</strong></p>
+      {% for package in other_packages %}
+      <p>• <strong>{{ package.name }}</strong> - {{ package.description }}</p>
+      {% endfor %}
+    </div>
+    
+    <spacer height="20"></spacer>
+    
+    <!-- PROPUESTA DE VALOR -->
+    <div class="value-proposition">
+      <p><strong>💡 NUESTRA PROPUESTA DE VALOR DIFERENCIADA:</strong></p>
+      {% for prop in value_props %}
+      <p class="stat">{{ prop }}</p>
+      {% endfor %}
+    </div>
+  </page>
+  
+  <!-- ==================== PÁGINA 6: CALL TO ACTION ==================== -->
+  <page id="cta">
+    <h2>¿LISTO PARA TRANSFORMAR SU CIBERSEGURIDAD EN VENTAJA COMPETITIVA?</h2>
+    
+    <img placeholder="BUSINESS_HANDSHAKE" 
+         alt="Apretón de manos profesional con elementos de ciberseguridad, sala de reuniones corporativa, confianza y alianza"></img>
+    
+    <spacer height="30"></spacer>
+    
+    <p class="stat">
+      "La ciberseguridad no es un gasto, es una inversión en la 
+      continuidad y crecimiento de su negocio"
+    </p>
+    <spacer height="30"></spacer>
+    
+    <!-- SIGUIENTE PASO -->
+    <div class="next-steps">
+      <p class="critical"><strong>🎯 SU SIGUIENTE PASO:</strong></p>
+      <p>
+        Agenda su consultoría estratégica GRATUITA para diseñar un plan 
+        personalizado de ciberseguridad adaptado a su organización
+      </p>
+      <spacer height="15"></spacer>
+      
+      <p><strong>En esta sesión ejecutiva analizaremos:</strong></p>
+      {% for item in session_items %}
+      <p>{{ item }}</p>
+      {% endfor %}
+    </div>
+    
+    <spacer height="30"></spacer>
+    
+    <!-- INFORMACIÓN DE CONTACTO -->
+    <div class="contact-section">
+      <p><strong>CONTACTO:</strong></p>
+      <table class="contact-table" style="width:100%; margin-top:10px;">
+        {% for contact in contact_info %}
+        <tr>
+          <td style="width:60px; font-size:12px; color:primary;">{{ contact.0 }}</td>
+          <td style="font-size:12px; color:primary;">{{ contact.1 }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+    
+    <spacer height="40"></spacer>
+    
+    <!-- REFERENCIAS -->
+    <div class="references">
+      <p><strong>REFERENCIAS CONSULTADAS:</strong></p>
+      {% for ref in references %}
+      <p style="font-size:8px;">{{ ref }}</p>
+      {% endfor %}
+    </div>
+  </page>

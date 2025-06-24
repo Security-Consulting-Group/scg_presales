@@ -16,6 +16,26 @@
     <a href="{% url 'admin_panel:prospect_detail' prospect.pk %}" class="btn btn-outline-primary btn-sm">
         <i class="fas fa-user me-1"></i>Ver Prospect
     </a>
+    
+    <!-- NUEVOS BOTONES PDF -->
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-success btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-file-pdf me-1"></i>Generar Reporte PDF
+        </button>
+        <ul class="dropdown-menu">
+            <li>
+                <a class="dropdown-item" href="{% url 'reports:generate_security_pdf' score_result.id %}" target="_blank">
+                    <i class="fas fa-download me-2"></i>Descargar PDF
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item" href="{% url 'reports:preview_security_pdf' score_result.id %}" target="_blank">
+                    <i class="fas fa-eye me-2"></i>Vista Previa
+                </a>
+            </li>
+        </ul>
+    </div>
+    
     <button class="btn btn-warning btn-sm" onclick="recalculateThisScore()">
         <i class="fas fa-sync-alt me-1"></i>Recalcular
     </button>
@@ -89,6 +109,15 @@
                     </span>
                 </div>
                 
+                <!-- PDF Generation Quick Actions -->
+                <div class="pdf-quick-actions mt-3">
+                    <a href="{% url 'reports:generate_security_pdf' score_result.id %}" 
+                       class="btn btn-success btn-sm" target="_blank" 
+                       onclick="trackPDFGeneration('download')">
+                        <i class="fas fa-file-pdf me-1"></i>Descargar Reporte
+                    </a>
+                </div>
+                
                 <!-- Percentile -->
                 {% if score_percentile %}
                 <div class="percentile-display mt-2">
@@ -103,6 +132,15 @@
     </div>
 </div>
 
+<!-- PDF Generation Success/Error Messages -->
+<div id="pdf-notifications" class="mt-3" style="display: none;">
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <span id="pdf-success-message">Reporte PDF generado exitosamente</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+</div>
+
 <!-- Main Content -->
 <div class="row">
     <!-- Left Column: Score Analysis -->
@@ -113,6 +151,9 @@
                 <h3 class="admin-card-title">
                     <i class="fas fa-star me-2"></i>Recomendaciones de Paquetes
                 </h3>
+                <div class="card-header-actions">
+                    <small class="text-muted">Incluido en reporte PDF</small>
+                </div>
             </div>
             <div class="admin-card-body">
                 <div class="package-recommendations">
@@ -297,6 +338,50 @@
     
     <!-- Right Column: Stats & Context -->
     <div class="col-lg-4">
+        <!-- PDF Generation Status -->
+        <div class="admin-card mb-4">
+            <div class="admin-card-header">
+                <h5 class="admin-card-title">
+                    <i class="fas fa-file-pdf me-2"></i>Reporte PDF
+                </h5>
+            </div>
+            <div class="admin-card-body">
+                <div class="pdf-actions-card">
+                    <p class="mb-3">
+                        <small class="text-muted">
+                            Genere un reporte profesional de ciberseguridad personalizado 
+                            basado en los resultados de esta evaluación.
+                        </small>
+                    </p>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'reports:generate_security_pdf' score_result.id %}" 
+                           class="btn btn-success btn-sm" target="_blank"
+                           onclick="trackPDFGeneration('download')">
+                            <i class="fas fa-download me-2"></i>Descargar PDF
+                        </a>
+                        <a href="{% url 'reports:preview_security_pdf' score_result.id %}" 
+                           class="btn btn-outline-primary btn-sm" target="_blank"
+                           onclick="trackPDFGeneration('preview')">
+                            <i class="fas fa-eye me-2"></i>Vista Previa
+                        </a>
+                    </div>
+                    
+                    <hr class="my-3">
+                    
+                    <div class="pdf-info">
+                        <small class="text-muted">
+                            <strong>El reporte incluye:</strong><br>
+                            • Análisis personalizado de riesgos<br>
+                            • Estadísticas de la industria<br>
+                            • Recomendaciones de paquetes<br>
+                            • Información de contacto para seguimiento
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!-- Score Metadata -->
         <div class="admin-card mb-4">
             <div class="admin-card-header">
@@ -488,10 +573,46 @@ function exportScoreDetail() {
     window.scgAdmin.showNotification('Función de exportación en desarrollo', 'info');
 }
 
+function trackPDFGeneration(action) {
+    // Track PDF generation for analytics
+    console.log(`PDF ${action} initiated for ScoreResult {{ score_result.id }}`);
+    
+    // Show feedback message
+    if (action === 'download') {
+        setTimeout(() => {
+            showPDFNotification('success', 'Reporte PDF descargado exitosamente');
+        }, 1000);
+    } else if (action === 'preview') {
+        showPDFNotification('info', 'Abriendo vista previa del reporte PDF...');
+    }
+}
+
+function showPDFNotification(type, message) {
+    const notification = document.getElementById('pdf-notifications');
+    const messageSpan = document.getElementById('pdf-success-message');
+    
+    if (notification && messageSpan) {
+        messageSpan.textContent = message;
+        notification.style.display = 'block';
+        
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 5000);
+    }
+}
+
 // Add filter for template lookup
 window.addEventListener('DOMContentLoaded', function() {
-    // Custom template filter helper if needed
-    console.log('Score Detail page loaded for {{ prospect.name }}');
+    console.log('Score Detail page with PDF functionality loaded for {{ prospect.name }}');
+    
+    // Add click handlers for PDF generation tracking
+    document.querySelectorAll('a[href*="generate_security_pdf"], a[href*="preview_security_pdf"]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            const action = this.href.includes('preview') ? 'preview' : 'download';
+            console.log(`PDF ${action} clicked for {{ prospect.name }}`);
+        });
+    });
 });
 </script>
 {% endblock %}
