@@ -144,7 +144,7 @@ class Prospect(models.Model):
     def update_status_to_qualified(self):
         """Auto-update status when prospect completes survey."""
         if self.status == ProspectStatus.LEAD and self.has_completed_survey():
-            self.status = ProspectStatus.QUALIFIED
+            self.status = ProspectStatus.LEAD
             self.save(update_fields=['status', 'updated_at'])
     
     def get_formatted_phone(self):
