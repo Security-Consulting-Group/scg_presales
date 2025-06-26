@@ -151,8 +151,14 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
     
+    <!-- Bootstrap Modal Polyfill -->
+    <script src="{% static 'js/bootstrap-polyfill.js' %}"></script>
+    
     <!-- Admin Panel JS -->
     <script src="{% static 'js/admin.js' %}"></script>
+    
+    <!-- Common Functionality JS -->
+    <script src="{% static 'js/prospects.js' %}"></script>
     
     <!-- Page specific JS -->
     {% block extra_js %}{% endblock %}

@@ -323,51 +323,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('📝 Survey Form cargado');
-    
-    // Featured checkbox warning
-    const featuredCheckbox = document.getElementById('id_is_featured');
-    if (featuredCheckbox) {
-        featuredCheckbox.addEventListener('change', function() {
-            if (this.checked) {
-                window.scgAdmin.showNotification(
-                    'Solo un survey puede estar featured a la vez. Si guardas, otros surveys perderán el estado featured.',
-                    'info'
-                );
-            }
-        });
-    }
-    
-    // Form validation
-    const form = document.querySelector('form');
-    form.addEventListener('submit', function(e) {
-        const title = document.getElementById('id_title').value.trim();
-        const version = document.getElementById('id_version').value.trim();
-        const maxScore = document.getElementById('id_max_score').value;
-        
-        if (!title || !version || !maxScore) {
-            e.preventDefault();
-            window.scgAdmin.showNotification('Por favor completa todos los campos requeridos', 'error');
-            return;
-        }
-        
-        if (parseInt(maxScore) < 1) {
-            e.preventDefault();
-            window.scgAdmin.showNotification('La puntuación máxima debe ser mayor a 0', 'error');
-            return;
-        }
-    });
-});
-
-function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(function() {
-        window.scgAdmin.showNotification('URL copiada al portapapeles', 'success');
-    }).catch(function(err) {
-        console.error('Error copiando al portapapeles:', err);
-        window.scgAdmin.showNotification('Error copiando al portapapeles', 'error');
-    });
-}
-</script>
+<script src="{% static 'js/surveys.js' %}"></script>
 {% endblock %}

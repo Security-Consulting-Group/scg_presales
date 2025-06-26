@@ -95,11 +95,11 @@
                     <div class="risk-ranges-mini">
                         <div class="ranges-visual">
                             <div class="range-bar-mini">
-                                <div class="range-segment-mini critical" style="width: {{ config.critical_max }}%"></div>
-                                <div class="range-segment-mini high" style="width: {{ config.high_max|add:'-'|add:config.critical_max }}%"></div>
-                                <div class="range-segment-mini moderate" style="width: {{ config.moderate_max|add:'-'|add:config.high_max }}%"></div>
-                                <div class="range-segment-mini good" style="width: {{ config.good_max|add:'-'|add:config.moderate_max }}%"></div>
-                                <div class="range-segment-mini excellent" style="width: {{ 100|add:'-'|add:config.good_max }}%"></div>
+                                <div class="range-segment-mini critical" data-width="{{ config.critical_max }}"></div>
+                                <div class="range-segment-mini high" data-width-calc="high" data-high="{{ config.high_max }}" data-critical="{{ config.critical_max }}"></div>
+                                <div class="range-segment-mini moderate" data-width-calc="moderate" data-moderate="{{ config.moderate_max }}" data-high="{{ config.high_max }}"></div>
+                                <div class="range-segment-mini good" data-width-calc="good" data-good="{{ config.good_max }}" data-moderate="{{ config.moderate_max }}"></div>
+                                <div class="range-segment-mini excellent" data-width-calc="excellent" data-good="{{ config.good_max }}"></div>
                             </div>
                         </div>
                         <div class="ranges-text">
@@ -270,115 +270,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-function createQuickConfig(surveyId, surveyTitle) {
-    if (confirm(`¿Crear configuración de riesgo con valores por defecto para "${surveyTitle}"?\n\nRangos:\n• Crítico: 0-20%\n• Alto: 21-40%\n• Moderado: 41-60%\n• Bueno: 61-80%\n• Excelente: 81-100%`)) {
-        
-        fetch('{% url "admin_panel:risk_config_quick_create" %}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-            },
-            body: `survey_id=${surveyId}`
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                window.scgAdmin.showNotification(data.message, 'success');
-                setTimeout(() => {
-                    if (data.redirect_url) {
-                        window.location.href = data.redirect_url;
-                    } else {
-                        window.location.reload();
-                    }
-                }, 1500);
-            } else {
-                window.scgAdmin.showNotification(data.message, 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            window.scgAdmin.showNotification('Error al crear configuración', 'error');
-        });
-    }
-}
-
-function showQuickCreateModal() {
-    const modal = new bootstrap.Modal(document.getElementById('quickCreateModal'));
-    modal.show();
-}
-
-function createMultipleConfigs() {
-    const selectedSurveys = Array.from(document.querySelectorAll('#quickCreateModal input[type="checkbox"]:checked'))
-                                .map(cb => cb.value);
-    
-    if (selectedSurveys.length === 0) {
-        alert('Selecciona al menos un survey');
-        return;
-    }
-    
-    // Close modal
-    const modal = bootstrap.Modal.getInstance(document.getElementById('quickCreateModal'));
-    modal.hide();
-    
-    // Show progress
-    window.scgAdmin.showNotification(`Creando ${selectedSurveys.length} configuraciones...`, 'info');
-    
-    // Create configs sequentially
-    let created = 0;
-    let errors = 0;
-    
-    const createNext = (index) => {
-        if (index >= selectedSurveys.length) {
-            // Finished
-            if (errors === 0) {
-                window.scgAdmin.showNotification(`✅ ${created} configuraciones creadas exitosamente`, 'success');
-            } else {
-                window.scgAdmin.showNotification(`⚠️ ${created} creadas, ${errors} errores`, 'warning');
-            }
-            setTimeout(() => window.location.reload(), 2000);
-            return;
-        }
-        
-        fetch('{% url "admin_panel:risk_config_quick_create" %}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-            },
-            body: `survey_id=${selectedSurveys[index]}`
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                created++;
-            } else {
-                errors++;
-            }
-            createNext(index + 1);
-        })
-        .catch(error => {
-            errors++;
-            createNext(index + 1);
-        });
-    };
-    
-    createNext(0);
-}
-
-// Make rows clickable
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.config-row').forEach(row => {
-        row.addEventListener('click', function(e) {
-            if (!e.target.closest('.action-buttons')) {
-                window.location.href = this.dataset.href;
-            }
-        });
-    });
-});
-</script>
-
-<!-- Token CSRF para AJAX -->
+<script src="{% static 'js/risk-config.js' %}"></script>
 {% csrf_token %}
 {% endblock %}

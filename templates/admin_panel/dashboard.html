@@ -210,16 +210,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Dashboard specific functionality
-    console.log('📊 Dashboard cargado');
-    
-    // Auto-refresh every 5 minutes
-    setInterval(function() {
-        // Only refresh stats, not the whole page
-        console.log('🔄 Auto-refresh stats (placeholder)');
-    }, 300000);
-});
-</script>
+<script src="{% static 'js/dashboard.js' %}"></script>
 {% endblock %}

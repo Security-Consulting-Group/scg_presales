@@ -548,54 +548,257 @@
         </div>
     </div>
 </div>
+
+<!-- Modal para cambiar estado del prospecto -->
+<div class="modal fade" id="changeStatusModal" tabindex="-1" aria-labelledby="changeStatusModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changeStatusModalLabel">Cambiar Estado del Prospect</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Seleccione el nuevo estado para este prospect:</p>
+                <select id="prospectStatusSelect" class="form-select mb-3">
+                    <option value="LEAD">Lead</option>
+                    <option value="QUALIFIED">Qualified</option>
+                    <option value="IN_PROCESS">In Process</option>
+                    <option value="CLOSED_WON">Closed Won</option>
+                    <option value="CLOSED_LOST">Closed Lost</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="confirmStatusChange">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para ver detalles de survey -->
+<div class="modal fade" id="surveyDetailsModal" tabindex="-1" aria-labelledby="surveyDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="surveyDetailsModalLabel">Detalles del Survey</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="surveyDetailsContent">
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <p class="mt-2">Cargando detalles del survey...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para deshabilitar survey -->
+<div class="modal fade" id="disableSurveyModal" tabindex="-1" aria-labelledby="disableSurveyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="disableSurveyModalLabel">Deshabilitar Survey</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>¡Atención!</strong> Esta acción deshabilitará permanentemente el survey. Los datos no se eliminarán, pero ya no estará disponible para su visualización.
+                </div>
+                <p>¿Está seguro de que desea deshabilitar este survey?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmDisableSurvey">Deshabilitar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para invitar a completar survey -->
+<div class="modal fade" id="inviteToSurveyModal" tabindex="-1" aria-labelledby="inviteToSurveyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="inviteToSurveyModalLabel">Invitar a Completar Survey</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Seleccione el survey al que desea invitar a este prospect:</p>
+                <select id="surveySelectInvite" class="form-select mb-3">
+                    <option value="" selected disabled>Seleccione un survey</option>
+                    <!-- Opciones se cargarán dinámicamente desde JS -->
+                </select>
+                
+                <div class="mb-3">
+                    <label for="inviteMessage" class="form-label">Mensaje personalizado (opcional):</label>
+                    <textarea class="form-control" id="inviteMessage" rows="3" placeholder="Ej: Estimado cliente, nos gustaría invitarle a completar este breve diagnóstico..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="confirmInviteToSurvey">Enviar Invitación</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para agregar nota de interacción -->
+<div class="modal fade" id="addNoteModal" tabindex="-1" aria-labelledby="addNoteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addNoteModalLabel">Agregar Nota de Interacción</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="noteTitle" class="form-label">Título:</label>
+                    <input type="text" class="form-control" id="noteTitle" placeholder="Ej: Llamada inicial">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="noteType" class="form-label">Tipo de Interacción:</label>
+                    <select class="form-select" id="noteType">
+                        <option value="PHONE_CALL">Llamada Telefónica</option>
+                        <option value="MEETING">Reunión</option>
+                        <option value="EMAIL">Email</option>
+                        <option value="DEMO">Demostración</option>
+                        <option value="PROPOSAL">Propuesta</option>
+                        <option value="FOLLOW_UP">Seguimiento</option>
+                        <option value="OTHER">Otro</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="noteContent" class="form-label">Contenido:</label>
+                    <textarea class="form-control" id="noteContent" rows="4" placeholder="Detalles de la interacción..."></textarea>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="nextSteps" class="form-label">Próximos Pasos (opcional):</label>
+                    <textarea class="form-control" id="nextSteps" rows="2" placeholder="Acciones a realizar..."></textarea>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="followUpDate" class="form-label">Fecha de Seguimiento (opcional):</label>
+                    <input type="date" class="form-control" id="followUpDate">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="confirmAddNote">Guardar Nota</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para programar seguimiento -->
+<div class="modal fade" id="scheduleFollowUpModal" tabindex="-1" aria-labelledby="scheduleFollowUpModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="scheduleFollowUpModalLabel">Programar Seguimiento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="followUpTitle" class="form-label">Título:</label>
+                    <input type="text" class="form-control" id="followUpTitle" placeholder="Ej: Seguimiento de propuesta">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="followUpType" class="form-label">Tipo de Seguimiento:</label>
+                    <select class="form-select" id="followUpType">
+                        <option value="PHONE_CALL">Llamada Telefónica</option>
+                        <option value="MEETING">Reunión</option>
+                        <option value="EMAIL">Email</option>
+                        <option value="DEMO">Demostración</option>
+                        <option value="PROPOSAL">Propuesta</option>
+                        <option value="OTHER">Otro</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="followUpDate" class="form-label">Fecha de Seguimiento:</label>
+                    <input type="date" class="form-control" id="followUpDate">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="followUpNotes" class="form-label">Notas (opcional):</label>
+                    <textarea class="form-control" id="followUpNotes" rows="3" placeholder="Detalles del seguimiento..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="confirmScheduleFollowUp">Programar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para exportar datos -->
+<div class="modal fade" id="exportDataModal" tabindex="-1" aria-labelledby="exportDataModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exportDataModalLabel">Exportar Datos del Prospect</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Seleccione qué datos desea exportar:</p>
+                
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="exportBasicInfo" checked>
+                    <label class="form-check-label" for="exportBasicInfo">
+                        Información Básica
+                    </label>
+                </div>
+                
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="exportInquiries" checked>
+                    <label class="form-check-label" for="exportInquiries">
+                        Consultas
+                    </label>
+                </div>
+                
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="exportSurveys" checked>
+                    <label class="form-check-label" for="exportSurveys">
+                        Surveys
+                    </label>
+                </div>
+                
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="exportNotes" checked>
+                    <label class="form-check-label" for="exportNotes">
+                        Notas de Interacción
+                    </label>
+                </div>
+                
+                <div class="mb-3 mt-3">
+                    <label for="exportFormat" class="form-label">Formato:</label>
+                    <select class="form-select" id="exportFormat">
+                        <option value="csv">CSV</option>
+                        <option value="pdf">PDF</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="confirmExportData">Exportar</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/prospects.js' %}"></script>
-<script>
-// Prospect detail specific functions
-function viewSurveyDetails(submissionId) {
-    // TODO: Implementar modal o página de detalles del survey
-    console.log('Ver detalles del survey:', submissionId);
-    window.scgAdmin.showNotification('Función en desarrollo', 'info');
-}
-
-function disableSurveySubmission(submissionId) {
-    if (confirm('¿Está seguro de que desea deshabilitar esta submisión del survey?')) {
-        // TODO: Implementar AJAX call para deshabilitar
-        console.log('Deshabilitar submission:', submissionId);
-        window.scgAdmin.showNotification('Función en desarrollo', 'info');
-    }
-}
-
-function inviteToSurvey(prospectId) {
-    // TODO: Implementar invitación por email
-    console.log('Invitar a survey:', prospectId);
-    window.scgAdmin.showNotification('Función en desarrollo', 'info');
-}
-
-function addInteractionNote(prospectId) {
-    // TODO: Implementar modal para agregar nota
-    console.log('Agregar nota para prospect:', prospectId);
-    window.scgAdmin.showNotification('Función en desarrollo', 'info');
-}
-
-function scheduleFollowUp(prospectId) {
-    // TODO: Implementar modal para programar seguimiento
-    console.log('Programar seguimiento para:', prospectId);
-    window.scgAdmin.showNotification('Función en desarrollo', 'info');
-}
-
-function changeProspectStatus(prospectId) {
-    // TODO: Implementar modal para cambiar estado
-    console.log('Cambiar estado del prospect:', prospectId);
-    window.scgAdmin.showNotification('Función en desarrollo', 'info');
-}
-
-function exportProspectData(prospectId) {
-    // TODO: Implementar exportación de datos
-    console.log('Exportar datos del prospect:', prospectId);
-    window.scgAdmin.showNotification('Exportación iniciada', 'success');
-}
-</script>
+{# Las funciones específicas se han trasladado al archivo prospects.js #}
 {% endblock %}

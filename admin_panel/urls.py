@@ -34,6 +34,7 @@ urlpatterns = [
     path('prospects/create/', views.ProspectCreateView.as_view(), name='prospect_create'),  # NEW
     path('prospects/<int:pk>/', views.ProspectDetailView.as_view(), name='prospect_detail'),
     path('prospects/<int:pk>/edit/', views.ProspectUpdateView.as_view(), name='prospect_edit'),
+    path('ajax/prospects/<int:prospect_id>/change-status/', views.ChangeProspectStatusView.as_view(), name='change_prospect_status'),
     
     # AJAX Actions
     path('ajax/surveys/<str:code>/toggle-status/', views.ToggleSurveyStatusView.as_view(), name='toggle_survey_status'),

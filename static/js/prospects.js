@@ -553,3 +553,431 @@ window.SCGProspects = {
 window.addEventListener('error', function(e) {
     console.error('JavaScript Error in Prospects:', e.error);
 });
+
+function changeProspectStatus(prospectId) {
+    console.log("Iniciando changeProspectStatus para prospectId:", prospectId);
+    
+    // Verificar si el elemento modal existe
+    const modalElement = document.getElementById('changeStatusModal');
+    if (!modalElement) {
+        console.error("Error: No se encontró el elemento modal con ID 'changeStatusModal'");
+        window.scgAdmin.showNotification('Error al abrir el modal: Elemento no encontrado', 'error');
+        return;
+    }
+    
+    try {
+        // Intentar varias formas de mostrar el modal, en orden de preferencia
+        
+        // 1. Intentar con Bootstrap directamente
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+        } 
+        // 2. Intentar con jQuery si está disponible
+        else if (typeof $ !== 'undefined') {
+            $(modalElement).modal('show');
+        } 
+        // 3. Intentar con la función Modal directamente sobre el elemento
+        else if (typeof modalElement.Modal === 'function') {
+            modalElement.Modal();
+        } 
+        // 4. Intentar activarlo por atributo data
+        else {
+            // Establecer data-attribute para modal
+            modalElement.setAttribute('data-bs-toggle', 'modal');
+            modalElement.setAttribute('data-bs-show', 'true');
+            // Disparar un evento click para activarlo
+            const event = new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                view: window
+            });
+            modalElement.dispatchEvent(event);
+        }
+        
+        // Preseleccionar el estado actual si es posible
+        const statusBadge = document.querySelector('.status-badge');
+        if (statusBadge) {
+            const currentStatus = Array.from(statusBadge.classList)
+                .find(cls => cls.startsWith('status-'))
+                ?.replace('status-', '')
+                ?.toUpperCase();
+                
+            if (currentStatus) {
+                const selectElement = document.getElementById('prospectStatusSelect');
+                // Buscar y seleccionar la opción que coincida con el estado actual
+                for (let i = 0; i < selectElement.options.length; i++) {
+                    if (selectElement.options[i].value === currentStatus) {
+                        selectElement.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Limpiar handler previo para evitar múltiples subscripciones
+        const confirmButton = document.getElementById('confirmStatusChange');
+        const oldClickHandler = confirmButton.onclick;
+        if (oldClickHandler) {
+            confirmButton.removeEventListener('click', oldClickHandler);
+        }
+        
+        // Manejar confirmación
+        confirmButton.addEventListener('click', async () => {
+            const selectedStatus = document.getElementById('prospectStatusSelect').value;
+            
+            try {
+                // Obtener CSRF token desde la meta tag que está en base.html
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                
+                // Enviar petición AJAX
+                const response = await fetch(`/admin-panel/ajax/prospects/${prospectId}/change-status/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: `status=${selectedStatus}`
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    // Actualizar UI
+                    const statusBadge = document.querySelector('.status-badge');
+                    if (statusBadge) {
+                        // Quitar clases anteriores
+                        statusBadge.classList.forEach(cls => {
+                            if (cls.startsWith('status-')) {
+                                statusBadge.classList.remove(cls);
+                            }
+                        });
+                        
+                        // Añadir nueva clase
+                        statusBadge.classList.add(`status-${data.status.toLowerCase()}`);
+                        statusBadge.textContent = data.status_display;
+                    }
+                    
+                    // Cerrar modal (intentar diferentes formas de cerrarlo)
+                    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                        const modal = bootstrap.Modal.getInstance(modalElement);
+                        if (modal) modal.hide();
+                    } else if (typeof $ !== 'undefined') {
+                        $(modalElement).modal('hide');
+                    }
+                    
+                    // Mostrar notificación
+                    window.scgAdmin.showNotification(data.message, 'success');
+                } else {
+                    throw new Error(data.message || 'Error al cambiar estado');
+                }
+            } catch (error) {
+                console.error('Error cambiando estado:', error);
+                window.scgAdmin.showNotification(error.message || 'Error al cambiar estado', 'error');
+            }
+        });
+    } catch (error) {
+        console.error("Error al inicializar o mostrar el modal:", error);
+        window.scgAdmin.showNotification('Error al abrir el modal', 'error');
+    }
+}
+
+// ====================================
+// PROSPECT DETAIL PAGE FUNCTIONS
+// ====================================
+
+// Function to view survey details
+function viewSurveyDetails(submissionId) {
+    // Usar el modal que ya existe en el HTML
+    const modal = new bootstrap.Modal(document.getElementById('surveyDetailsModal'));
+    
+    // Mostrar el modal con el spinner de carga
+    modal.show();
+    
+    // En una implementación real, aquí se haría una petición AJAX para obtener los detalles
+    // Por ahora, simulamos una carga y mostramos un mensaje
+    setTimeout(() => {
+        document.getElementById('surveyDetailsContent').innerHTML = `
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Funcionalidad en desarrollo. Survey ID: ${submissionId}
+            </div>
+            <p class="text-muted">Aquí se mostrarán las respuestas del survey.</p>
+        `;
+    }, 1000);
+}
+
+// Function to disable survey submission
+function disableSurveySubmission(submissionId) {
+    // Usar el modal que ya existe en el HTML
+    const modal = new bootstrap.Modal(document.getElementById('disableSurveyModal'));
+    
+    // Mostrar el modal
+    modal.show();
+    
+    // Limpiar handler previo para evitar múltiples subscripciones
+    const confirmButton = document.getElementById('confirmDisableSurvey');
+    const oldClickHandler = confirmButton.onclick;
+    if (oldClickHandler) {
+        confirmButton.removeEventListener('click', oldClickHandler);
+    }
+    
+    // Manejar confirmación
+    confirmButton.addEventListener('click', async () => {
+        try {
+            // En una implementación real, aquí se haría una petición AJAX
+            // Por ahora, simulamos una respuesta exitosa
+            
+            // Cerrar modal
+            modal.hide();
+            
+            // Mostrar notificación
+            window.scgAdmin.showNotification('Survey deshabilitado correctamente', 'success');
+            
+            // Opcional: Actualizar UI para reflejar el cambio
+            const surveyItem = document.querySelector(`.survey-item[data-id="${submissionId}"]`);
+            if (surveyItem) {
+                surveyItem.classList.add('disabled');
+            }
+            
+        } catch (error) {
+            console.error('Error deshabilitando survey:', error);
+            window.scgAdmin.showNotification('Error al deshabilitar el survey', 'error');
+        }
+    });
+}
+
+// Function to invite prospect to survey
+function inviteToSurvey(prospectId) {
+    // Usar el modal que ya existe en el HTML
+    const modal = new bootstrap.Modal(document.getElementById('inviteToSurveyModal'));
+    
+    // En una implementación real, aquí cargaríamos la lista de surveys disponibles
+    // Por ahora, agregamos algunas opciones de ejemplo
+    const surveySelect = document.getElementById('surveySelectInvite');
+    surveySelect.innerHTML = `
+        <option value="" selected disabled>Seleccione un survey</option>
+        <option value="1">Diagnóstico de Seguridad</option>
+        <option value="2">Evaluación de Riesgos</option>
+        <option value="3">Análisis de Cumplimiento</option>
+    `;
+    
+    // Mostrar el modal
+    modal.show();
+    
+    // Limpiar handler previo para evitar múltiples subscripciones
+    const confirmButton = document.getElementById('confirmInviteToSurvey');
+    const oldClickHandler = confirmButton.onclick;
+    if (oldClickHandler) {
+        confirmButton.removeEventListener('click', oldClickHandler);
+    }
+    
+    // Manejar confirmación
+    confirmButton.addEventListener('click', async () => {
+        const selectedSurvey = document.getElementById('surveySelectInvite').value;
+        const inviteMessage = document.getElementById('inviteMessage').value;
+        
+        if (!selectedSurvey) {
+            window.scgAdmin.showNotification('Por favor seleccione un survey', 'error');
+            return;
+        }
+        
+        try {
+            // En una implementación real, aquí se haría una petición AJAX
+            // Por ahora, simulamos una respuesta exitosa
+            
+            // Cerrar modal
+            modal.hide();
+            
+            // Mostrar notificación
+            window.scgAdmin.showNotification('Invitación enviada correctamente', 'success');
+            
+        } catch (error) {
+            console.error('Error enviando invitación:', error);
+            window.scgAdmin.showNotification('Error al enviar la invitación', 'error');
+        }
+    });
+}
+
+// Function to add interaction note
+function addInteractionNote(prospectId) {
+    // Usar el modal que ya existe en el HTML
+    const modal = new bootstrap.Modal(document.getElementById('addNoteModal'));
+    
+    // Limpiar campos del formulario
+    document.getElementById('noteTitle').value = '';
+    document.getElementById('noteType').value = 'PHONE_CALL';
+    document.getElementById('noteContent').value = '';
+    document.getElementById('nextSteps').value = '';
+    document.getElementById('followUpDate').value = '';
+    
+    // Mostrar el modal
+    modal.show();
+    
+    // Limpiar handler previo para evitar múltiples subscripciones
+    const confirmButton = document.getElementById('confirmAddNote');
+    const oldClickHandler = confirmButton.onclick;
+    if (oldClickHandler) {
+        confirmButton.removeEventListener('click', oldClickHandler);
+    }
+    
+    // Manejar confirmación
+    confirmButton.addEventListener('click', async () => {
+        const title = document.getElementById('noteTitle').value;
+        const noteType = document.getElementById('noteType').value;
+        const content = document.getElementById('noteContent').value;
+        const nextSteps = document.getElementById('nextSteps').value;
+        const followUpDate = document.getElementById('followUpDate').value;
+        
+        if (!title || !content) {
+            window.scgAdmin.showNotification('Por favor complete los campos requeridos', 'error');
+            return;
+        }
+        
+        try {
+            // En una implementación real, aquí se haría una petición AJAX
+            // Por ahora, simulamos una respuesta exitosa
+            
+            // Cerrar modal
+            modal.hide();
+            
+            // Mostrar notificación
+            window.scgAdmin.showNotification('Nota agregada correctamente', 'success');
+            
+            // En una implementación real, aquí actualizaríamos la UI para mostrar la nueva nota
+            
+        } catch (error) {
+            console.error('Error agregando nota:', error);
+            window.scgAdmin.showNotification('Error al agregar la nota', 'error');
+        }
+    });
+}
+
+// Function to schedule follow up
+function scheduleFollowUp(prospectId) {
+    // Usar el modal que ya existe en el HTML
+    const modal = new bootstrap.Modal(document.getElementById('scheduleFollowUpModal'));
+    
+    // Limpiar campos del formulario
+    document.getElementById('followUpTitle').value = '';
+    document.getElementById('followUpType').value = 'PHONE_CALL';
+    document.getElementById('followUpDate').value = '';
+    document.getElementById('followUpNotes').value = '';
+    
+    // Mostrar el modal
+    modal.show();
+    
+    // Limpiar handler previo para evitar múltiples subscripciones
+    const confirmButton = document.getElementById('confirmScheduleFollowUp');
+    const oldClickHandler = confirmButton.onclick;
+    if (oldClickHandler) {
+        confirmButton.removeEventListener('click', oldClickHandler);
+    }
+    
+    // Manejar confirmación
+    confirmButton.addEventListener('click', async () => {
+        const title = document.getElementById('followUpTitle').value;
+        const followUpType = document.getElementById('followUpType').value;
+        const followUpDate = document.getElementById('followUpDate').value;
+        const notes = document.getElementById('followUpNotes').value;
+        
+        if (!title || !followUpDate) {
+            window.scgAdmin.showNotification('Por favor complete los campos requeridos', 'error');
+            return;
+        }
+        
+        try {
+            // En una implementación real, aquí se haría una petición AJAX
+            // Por ahora, simulamos una respuesta exitosa
+            
+            // Cerrar modal
+            modal.hide();
+            
+            // Mostrar notificación
+            window.scgAdmin.showNotification('Seguimiento programado correctamente', 'success');
+            
+            // En una implementación real, aquí actualizaríamos la UI
+            
+        } catch (error) {
+            console.error('Error programando seguimiento:', error);
+            window.scgAdmin.showNotification('Error al programar el seguimiento', 'error');
+        }
+    });
+}
+
+// Function to export prospect data
+function exportProspectData(prospectId) {
+    // Usar el modal que ya existe en el HTML
+    const modal = new bootstrap.Modal(document.getElementById('exportDataModal'));
+    
+    // Mostrar el modal
+    modal.show();
+    
+    // Limpiar handler previo para evitar múltiples subscripciones
+    const confirmButton = document.getElementById('confirmExportData');
+    const oldClickHandler = confirmButton.onclick;
+    if (oldClickHandler) {
+        confirmButton.removeEventListener('click', oldClickHandler);
+    }
+    
+    // Manejar confirmación
+    confirmButton.addEventListener('click', async () => {
+        const exportBasicInfo = document.getElementById('exportBasicInfo').checked;
+        const exportInquiries = document.getElementById('exportInquiries').checked;
+        const exportSurveys = document.getElementById('exportSurveys').checked;
+        const exportNotes = document.getElementById('exportNotes').checked;
+        const format = document.getElementById('exportFormat').value;
+        
+        if (!exportBasicInfo && !exportInquiries && !exportSurveys && !exportNotes) {
+            window.scgAdmin.showNotification('Por favor seleccione al menos un tipo de dato para exportar', 'error');
+            return;
+        }
+        
+        try {
+            // En una implementación real, aquí se haría una petición AJAX
+            // Por ahora, simulamos una respuesta exitosa
+            
+            // Cerrar modal
+            modal.hide();
+            
+            // Mostrar notificación
+            window.scgAdmin.showNotification('Exportación iniciada. Se descargará en breve.', 'success');
+            
+        } catch (error) {
+            console.error('Error exportando datos:', error);
+            window.scgAdmin.showNotification('Error al exportar los datos', 'error');
+        }
+    });
+}
+
+// Function to export all prospects
+function exportProspects() {
+    // Get current filters
+    const filterForm = document.getElementById('filterForm');
+    const params = new URLSearchParams();
+    
+    if (filterForm) {
+        const formData = new FormData(filterForm);
+        for (let [key, value] of formData.entries()) {
+            if (value) {
+                params.append(key, value);
+            }
+        }
+    }
+    
+    // Add export parameter
+    params.append('export', 'csv');
+    
+    // Create download link
+    const exportUrl = `${window.location.pathname}?${params.toString()}`;
+    
+    // Create temporary link and trigger download
+    const link = document.createElement('a');
+    link.href = exportUrl;
+    link.download = `prospects_export_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    window.scgAdmin.showNotification('Exportación iniciada', 'success');
+}

@@ -189,7 +189,7 @@
                         <div class="score-progress">
                             <div class="progress" style="height: 4px;">
                                 <div class="progress-bar" role="progressbar" 
-                                     style="width: {{ score.score_percentage }}%"
+                                     data-width="{{ score.score_percentage }}"
                                      aria-valuenow="{{ score.score_percentage }}" 
                                      aria-valuemin="0" aria-valuemax="100"></div>
                             </div>
@@ -379,44 +379,5 @@
 
 {% block extra_js %}
 <script src="{% static 'js/scoring.js' %}"></script>
-<script>
-// Export scores function
-function exportScores() {
-    // Construir URL con filtros actuales
-    const form = document.getElementById('filterForm');
-    const formData = new FormData(form);
-    const params = new URLSearchParams(formData);
-    
-    // Redirect to export URL with current filters
-    window.location.href = '{% url "admin_panel:export_scores" %}?' + params.toString();
-}
-
-// Individual score recalculation
-function recalculateScore(surveyId, prospectName) {
-    if (confirm(`¿Recalcular el score para ${prospectName}?`)) {
-        window.scgScoring.recalculateScores(surveyId, false);
-    }
-}
-
-// Execute bulk recalculation
-function executeRecalculation() {
-    const form = document.getElementById('recalculateForm');
-    const formData = new FormData(form);
-    
-    if (!formData.get('survey_id')) {
-        alert('Por favor selecciona un survey');
-        return;
-    }
-    
-    const surveyId = formData.get('survey_id');
-    const force = formData.get('force') === 'on';
-    
-    // Close modal
-    const modal = bootstrap.Modal.getInstance(document.getElementById('recalculateModal'));
-    modal.hide();
-    
-    // Execute recalculation
-    window.scgScoring.recalculateScores(surveyId, force);
-}
-</script>
+<div class="d-none" data-export-url="{% url 'admin_panel:export_scores' %}"></div>
 {% endblock %}

@@ -7,20 +7,20 @@ from . import views
 app_name = 'reports'
 
 urlpatterns = [
-    # PDF generation
+    # PDF generation - using class-based views
     path(
         'pdf/security-assessment/<int:score_result_id>/', 
-        views.generate_security_report_pdf, 
+        views.SecurityReportPDFView.as_view(), 
         name='generate_security_pdf'
     ),
     path(
         'pdf/security-assessment/<int:score_result_id>/preview/', 
-        views.preview_security_report_pdf, 
+        views.SecurityReportPreviewView.as_view(), 
         name='preview_security_pdf'
     ),
     path(
         'pdf/bulk-generate/', 
-        views.bulk_generate_reports, 
+        views.BulkReportsGenerateView.as_view(), 
         name='bulk_generate_reports'
     ),
 ]

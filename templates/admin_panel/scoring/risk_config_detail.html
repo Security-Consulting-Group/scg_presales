@@ -98,23 +98,23 @@
                 <!-- Visual Range Display -->
                 <div class="risk-ranges-visual mb-4">
                     <div class="range-scale">
-                        <div class="range-segment critical" style="width: {{ range_widths.critical }}%">
+                        <div class="range-segment critical" data-width="{{ range_widths.critical }}">
                             <div class="range-label">CRÍTICO</div>
                             <div class="range-values">{{ risk_ranges.critical.percent_min }}% - {{ risk_ranges.critical.percent_max }}%</div>
                         </div>
-                        <div class="range-segment high" style="width: {{ range_widths.high }}%">
+                        <div class="range-segment high" data-width="{{ range_widths.high }}">
                             <div class="range-label">ALTO</div>
                             <div class="range-values">{{ risk_ranges.high.percent_min }}% - {{ risk_ranges.high.percent_max }}%</div>
                         </div>
-                        <div class="range-segment moderate" style="width: {{ range_widths.moderate }}%">
+                        <div class="range-segment moderate" data-width="{{ range_widths.moderate }}">
                             <div class="range-label">MODERADO</div>
                             <div class="range-values">{{ risk_ranges.moderate.percent_min }}% - {{ risk_ranges.moderate.percent_max }}%</div>
                         </div>
-                        <div class="range-segment good" style="width: {{ range_widths.good }}%">
+                        <div class="range-segment good" data-width="{{ range_widths.good }}">
                             <div class="range-label">BUENO</div>
                             <div class="range-values">{{ risk_ranges.good.percent_min }}% - {{ risk_ranges.good.percent_max }}%</div>
                         </div>
-                        <div class="range-segment excellent" style="width: {{ range_widths.excellent }}%">
+                        <div class="range-segment excellent" data-width="{{ range_widths.excellent }}">
                             <div class="range-label">EXCELENTE</div>
                             <div class="range-values">{{ risk_ranges.excellent.percent_min }}% - {{ risk_ranges.excellent.percent_max }}%</div>
                         </div>
@@ -254,7 +254,7 @@
                         <div class="risk-stat-details">
                             <div class="stat-bar">
                                 <div class="stat-fill risk-{{ stat.risk_level|lower }}" 
-                                     style="width: {{ stat.percentage_width }}%"></div>
+                                     data-width="{{ stat.percentage_width }}"></div>
                             </div>
                             <small class="text-muted">
                                 Promedio: {{ stat.avg_score|floatformat:1 }}%
@@ -373,51 +373,7 @@
 
 {% block extra_js %}
 <script src="{% static 'js/scoring.js' %}"></script>
-<script>
-function recalculateAllScores() {
-    if (confirm('¿Recalcular TODOS los scores para el survey "{{ risk_config.survey.title }}"?\n\nEsto puede tomar varios minutos.')) {
-        window.scgScoring.recalculateScores('{{ risk_config.survey.id }}', true);
-    }
-}
-
-function exportRiskConfig() {
-    const config = {
-        survey: '{{ risk_config.survey.title }}',
-        survey_code: '{{ risk_config.survey.code }}',
-        critical_max: {{ risk_config.critical_max }},
-        high_max: {{ risk_config.high_max }},
-        moderate_max: {{ risk_config.moderate_max }},
-        good_max: {{ risk_config.good_max }},
-        created_at: '{{ risk_config.created_at|date:"c" }}',
-        is_active: {{ risk_config.is_active|yesno:"true,false" }}
-    };
-    
-    const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `risk_config_{{ risk_config.survey.code }}_{{ risk_config.created_at|date:"Y-m-d" }}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    window.scgAdmin.showNotification('Configuración exportada', 'success');
-}
-
-function duplicateConfig() {
-    window.scgAdmin.showNotification('Función de duplicación en desarrollo', 'info');
-}
-
-function resetConfiguration() {
-    if (confirm('¿Restaurar la configuración por defecto?\n\nEsto sobrescribirá los valores actuales:\n- Crítico: 0-20%\n- Alto: 21-40%\n- Moderado: 41-60%\n- Bueno: 61-80%\n- Excelente: 81-100%')) {
-        window.scgAdmin.showNotification('Función de reset en desarrollo', 'info');
-    }
-}
-
-// Initialize score circle animations on load
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Risk Config Detail page loaded for {{ risk_config.survey.title }}');
-});
-</script>
+<script src="{% static 'js/risk-config.js' %}"></script>
+<div class="d-none" 
+     data-risk-config='{"surveyId":"{{ risk_config.survey.id }}","surveyTitle":"{{ risk_config.survey.title }}","surveyCode":"{{ risk_config.survey.code }}","criticalMax":{{ risk_config.critical_max }},"highMax":{{ risk_config.high_max }},"moderateMax":{{ risk_config.moderate_max }},"goodMax":{{ risk_config.good_max }},"createdAt":"{{ risk_config.created_at|date:"c" }}","isActive":{{ risk_config.is_active|yesno:"true,false" }}}'></div>
 {% endblock %}

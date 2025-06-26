@@ -1360,3 +1360,28 @@ class QuickRiskConfigCreateView(LoginRequiredMixin, View):
                 'success': False,
                 'message': f'Error creando configuración: {str(e)}'
             }, status=500)
+
+class ChangeProspectStatusView(LoginRequiredMixin, View):
+    """Vista para cambiar el estado de un prospect vía AJAX"""
+    
+    def post(self, request, prospect_id):
+        prospect = get_object_or_404(Prospect, pk=prospect_id)
+        new_status = request.POST.get('status')
+        
+        # Validar que el estado sea uno de los permitidos
+        if new_status in dict(Prospect._meta.get_field('status').choices):
+            old_status = prospect.status
+            prospect.status = new_status
+            prospect.save(update_fields=['status', 'updated_at'])
+            
+            return JsonResponse({
+                'success': True,
+                'status': prospect.status,
+                'status_display': prospect.get_status_display(),
+                'message': f'Estado actualizado de {dict(Prospect._meta.get_field("status").choices)[old_status]} a {prospect.get_status_display()}'
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'message': 'Estado inválido'
+            }, status=400)

@@ -522,13 +522,16 @@
                 <div class="engagement-score mt-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <span class="text-muted">Engagement Score</span>
-                        <span class="badge bg-{% if surveys_count > 0 %}success{% elif total_inquiries_count > 1 %}warning{% else %}secondary{% endif %}">
+                        <span class="badge engagement-badge" 
+                              data-surveys="{{ surveys_count|default:0 }}" 
+                              data-inquiries="{{ total_inquiries_count|default:0 }}">
                             {% if surveys_count > 0 %}Alto{% elif total_inquiries_count > 1 %}Medio{% else %}Bajo{% endif %}
                         </span>
                     </div>
                     <div class="progress" style="height: 8px;">
-                        <div class="progress-bar bg-{% if surveys_count > 0 %}success{% elif total_inquiries_count > 1 %}warning{% else %}secondary{% endif %}" 
-                             style="width: {% if surveys_count > 0 %}85{% elif total_inquiries_count > 1 %}60{% else %}25{% endif %}%">
+                        <div class="progress-bar engagement-progress" 
+                             data-surveys="{{ surveys_count|default:0 }}" 
+                             data-inquiries="{{ total_inquiries_count|default:0 }}">
                         </div>
                     </div>
                 </div>
@@ -540,122 +543,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/prospects.js' %}"></script>
-<script>
-// Form specific functionality
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize form validation
-    initProspectForm();
-    
-    // Auto-format email field
-    const emailField = document.getElementById('{{ form.email.id_for_label }}');
-    if (emailField) {
-        emailField.addEventListener('blur', function() {
-            this.value = this.value.toLowerCase().trim();
-        });
-    }
-    
-    // Status change warnings
-    const statusField = document.getElementById('{{ form.status.id_for_label }}');
-    if (statusField) {
-        statusField.addEventListener('change', function() {
-            if (this.value === 'CLOSED_LOST') {
-                if (!confirm('¿Está seguro de marcar este prospect como "Closed Lost"? Esta acción indica que se perdió la oportunidad.')) {
-                    this.value = '{{ object.status|default:"LEAD" }}';
-                }
-            }
-        });
-    }
-});
-
-function initProspectForm() {
-    const form = document.querySelector('.prospect-form');
-    
-    // Add real-time validation
-    const requiredFields = form.querySelectorAll('input[required], select[required]');
-    requiredFields.forEach(field => {
-        field.addEventListener('blur', validateField);
-        field.addEventListener('input', clearFieldError);
-    });
-}
-
-function validateField(event) {
-    const field = event.target;
-    const value = field.value.trim();
-    
-    // Clear previous errors
-    clearFieldError(event);
-    
-    // Validate based on field type
-    if (field.type === 'email' && value) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(value)) {
-            showFieldError(field, 'Por favor ingrese un email válido');
-            return false;
-        }
-    }
-    
-    if (field.required && !value) {
-        showFieldError(field, 'Este campo es obligatorio');
-        return false;
-    }
-    
-    return true;
-}
-
-function showFieldError(field, message) {
-    const formGroup = field.closest('.admin-form-group');
-    const existingError = formGroup.querySelector('.form-error');
-    
-    if (!existingError) {
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'form-error';
-        errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle me-1"></i>${message}`;
-        field.parentNode.insertBefore(errorDiv, field.nextSibling);
-    }
-    
-    field.classList.add('is-invalid');
-}
-
-function clearFieldError(event) {
-    const field = event.target;
-    const formGroup = field.closest('.admin-form-group');
-    const existingError = formGroup.querySelector('.form-error');
-    
-    if (existingError && !existingError.textContent.includes('Este campo es obligatorio')) {
-        existingError.remove();
-    }
-    
-    field.classList.remove('is-invalid');
-}
-
-// Additional actions for existing prospects
-{% if object %}
-function scheduleFollowUp(prospectId) {
-    // TODO: Implement follow-up scheduling modal
-    console.log('Schedule follow up for prospect:', prospectId);
-    window.scgAdmin.showNotification('Función en desarrollo', 'info');
-}
-
-function exportProspectData(prospectId) {
-    // TODO: Implement data export
-    console.log('Export data for prospect:', prospectId);
-    window.scgAdmin.showNotification('Exportación iniciada', 'success');
-}
-
-function mergeProspect(prospectId) {
-    // TODO: Implement prospect merging
-    console.log('Merge prospect:', prospectId);
-    window.scgAdmin.showNotification('Función en desarrollo', 'info');
-}
-
-function archiveProspect(prospectId) {
-    if (confirm('¿Está seguro de que desea archivar este prospect? Esta acción se puede revertir pero el prospect no aparecerá en las listas principales.')) {
-        // TODO: Implement archiving
-        console.log('Archive prospect:', prospectId);
-        window.scgAdmin.showNotification('Función en desarrollo', 'info');
-    }
-}
-{% endif %}
-</script>
+<script src="{% static 'js/prospect-form.js' %}"></script>
 {% endblock %}

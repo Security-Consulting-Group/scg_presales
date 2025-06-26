@@ -520,50 +520,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('📋 Survey Detail with Tabs cargado:', '{{ survey.code }}');
-        
-        // Tab navigation functions
-        window.showTab = function(tabName) {
-            const tab = document.getElementById(tabName + '-tab');
-            if (tab) {
-                tab.click();
-            }
-        };
-        
-        // Section management - QUITAR LOS POPUPS
-        document.addEventListener('click', function(e) {
-            // Los botones de agregar sección y pregunta ya no muestran popups
-            // Se manejan por los enlaces href normales
-            
-            if (e.target.classList.contains('delete-section-btn')) {
-                const actionUrl = e.target.dataset.actionUrl;
-                const confirmMsg = e.target.dataset.confirm;
-                if (confirm(confirmMsg)) {
-                    console.log('🗑️ Eliminando sección via:', actionUrl);
-                    // Esta funcionalidad sí se puede implementar después
-                }
-            }
-            
-            if (e.target.classList.contains('delete-question-btn')) {
-                const actionUrl = e.target.dataset.actionUrl;
-                const confirmMsg = e.target.dataset.confirm;
-                if (confirm(confirmMsg)) {
-                    console.log('🗑️ Eliminando pregunta via:', actionUrl);
-                    // Esta funcionalidad sí se puede implementar después
-                }
-            }
-        });
-    });
-    
-    function copyToClipboard(text) {
-        navigator.clipboard.writeText(text).then(function() {
-            window.scgAdmin.showNotification('Copiado al portapapeles', 'success');
-        }).catch(function(err) {
-            console.error('Error copiando al portapapeles:', err);
-            window.scgAdmin.showNotification('Error copiando al portapapeles', 'error');
-        });
-    }
-</script>
+<script src="{% static 'js/surveys.js' %}"></script>
+<div class="d-none" data-survey-code="{{ survey.code }}"></div>
 {% endblock %}

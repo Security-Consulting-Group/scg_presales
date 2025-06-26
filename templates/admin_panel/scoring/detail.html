@@ -203,7 +203,7 @@
                         <div class="section-progress">
                             <div class="progress">
                                 <div class="progress-bar" role="progressbar" 
-                                     style="width: {{ section_data.percentage }}%"
+                                     data-width="{{ section_data.percentage }}"
                                      aria-valuenow="{{ section_data.percentage }}" 
                                      aria-valuemin="0" aria-valuemax="100"></div>
                             </div>
@@ -467,7 +467,7 @@
                             </div>
                             <div class="position-track">
                                 <div class="position-marker" 
-                                    style="left: {{ score_marker_position }}%">
+                                    data-position="{{ score_marker_position }}">
                                     <i class="fas fa-map-marker-alt"></i>
                                 </div>
                             </div>
@@ -562,57 +562,18 @@
 {% block extra_js %}
 <script src="{% static 'js/scoring.js' %}"></script>
 <script>
+// Page-specific data for scoring.js
+window.scoreDetailData = {
+    surveyId: '{{ survey.id }}',
+    scoreResultId: '{{ score_result.id }}',
+    prospectName: '{{ prospect.name }}'
+};
+
+// Page-specific functions
 function recalculateThisScore() {
     if (confirm('¿Recalcular el score para {{ prospect.name }}?')) {
         window.scgScoring.recalculateScores('{{ survey.id }}', true);
     }
 }
-
-function exportScoreDetail() {
-    // Implementation for exporting individual score
-    window.scgAdmin.showNotification('Función de exportación en desarrollo', 'info');
-}
-
-function trackPDFGeneration(action) {
-    // Track PDF generation for analytics
-    console.log(`PDF ${action} initiated for ScoreResult {{ score_result.id }}`);
-    
-    // Show feedback message
-    if (action === 'download') {
-        setTimeout(() => {
-            showPDFNotification('success', 'Reporte PDF descargado exitosamente');
-        }, 1000);
-    } else if (action === 'preview') {
-        showPDFNotification('info', 'Abriendo vista previa del reporte PDF...');
-    }
-}
-
-function showPDFNotification(type, message) {
-    const notification = document.getElementById('pdf-notifications');
-    const messageSpan = document.getElementById('pdf-success-message');
-    
-    if (notification && messageSpan) {
-        messageSpan.textContent = message;
-        notification.style.display = 'block';
-        
-        // Auto-hide after 5 seconds
-        setTimeout(() => {
-            notification.style.display = 'none';
-        }, 5000);
-    }
-}
-
-// Add filter for template lookup
-window.addEventListener('DOMContentLoaded', function() {
-    console.log('Score Detail page with PDF functionality loaded for {{ prospect.name }}');
-    
-    // Add click handlers for PDF generation tracking
-    document.querySelectorAll('a[href*="generate_security_pdf"], a[href*="preview_security_pdf"]').forEach(link => {
-        link.addEventListener('click', function(e) {
-            const action = this.href.includes('preview') ? 'preview' : 'download';
-            console.log(`PDF ${action} clicked for {{ prospect.name }}`);
-        });
-    });
-});
 </script>
 {% endblock %}

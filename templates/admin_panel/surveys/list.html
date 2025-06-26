@@ -241,29 +241,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('📋 Survey List cargado');
-    
-    // Add click tracking for survey links
-    const surveyRows = document.querySelectorAll('tr[data-href]');
-    surveyRows.forEach(row => {
-        row.addEventListener('click', function(e) {
-            // Skip if clicking on dropdown or buttons
-            if (e.target.closest('.dropdown, button, a')) {
-                return;
-            }
-            window.location.href = this.dataset.href;
-        });
-    });
-    
-    // Enhanced search with keyboard shortcut
-    document.addEventListener('keydown', function(e) {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-            e.preventDefault();
-            document.getElementById('searchInput').focus();
-        }
-    });
-});
-</script>
+<script src="{% static 'js/surveys.js' %}"></script>
 {% endblock %}

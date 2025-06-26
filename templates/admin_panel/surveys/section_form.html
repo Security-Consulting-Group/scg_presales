@@ -306,42 +306,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('📝 Section Form cargado');
-    
-    // Form validation
-    const form = document.querySelector('form');
-    form.addEventListener('submit', function(e) {
-        const title = document.getElementById('id_title').value.trim();
-        const order = document.getElementById('id_order').value;
-        const maxPoints = document.getElementById('id_max_points').value;
-        
-        if (!title || !order || !maxPoints) {
-            e.preventDefault();
-            window.scgAdmin.showNotification('Por favor completa todos los campos requeridos', 'error');
-            return;
-        }
-        
-        if (parseInt(order) < 1) {
-            e.preventDefault();
-            window.scgAdmin.showNotification('El orden debe ser mayor a 0', 'error');
-            return;
-        }
-        
-        if (parseInt(maxPoints) < 0) {
-            e.preventDefault();
-            window.scgAdmin.showNotification('Los puntos máximos no pueden ser negativos', 'error');
-            return;
-        }
-    });
-    
-    // Auto-suggest order
-    const orderInput = document.getElementById('id_order');
-    if (orderInput && !orderInput.value) {
-        const nextOrder = {{ next_order|default:1 }};
-        orderInput.value = nextOrder;
-    }
-});
-</script>
+<script src="{% static 'js/surveys.js' %}"></script>
+<div class="d-none" data-next-order="{{ next_order|default:1 }}"></div>
 {% endblock %}
