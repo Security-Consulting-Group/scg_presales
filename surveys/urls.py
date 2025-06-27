@@ -6,8 +6,8 @@ app_name = 'surveys'
 
 urlpatterns = [
     # Survey principal con código único
-    path('survey/<str:code>/', views.SurveyView.as_view(), name='survey_detail'),
+    path('<str:code>/', views.SurveyView.as_view(), name='survey_detail'),
     
     # Endpoint para procesar respuestas via AJAX
-    path('survey/<str:code>/submit/', views.SurveySubmitView.as_view(), name='survey_submit'),
+    path('<str:code>/submit/', views.SurveySubmitView.as_view(), name='survey_submit'),
 ]

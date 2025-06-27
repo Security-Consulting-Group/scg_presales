@@ -183,9 +183,3 @@ class BulkReportsGenerateView(LoginRequiredMixin, View):
         except Exception as e:
             logger.error(f"Error in bulk PDF generation: {str(e)}")
             return HttpResponse("Error generando los reportes masivos.", status=500)
-
-
-# Keep old function names for backward compatibility (if needed)
-generate_security_report_pdf = SecurityReportPDFView.as_view()
-preview_security_report_pdf = SecurityReportPreviewView.as_view() 
-bulk_generate_reports = BulkReportsGenerateView.as_view()

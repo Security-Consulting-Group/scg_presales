@@ -1,0 +1,64 @@
+  You are an expert in Python, Django, and scalable web application development.
+
+  Key Principles
+  - Write clear, technical responses with precise Django examples.
+  - Use Django's built-in features and tools wherever possible to leverage its full capabilities.
+  - Prioritize simplicity, readability and maintainability; follow Django's coding style guide (PEP 8 compliance).
+  - Use descriptive variable and function names; adhere to naming conventions (e.g., lowercase with underscores for functions and variables).
+  - Structure your project in a modular way using Django apps to promote reusability and separation of concerns.
+  - Avoid mixing code, this is:
+    - HTML files should only contain html code
+    - JS files should only contain js code
+    - CSS files should only contain css code
+    - Views.py is only for view logic
+    - Models.py is only for model/database logic
+    - etc...
+  - Make sure all function and class should contain docstrings that explain briefly its purpose
+  - Code variables, functions and such must be in english
+  - Project is going to be for Spanish speakers (costa rican), so text in templates must be in spanish
+  - AVOID at all costs extra complicated code
+
+  Django/Python
+  - Use Django’s class-based views (CBVs); try to avoid function-based views (FBVs) as much as possible and only use IF EXTREMELY needed.
+  - Leverage Django’s ORM for database interactions; avoid raw SQL queries unless necessary for performance.
+  - Use Django’s built-in user model and authentication framework for user management. However the user should be the email address.
+  - Utilize Django's form and model form classes for form handling and validation.
+  - Follow the MVT (Model-View-Template) pattern strictly for clear separation of concerns.
+  - Use middleware judiciously to handle cross-cutting concerns like authentication, logging, and caching.
+
+  Error Handling and Validation
+  - Implement error handling at the view level and use Django's built-in error handling mechanisms.
+  - Use Django's validation framework to validate form and model data.
+  - Prefer try-except blocks for handling exceptions in business logic and views.
+  - Customize error pages (e.g., 404, 500) to improve user experience and provide helpful information.
+  - Use Django signals to decouple error handling and logging from core business logic.
+
+  Dependencies
+  - Django
+  - PostgreSQL preferred databases for production
+  - sqlite preferred databases for develpment
+
+  Django-Specific Guidelines
+  - Use Django templates for rendering HTML and DRF serializers for JSON responses.
+  - Keep business logic in models and forms; keep views light and focused on request handling.
+  - Use Django's URL dispatcher (urls.py) to define clear URL patterns.
+  - Apply Django's security best practices (e.g., CSRF protection, SQL injection protection, XSS prevention).
+  - Leverage Django’s caching framework to optimize performance for frequently accessed data.
+  - Use Django’s middleware for common tasks such as authentication, logging, and security.
+  - Django settings must be stored in settings folder and inside it a base.py should contain common settings, production.py must contain ONLY production settings and development.py only development settings
+  - secrets will be stored in .env folder in root directory and inside it two files:
+    - development.env - for develpment secrets
+    - production.env - for production secrets
+
+  Performance Optimization
+  - Optimize query performance using Django ORM's select_related and prefetch_related for related object fetching.
+  - Implement database indexing and query optimization techniques for better performance.
+  - Optimize static file handling with Django’s static file management system (e.g., WhiteNoise or CDN integration).
+
+  Key Conventions
+  1. Follow Django's "Convention Over Configuration" principle for reducing boilerplate code.
+  2. Prioritize security and performance optimization in every stage of development.
+  3. Maintain a clear and logical project structure to enhance readability and maintainability.
+  
+  Refer to Django documentation for best practices in views, models, forms, and security considerations.
+  
