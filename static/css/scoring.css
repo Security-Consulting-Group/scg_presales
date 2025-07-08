@@ -13,6 +13,35 @@
     --scoring-shadow: 0 4px 6px -1px rgb(0 45 116 / 0.1);
 }
 
+/* Email dropdown form styling */
+.dropdown-menu form {
+    margin: 0 !important;
+}
+
+.dropdown-menu form button.dropdown-item {
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    padding: 0.5rem 1rem;
+    color: var(--bs-dropdown-link-color);
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+}
+
+.dropdown-menu form button.dropdown-item:hover {
+    background-color: var(--bs-dropdown-link-hover-bg);
+    color: var(--bs-dropdown-link-hover-color);
+}
+
+.dropdown-menu form button.dropdown-item:focus {
+    background-color: var(--bs-dropdown-link-hover-bg);
+    color: var(--bs-dropdown-link-hover-color);
+    outline: none;
+}
+
 /* ====================================
    SCORE HEADER CARD
    ==================================== */

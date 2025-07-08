@@ -66,4 +66,5 @@ urlpatterns = [
 
     # AJAX Actions for Scoring
     path('ajax/scoring/recalculate/', views.RecalculateScoresView.as_view(), name='recalculate_scores'),
+    path('ajax/scoring/<int:score_result_id>/send-email/', views.SendSurveyEmailView.as_view(), name='send_survey_email'),
 ]

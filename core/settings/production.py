@@ -16,7 +16,9 @@ ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 # Production Secret Key
 SECRET_KEY = os.environ.get('SECRET_KEY_PROD')
 if not SECRET_KEY:
-    raise ValueError("SECRET_KEY_PROD environment variable is required in production")
+    raise ValueError(
+        "SECRET_KEY_PROD environment variable is required in production"
+    )
 
 # Database - PostgreSQL for production
 DATABASES = {
@@ -32,8 +34,8 @@ DATABASES = {
 
 # Email settings for production - Microsoft 365
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.office365.com')
-EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
+EMAIL_HOST = os.getenv('EMAIL_HOST', default='')
+EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
@@ -61,15 +63,22 @@ MEDIA_ROOT = os.environ.get('MEDIA_ROOT', BASE_DIR / 'media')
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        'LOCATION': os.environ.get('REDIS_URL', 'redis://127.0.0.1:6379/1'),
+        'LOCATION': os.environ.get(
+            'REDIS_URL', 'redis://127.0.0.1:6379/1'
+        ),
     }
 }
 
 # Production logging
-LOGGING['handlers']['file']['filename'] = os.environ.get('LOG_FILE', '/var/log/scg_presales.log')
+LOGGING['handlers']['file']['filename'] = os.environ.get(
+    'LOG_FILE', '/var/log/scg_presales.log'
+)
 
 # Admin settings
 ADMINS = [
-    ('SCG Admin', os.environ.get('ADMIN_EMAIL', 'admin@securitygroupcr.com')),
+    (
+        'SCG Admin',
+        os.environ.get('ADMIN_EMAIL', 'admin@securitygroupcr.com')
+    ),
 ]
 MANAGERS = ADMINS

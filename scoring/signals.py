@@ -10,6 +10,7 @@ from django.db import transaction
 
 from surveys.models import SurveySubmission, Response
 from .models import ScoreResult
+from core.email_service import SurveyEmailService
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +44,17 @@ def calculate_score_on_submission_completion(sender, instance, created, **kwargs
                     instance.prospect.save(update_fields=['last_contact_at'])
                     
                     logger.info(f"📅 Actualizado last_contact_at para {instance.prospect.name}")
+                    
+                    # Send survey completion email
+                    try:
+                        email_sent = SurveyEmailService.send_survey_completion_email(score_result)
+                        if email_sent:
+                            logger.info(f"📧 Email de completion enviado a {instance.prospect.email}")
+                        else:
+                            logger.warning(f"⚠️ No se pudo enviar email a {instance.prospect.email}")
+                    except Exception as e:
+                        logger.error(f"❌ Error enviando email de completion: {str(e)}")
+                        # Don't raise exception - email failure shouldn't break the scoring process
                 
         except Exception as e:
             logger.error(f"❌ Error calculando score para submission {instance.id}: {str(e)}")

@@ -165,11 +165,12 @@ class SecurityReportGenerator:
             filename_base = prospect_name
         
         eval_date = self.submission.completed_at.strftime('%Y%m%d')
+        timestamp = self.submission.completed_at.strftime('%Y%m%d%H%M%S')
         
         return {
             'base_name': filename_base,
             'date': eval_date,
-            'full_name': f"Reporte_Ciberseguridad_{filename_base}_{eval_date}.pdf"
+            'full_name': f"SCG_Reporte_Ciberseguridad_{timestamp}.pdf"
         }
     
     def _format_date(self):

@@ -44,9 +44,14 @@
             <i class="fas fa-ellipsis-v"></i>
         </button>
         <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="mailto:{{ prospect.email }}">
-                <i class="fas fa-envelope me-2"></i>Enviar Email
-            </a></li>
+            <li>
+                <form method="post" action="{% url 'admin_panel:send_survey_email' score_result.id %}" style="margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" class="dropdown-item" onclick="return confirm('¿Enviar email de evaluación de ciberseguridad a {{ prospect.email }}?')">
+                        <i class="fas fa-envelope me-2"></i>Enviar Email
+                    </button>
+                </form>
+            </li>
             <li><a class="dropdown-item" href="#" onclick="exportScoreDetail()">
                 <i class="fas fa-download me-2"></i>Exportar Score
             </a></li>

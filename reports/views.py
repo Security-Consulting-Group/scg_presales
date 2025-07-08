@@ -160,7 +160,7 @@ class BulkReportsGenerateView(LoginRequiredMixin, View):
                         
                         # File name
                         filename_info = generator.get_filename_info()
-                        filename = f"Reporte_{filename_info['base_name']}_{filename_info['date']}.pdf"
+                        filename = filename_info['full_name']
                         
                         # Add to ZIP
                         zip_file.writestr(filename, pdf_buffer.getvalue())

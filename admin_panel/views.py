@@ -18,6 +18,7 @@ from prospects.models import Prospect, ProspectInquiry, InteractionNote
 from scoring.models import ScoreResult, SurveyRiskConfiguration, RiskLevelPackageRecommendation, RiskLevel
 from scoring.signals import recalculate_scores_for_survey
 from core.models import User
+from core.email_service import SurveyEmailService
 import json
 
 import logging
@@ -1393,3 +1394,35 @@ class ChangeProspectStatusView(LoginRequiredMixin, View):
                 'success': False,
                 'message': 'Estado inválido'
             }, status=400)
+
+class SendSurveyEmailView(LoginRequiredMixin, View):
+    """Send survey completion email to prospect"""
+    
+    def post(self, request, score_result_id):
+        """Send email using survey completion template"""
+        try:
+            score_result = get_object_or_404(ScoreResult, id=score_result_id)
+            
+            # Send email using the email service
+            email_sent = SurveyEmailService.send_survey_completion_email(score_result)
+            
+            if email_sent:
+                messages.success(
+                    request, 
+                    f'Email enviado exitosamente a {score_result.submission.prospect.email}'
+                )
+            else:
+                messages.error(
+                    request, 
+                    'Error al enviar el email. Revise los logs para más detalles.'
+                )
+                
+        except Exception as e:
+            logger.error(f"Error sending survey completion email: {str(e)}")
+            messages.error(
+                request, 
+                f'Error al enviar email: {str(e)}'
+            )
+        
+        # Redirect back to score detail page
+        return redirect('admin_panel:score_result_detail', pk=score_result_id)

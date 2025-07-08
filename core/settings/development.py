@@ -39,3 +39,5 @@ COMPANY_LINKEDIN = 'https://www.linkedin.com/company/securitygroupcr/'
 
 # Sales configuration
 SALES_EMAIL = 'ijgr11@gmail.com'
+
+DEFAULT_FROM_EMAIL = 'SCG Presales <noreply@securitygroupcr.com>'
