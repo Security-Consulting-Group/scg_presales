@@ -96,142 +96,105 @@ class SecurityContentData:
     
     @staticmethod
     def get_vulnerabilities_for_score(risk_level):
-        """Vulnerabilidades según el nivel de riesgo"""
-        base_vulns = [
-            {
-                'level': 'CRÍTICO',
-                'title': 'GESTIÓN DE ACCESOS Y CREDENCIALES',
-                'description': 'Su organización presenta exposición en la autenticación y control de accesos. Las credenciales débiles son la puerta de entrada preferida del 89% de atacantes.',
-                'impact': 'Acceso no autorizado a sistemas críticos, manipulación de datos financieros, y exposición de información estratégica de la empresa.',
-                'recommendations': [
-                    'Implementar autenticación multifactor (MFA) en todos los sistemas críticos',
-                    'Establecer políticas robustas de contraseñas con renovación periódica',
-                    'Realizar auditorías regulares de permisos y accesos de usuario',
-                    'Implementar gestión centralizada de identidades y accesos (IAM)'
-                ]
-            },
-            {
-                'level': 'ALTO',
-                'title': 'CULTURA Y CAPACITACIÓN EN SEGURIDAD',
-                'description': 'El factor humano representa el 95% de brechas exitosas. Detectamos oportunidades de fortalecimiento en la conciencia de seguridad de su equipo.',
-                'impact': 'Susceptibilidad a ataques de ingeniería social, pérdida de información confidencial, y potencial paralización operativa.',
-                'recommendations': [
-                    'Implementar programa de capacitación continua en ciberseguridad',
-                    'Realizar simulacros de phishing para evaluar y mejorar la respuesta del equipo',
-                    'Establecer políticas claras de uso aceptable de tecnología',
-                    'Crear programa de recompensas por reporte de incidentes de seguridad'
-                ]
-            }
-        ]
+        """Vulnerabilidades según el nivel de riesgo - Alineadas correctamente"""
         
-        if risk_level in ['CRITICAL', 'HIGH']:
-            base_vulns.append({
+        if risk_level == 'CRITICAL':
+            return [
+                {
+                    'level': 'CRÍTICO',
+                    'title': 'GESTIÓN DE ACCESOS Y CREDENCIALES',
+                    'description': 'Su organización presenta exposición crítica en la autenticación y control de accesos. Las credenciales débiles son la puerta de entrada preferida del 89% de atacantes.',
+                    'impact': 'Acceso no autorizado a sistemas críticos, manipulación de datos financieros, y exposición de información estratégica de la empresa.',
+                },
+                {
+                    'level': 'CRÍTICO',
+                    'title': 'CULTURA Y CAPACITACIÓN EN SEGURIDAD',
+                    'description': 'El factor humano representa el 95% de brechas exitosas. Su equipo carece de entrenamiento básico en ciberseguridad.',
+                    'impact': 'Susceptibilidad extrema a ataques de ingeniería social, pérdida masiva de información confidencial, y paralización operativa.',
+                },
+                {
+                    'level': 'ALTO',
+                    'title': 'CONTINUIDAD DE NEGOCIO Y RECUPERACIÓN',
+                    'description': 'Sus procesos de contingencia y recuperación ante incidentes son inexistentes o inadecuados.',
+                    'impact': 'Tiempo de inactividad prolongado, pérdida de ingresos significativa, y daño reputacional severo ante clientes e inversionistas.',
+                }
+            ]
+        
+        elif risk_level == 'HIGH':
+            return [
+                {
+                    'level': 'ALTO',
+                    'title': 'GESTIÓN DE ACCESOS Y CREDENCIALES',
+                    'description': 'Su organización presenta deficiencias importantes en la autenticación y control de accesos que requieren atención prioritaria.',
+                    'impact': 'Riesgo elevado de acceso no autorizado a sistemas críticos y exposición de información sensible.',
+                },
+                {
+                    'level': 'ALTO',
+                    'title': 'CULTURA Y CAPACITACIÓN EN SEGURIDAD',
+                    'description': 'Detectamos brechas significativas en la conciencia de seguridad de su equipo que aumentan la vulnerabilidad organizacional.',
+                    'impact': 'Susceptibilidad a ataques de ingeniería social y potencial compromiso de sistemas por errores humanos.',
+                },
+                {
+                    'level': 'MEDIO',
+                    'title': 'MONITOREO Y DETECCIÓN DE AMENAZAS',
+                    'description': 'Sus capacidades de monitoreo y detección temprana de amenazas necesitan fortalecimiento.',
+                    'impact': 'Detección tardía de incidentes de seguridad, permitiendo mayor daño y tiempo de exposición.',
+                }
+            ]
+        
+        elif risk_level == 'MODERATE':
+            return [
+                {
+                    'level': 'MEDIO',
+                    'title': 'OPTIMIZACIÓN DE CONTROLES DE ACCESO',
+                    'description': 'Sus controles de acceso actuales son funcionales pero presentan oportunidades de mejora para mayor robustez.',
+                    'impact': 'Riesgo moderado de acceso indebido por configuraciones subóptimas o políticas inconsistentes.',
+                },
+                {
+                    'level': 'MEDIO',
+                    'title': 'ACTUALIZACIÓN DE PROTOCOLOS DE SEGURIDAD',
+                    'description': 'Sus protocolos de seguridad requieren actualización para alinearse con las mejores prácticas actuales.',
+                    'impact': 'Posible exposición a amenazas emergentes no cubiertas por protocolos desactualizados.',
+                },
+                {
+                    'level': 'BAJO',
+                    'title': 'CAPACITACIÓN CONTINUA EN CIBERSEGURIDAD',
+                    'description': 'Su equipo tiene conocimientos básicos de seguridad, pero se beneficiaría de capacitación especializada adicional.',
+                    'impact': 'Riesgo reducido pero presente de errores humanos en escenarios de amenazas sofisticadas.',
+                }
+            ]
+        
+        elif risk_level in ['GOOD', 'EXCELLENT']:
+            return [
+                {
+                    'level': 'BAJO',
+                    'title': 'OPTIMIZACIÓN DE RENDIMIENTO DE SEGURIDAD',
+                    'description': 'Su infraestructura de seguridad es sólida, con oportunidades menores de optimización para máximo rendimiento.',
+                    'impact': 'Impacto mínimo en operaciones, principalmente relacionado con eficiencia y optimización de recursos.',
+                },
+                {
+                    'level': 'BAJO',
+                    'title': 'ACTUALIZACIÓN PREVENTIVA DE POLÍTICAS',
+                    'description': 'Sus políticas de seguridad son efectivas, con oportunidades de refinamiento para mantenerse a la vanguardia.',
+                    'impact': 'Riesgo muy bajo, principalmente preventivo para mantener la excelencia en seguridad a largo plazo.',
+                },
+                {
+                    'level': 'INFORMATIVO',
+                    'title': 'MONITOREO DE AMENAZAS EMERGENTES',
+                    'description': 'Recomendamos vigilancia continua de amenazas emergentes para mantener su posición de liderazgo en seguridad.',
+                    'impact': 'Mantenimiento de la ventaja competitiva en seguridad y preparación proactiva ante futuras amenazas.',
+                }
+            ]
+        
+        # Fallback para casos no contemplados
+        return [
+            {
                 'level': 'MEDIO',
-                'title': 'CONTINUIDAD DE NEGOCIO Y RECUPERACIÓN',
-                'description': 'Sus procesos de contingencia y recuperación ante incidentes requieren optimización para garantizar continuidad operativa.',
-                'impact': 'Tiempo de inactividad prolongado, pérdida de ingresos, y daño reputacional ante clientes e inversionistas.',
-                'recommendations': [
-                    'Desarrollar y documentar plan de continuidad de negocio (BCP)',
-                    'Implementar soluciones de respaldo automatizado y recuperación de desastres',
-                    'Realizar pruebas regulares de recuperación y restauración',
-                    'Establecer acuerdos de nivel de servicio (SLA) para recuperación crítica'
-                ]
-            })
-        
-        return base_vulns
-    
-    @staticmethod
-    def get_recommended_package_details(primary_package):
-        """Detalles del paquete recomendado según el score"""
-        if primary_package == 'SEGURIDAD_PROACTIVA':
-            return {
-                'name': 'SEGURIDAD PROACTIVA',
-                'subtitle': '"Liderazgo en Ciberseguridad para Empresas Visionarias"',
-                'price': '$2,500/mes',
-                'billing_period': 'Facturación mensual',
-                'features': [
-                    'Evaluaciones profesionales de vulnerabilidades (4 veces al año)',
-                    'Simulación de ataques reales (penetration testing)',
-                    'Arquitectura de recuperación ante desastres (DRP/BCP)',
-                    'Marco de políticas corporativas alineadas con estándares internacionales',
-                    'Capacitación intensiva (4 sesiones anuales)',
-                    'Soporte prioritario 24 horas'
-                ],
-                'benefits': [
-                    'Reducción del 70% en tiempo de detección de amenazas',
-                    'Cumplimiento con estándares internacionales (ISO 27001, NIST)',
-                    'ROI comprobado del 300% en el primer año',
-                    'Reducción de riesgos operacionales críticos'
-                ],
-                'ideal': 'Su nivel actual de riesgo requiere acción proactiva inmediata'
-            }
-        
-        elif primary_package == 'DEFENSA_INTEGRAL':
-            return {
-                'name': 'DEFENSA INTEGRAL',
-                'subtitle': '"Excelencia Operativa en Ciberseguridad de Clase Mundial"',
-                'price': '$3,500/mes',
-                'billing_period': 'Facturación mensual',
-                'features': [
-                    'Monitoreo continuo 24/7 con detección en tiempo real',
-                    'Centro de operaciones de seguridad (SOC) dedicado',
-                    'Respuesta inmediata ante incidentes (SLA de 3 horas)',
-                    'Evaluaciones continuas de cumplimiento',
-                    'Consultoría estratégica para transformación digital segura',
-                    'Soporte premium especializado'
-                ],
-                'benefits': [
-                    'Detección de amenazas en tiempo real',
-                    'Respuesta automática ante incidentes',
-                    'Cumplimiento garantizado con regulaciones',
-                    'Ventaja competitiva en seguridad digital'
-                ],
-                'ideal': 'Organizaciones que requieren estándares de seguridad de clase mundial'
-            }
-        
-        else:  # PROTECCION_ESENCIAL o default
-            return {
-                'name': 'PROTECCIÓN ESENCIAL',
-                'subtitle': '"Fundamentos Sólidos para Crecimiento Seguro"',
-                'price': '$1,000/mes',
-                'billing_period': 'Facturación mensual',
-                'features': [
-                    'Evaluaciones profesionales de vulnerabilidades (2 veces al año)',
-                    'Reportes ejecutivos trimestrales para toma de decisiones',
-                    'Capacitación especializada del equipo humano',
-                    'Asesoría estratégica mensual personalizada',
-                    'Soporte técnico especializado'
-                ],
-                'benefits': [
-                    'Base sólida de seguridad para crecimiento',
-                    'Reducción significativa de riesgos operacionales',
-                    'Equipo humano capacitado y consciente',
-                    'Inversión escalable según crecimiento'
-                ],
-                'ideal': 'Empresas que inician su journey de ciberseguridad con bases sólidas'
-            }
-    
-    @staticmethod
-    def get_other_packages_summary(current_package):
-        """Resumen de otros paquetes disponibles"""
-        all_packages = [
-            {
-                'name': 'Protección Esencial ($1,000/mes)',
-                'description': 'Fundamentos sólidos para empresas que inician en ciberseguridad'
-            },
-            {
-                'name': 'Seguridad Proactiva ($2,500/mes)',
-                'description': 'Liderazgo proactivo con pruebas de penetración y DRP/BCP'
-            },
-            {
-                'name': 'Defensa Integral ($3,500/mes)',
-                'description': 'Excelencia operativa con monitoreo 24/7 y SOC dedicado'
+                'title': 'EVALUACIÓN GENERAL DE SEGURIDAD',
+                'description': 'Se identificaron oportunidades de mejora en la postura general de ciberseguridad de su organización.',
+                'impact': 'Riesgo variable dependiendo de la implementación de controles recomendados.',
             }
         ]
-        
-        # Filtrar el paquete actual
-        current_name = current_package.replace('_', ' ').title()
-        return [pkg for pkg in all_packages if not pkg['name'].startswith(current_name)]
     
     @staticmethod
     def get_session_items():

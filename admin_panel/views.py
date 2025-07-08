@@ -965,6 +965,14 @@ class ScoreResultDetailView(LoginRequiredMixin, DetailView):
                         responses_by_section[section] = []
                     responses_by_section[section].append(response)
                 
+                # Añadir información de porcentaje a cada sección
+                for section in responses_by_section.keys():
+                    section_key = f"section_{section.order}"
+                    if score_result.section_scores and section_key in score_result.section_scores:
+                        section.percentage = score_result.section_scores[section_key].get('percentage', 0)
+                    else:
+                        section.percentage = 0
+                
                 context['responses_by_section'] = responses_by_section
             
         except Exception as e:

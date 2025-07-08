@@ -245,9 +245,7 @@
                                     <span class="section-stats">
                                         {{ responses|length }} pregunta{{ responses|length|pluralize }}
                                         {% if score_result.section_scores %}
-                                        {% with section_key="section_"|add:section.order %}
                                         - {{ section.percentage|default:"0" }}%
-                                        {% endwith %}
                                         {% endif %}
                                     </span>
                                 </div>

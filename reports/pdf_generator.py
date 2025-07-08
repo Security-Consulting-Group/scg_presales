@@ -99,6 +99,7 @@ class SecurityReportGenerator:
         section_globe_image_url = self._get_absolute_static_url('img/reports/section_globe.png')
         section_risk_image_url = self._get_absolute_static_url('img/reports/section_risk.png')
         section_solution_image_url = self._get_absolute_static_url('img/reports/section_solution.png')
+        final_cover_image_url = self._get_absolute_static_url('img/reports/final_cover.png')
         
 
         
@@ -109,6 +110,7 @@ class SecurityReportGenerator:
             'company_name': company_name,
             'fecha_actual': fecha_actual,
             'risk_level_display': risk_level_display,
+            'risk_level_color': self._get_risk_level_color(),
             
             # Absolute image URLs for WeasyPrint
             'cover_image_url': cover_image_url,
@@ -122,13 +124,12 @@ class SecurityReportGenerator:
             'section_globe_image_url': section_globe_image_url,
             'section_risk_image_url': section_risk_image_url,
             'section_solution_image_url': section_solution_image_url,
+            'final_cover_image_url': final_cover_image_url,
             
             # Contenido dinámico
             'risk_content': content_data.get_risk_level_content(self.score_result.risk_level),
 
-            'vulnerabilities': content_data.get_vulnerabilities_for_score(self.score_result.risk_level),
-            'recommended_package': content_data.get_recommended_package_details(self.score_result.primary_package),
-            'other_packages': content_data.get_other_packages_summary(self.score_result.primary_package),
+            'vulnerabilities': self._process_vulnerabilities(content_data.get_vulnerabilities_for_score(self.score_result.risk_level)),
             'session_items': content_data.get_session_items(),
             'contact_info': content_data.get_contact_info(),
             'references': content_data.get_references(),
@@ -172,20 +173,52 @@ class SecurityReportGenerator:
         }
     
     def _format_date(self):
-        """Formatea la fecha en español"""
-        from datetime import datetime
+        """Formatea la fecha en español usando la fecha de completion del survey"""
         meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
                 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
-        ahora = datetime.now()
-        return f"{ahora.day} de {meses[ahora.month-1]} de {ahora.year}"
+        # Use the survey completion date instead of current date
+        fecha_completion = self.submission.completed_at
+        return f"{fecha_completion.day} de {meses[fecha_completion.month-1]} de {fecha_completion.year}"
     
     def _get_risk_level_display(self):
-        """Retorna el display del nivel de riesgo con emoji"""
+        """Retorna el display del nivel de riesgo"""
         risk_displays = {
-            'CRITICAL': '🔴 CRÍTICO',
-            'HIGH': '🟠 ALTO',
-            'MODERATE': '🟡 MEDIO',
-            'GOOD': '🟢 BAJO',
-            'EXCELLENT': '🟢 EXCELENTE'
+            'CRITICAL': 'CRÍTICO',
+            'HIGH': 'ALTO',
+            'MODERATE': 'MEDIO',
+            'GOOD': 'BAJO',
+            'EXCELLENT': 'EXCELENTE'
         }
         return risk_displays.get(self.score_result.risk_level, self.score_result.risk_level)
+    
+    def _get_risk_level_color(self):
+        """Retorna la variable CSS de color apropiada para el nivel de riesgo"""
+        risk_colors = {
+            'CRITICAL': 'var(--risk-critical)',
+            'HIGH': 'var(--risk-high)',
+            'MODERATE': 'var(--risk-moderate)',
+            'GOOD': 'var(--risk-good)',
+            'EXCELLENT': 'var(--risk-excellent)'
+        }
+        return risk_colors.get(self.score_result.risk_level, 'var(--risk-critical)')
+    
+    def _get_vulnerability_color(self, vuln_level):
+        """Retorna la variable CSS de color apropiada para el nivel de vulnerabilidad"""
+        vuln_colors = {
+            'CRÍTICO': 'var(--vuln-critico)',
+            'ALTO': 'var(--vuln-alto)',
+            'MEDIO': 'var(--vuln-medio)',
+            'BAJO': 'var(--vuln-bajo)',
+            'INFORMATIVO': 'var(--vuln-informativo)'
+        }
+        return vuln_colors.get(vuln_level, 'var(--vuln-critico)')
+    
+    def _process_vulnerabilities(self, vulnerabilities):
+        """Procesa las vulnerabilidades añadiendo información de color"""
+        processed_vulns = []
+        for vuln in vulnerabilities:
+            # Create a copy of the vulnerability dict and add color info
+            processed_vuln = vuln.copy()
+            processed_vuln['level_color'] = self._get_vulnerability_color(vuln['level'])
+            processed_vulns.append(processed_vuln)
+        return processed_vulns
