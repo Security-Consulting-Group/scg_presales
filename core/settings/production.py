@@ -49,6 +49,7 @@ EMAIL_BACKEND = 'django_o365mail.EmailBackend'
 O365_MAIL_CLIENT_ID = os.environ.get('O365_MAIL_CLIENT_ID')
 O365_MAIL_CLIENT_SECRET = os.environ.get('O365_MAIL_CLIENT_SECRET')
 O365_MAIL_TENANT_ID = os.environ.get('O365_MAIL_TENANT_ID')
+O365_MAIL_MAILBOX_KWARGS = {'resource': os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@securitygroupcr.com')}
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@securitygroupcr.com')
 
 # Security settings
