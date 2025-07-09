@@ -13,6 +13,18 @@ DEBUG = False
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
+# Add whitenoise middleware for static files
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
 # Production Secret Key
 SECRET_KEY = os.environ.get('SECRET_KEY_PROD')
 if not SECRET_KEY:
@@ -56,6 +68,9 @@ X_FRAME_OPTIONS = 'DENY'
 # Static files for production
 STATIC_ROOT = os.environ.get('STATIC_ROOT', BASE_DIR / 'staticfiles')
 
+# Whitenoise settings for static files
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 # Media files for production
 MEDIA_ROOT = os.environ.get('MEDIA_ROOT', BASE_DIR / 'media')
 
@@ -69,9 +84,9 @@ MEDIA_ROOT = os.environ.get('MEDIA_ROOT', BASE_DIR / 'media')
 #     }
 # }
 
-# Production logging
+# Production logging - adjusted for Docker
 LOGGING['handlers']['file']['filename'] = os.environ.get(
-    'LOG_FILE', '/var/log/scg_presales.log'
+    'LOG_FILE', '/app/logs/scg_presales.log'
 )
 
 # # Admin settings
