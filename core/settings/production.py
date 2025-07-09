@@ -11,7 +11,7 @@ load_dotenv(BASE_DIR / '.env' / 'production.env')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',') + ['159.65.239.205']
 
 # Add whitenoise middleware for static files
 MIDDLEWARE = [

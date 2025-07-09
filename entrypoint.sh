@@ -28,4 +28,4 @@ for i in 1 2 3 4 5; do
 done
 
 echo '\n======> Running server...'
-gunicorn core.wsgi:application --bind 0.0.0.0:8000 --workers 1
+gunicorn core.wsgi:application --bind 0.0.0.0:8000 --workers 1 --timeout 120
