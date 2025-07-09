@@ -28,7 +28,7 @@ DATABASES = {
         'USER': os.environ.get('DB_USER'),
         'PASSWORD': os.environ.get('DB_PASSWORD'),
         'HOST': os.environ.get('DB_HOST'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
+        'PORT': os.environ.get('DB_PORT'),
     }
 }
 
@@ -59,26 +59,26 @@ STATIC_ROOT = os.environ.get('STATIC_ROOT', BASE_DIR / 'staticfiles')
 # Media files for production
 MEDIA_ROOT = os.environ.get('MEDIA_ROOT', BASE_DIR / 'media')
 
-# Cache for production - Redis
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        'LOCATION': os.environ.get(
-            'REDIS_URL', 'redis://127.0.0.1:6379/1'
-        ),
-    }
-}
+# # Cache for production - Redis
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+#         'LOCATION': os.environ.get(
+#             'REDIS_URL', 'redis://127.0.0.1:6379/1'
+#         ),
+#     }
+# }
 
 # Production logging
 LOGGING['handlers']['file']['filename'] = os.environ.get(
     'LOG_FILE', '/var/log/scg_presales.log'
 )
 
-# Admin settings
-ADMINS = [
-    (
-        'SCG Admin',
-        os.environ.get('ADMIN_EMAIL', 'admin@securitygroupcr.com')
-    ),
-]
-MANAGERS = ADMINS
+# # Admin settings
+# ADMINS = [
+#     (
+#         'SCG Admin',
+#         os.environ.get('ADMIN_EMAIL', 'admin@securitygroupcr.com')
+#     ),
+# ]
+# MANAGERS = ADMINS
