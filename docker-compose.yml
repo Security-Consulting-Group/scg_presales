@@ -23,6 +23,7 @@ services:
       - ./staticfiles:/app/staticfiles
       - ./nginx/conf.d/:/etc/nginx/conf.d/
       - /var/certbot/conf:/etc/letsencrypt:ro
+      - /var/certbot/www:/var/www/certbot:ro
     depends_on:
       - backend
 
