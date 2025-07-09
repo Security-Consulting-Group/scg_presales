@@ -1,4 +1,4 @@
-# Digital Ocean Deployment Guide
+# Digital Ocean Deployment Guide - WORKING VERSION
 
 ## Prerequisites
 
@@ -31,20 +31,11 @@ apt install docker-compose-plugin -y
 # Start Docker service
 systemctl enable docker
 systemctl start docker
-
-# Add user to docker group (optional, for non-root user)
-usermod -aG docker $USER
 ```
 
 ### 4. Install Git:
 ```bash
 apt install git -y
-```
-
-### 5. Create directories for SSL certificates:
-```bash
-mkdir -p /var/certbot/conf
-mkdir -p /var/certbot/www
 ```
 
 ## Step 2: Clone and Setup Project
@@ -69,8 +60,8 @@ DEBUG=False
 ALLOWED_HOSTS=securitygroupcr.com,www.securitygroupcr.com
 
 # Database Settings (Digital Ocean Database)
-DB_NAME=your_db_name
-DB_USER=your_db_user
+DB_NAME=DB_SCG_PRESALES_PROD
+DB_USER=SCG_PRESALES_USER
 DB_PASSWORD=your_db_password
 DB_HOST=your_db_host
 DB_PORT=25060
@@ -94,75 +85,44 @@ LOG_FILE=/app/logs/scg_presales.log
 mkdir -p staticfiles
 mkdir -p logs
 mkdir -p media
+mkdir -p /var/certbot/conf
+mkdir -p /var/certbot/www/.well-known/acme-challenge
 ```
 
-## Step 3: SSL Certificate Setup
+## Step 3: Database Permissions Setup
 
-### 1. First, get SSL certificates using certbot:
+### 1. Connect to your database with admin user and grant permissions:
 ```bash
-# Run this command to get initial certificates
-docker run --rm \
-  -v /var/certbot/conf:/etc/letsencrypt \
-  -v /var/certbot/www:/var/www/certbot \
-  certbot/certbot certonly \
-  --webroot \
-  --webroot-path=/var/www/certbot \
-  --email itops@securitygroupcr.com \
-  --agree-tos \
-  --no-eff-email \
-  -d securitygroupcr.com \
-  -d www.securitygroupcr.com
+# Connect to your Digital Ocean database with the admin user
+psql -h your_db_host -U doadmin -d DB_SCG_PRESALES_PROD -p 25060
 ```
 
-**Note:** You might need to temporarily serve the domain on port 80 first. If the above fails, follow these steps:
+### 2. Run these SQL commands to grant permissions:
+```sql
+-- Grant database-level permissions
+GRANT ALL PRIVILEGES ON DATABASE "DB_SCG_PRESALES_PROD" TO "SCG_PRESALES_USER";
 
-1. Create a temporary nginx configuration:
-```bash
-# Create temporary nginx config
-mkdir -p /tmp/nginx
-cat > /tmp/nginx/default.conf << 'EOF'
-server {
-    listen 80;
-    server_name securitygroupcr.com;
-    
-    location /.well-known/acme-challenge/ {
-        root /var/www/certbot;
-    }
-    
-    location / {
-        return 200 'OK';
-        add_header Content-Type text/plain;
-    }
-}
-EOF
+-- Grant schema permissions
+GRANT ALL PRIVILEGES ON SCHEMA public TO "SCG_PRESALES_USER";
+GRANT CREATE ON SCHEMA public TO "SCG_PRESALES_USER";
+GRANT USAGE ON SCHEMA public TO "SCG_PRESALES_USER";
 
-# Run temporary nginx
-docker run --rm -d \
-  --name temp-nginx \
-  -p 80:80 \
-  -v /tmp/nginx:/etc/nginx/conf.d \
-  -v /var/certbot/www:/var/www/certbot \
-  nginx:alpine
+-- Grant table permissions (for existing and future tables)
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO "SCG_PRESALES_USER";
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO "SCG_PRESALES_USER";
+
+-- Set default privileges for future objects
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO "SCG_PRESALES_USER";
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO "SCG_PRESALES_USER";
+
+-- Make the user a database owner
+ALTER DATABASE "DB_SCG_PRESALES_PROD" OWNER TO "SCG_PRESALES_USER";
+
+-- Exit psql
+\q
 ```
 
-2. Then run certbot:
-```bash
-docker run --rm \
-  -v /var/certbot/conf:/etc/letsencrypt \
-  -v /var/certbot/www:/var/www/certbot \
-  certbot/certbot certonly \
-  --webroot \
-  --webroot-path=/var/www/certbot \
-  --email your-email@securitygroupcr.com \
-  --agree-tos \
-  --no-eff-email \
-  -d securitygroupcr.com
-
-# Stop temporary nginx
-docker stop temp-nginx
-```
-
-## Step 4: Deploy the Application
+## Step 4: Deploy the Application (HTTP First)
 
 ### 1. Build and start the containers:
 ```bash
@@ -194,28 +154,161 @@ docker compose logs
 
 ### 1. Run database migrations:
 ```bash
-docker compose exec backend python manage.py makemigrations
+# Create migrations for all custom apps
+docker compose exec backend python manage.py makemigrations surveys
+docker compose exec backend python manage.py makemigrations prospects
+docker compose exec backend python manage.py makemigrations scoring
+docker compose exec backend python manage.py makemigrations communications
+docker compose exec backend python manage.py makemigrations reports
+docker compose exec backend python manage.py makemigrations landing
+docker compose exec backend python manage.py makemigrations admin_panel
+
+# Apply all migrations
 docker compose exec backend python manage.py migrate
 ```
 
-### 2. Create a superuser:
+### 2. Load survey data:
+```bash
+docker compose exec backend python manage.py load_survey_data
+```
+
+### 3. Create a superuser:
 ```bash
 docker compose exec backend python manage.py createsuperuser
 ```
 
-### 3. Collect static files:
+### 4. Collect static files:
 ```bash
 docker compose exec backend python manage.py collectstatic --no-input
 ```
 
-## Step 6: SSL Certificate Renewal
+### 5. Test HTTP access:
+```bash
+# Test if the site is working on HTTP
+curl -I http://securitygroupcr.com
+# Should return HTTP/1.1 200 OK
+```
+
+## Step 6: SSL Certificate Setup
+
+### 1. Test certbot challenge path:
+```bash
+# Create a test file to verify the challenge path works
+echo "test123" > /var/certbot/www/.well-known/acme-challenge/testfile
+
+# Test if it's accessible
+curl http://securitygroupcr.com/.well-known/acme-challenge/testfile
+# Should return "test123"
+
+# Remove test file
+rm /var/certbot/www/.well-known/acme-challenge/testfile
+```
+
+### 2. Get SSL certificates:
+```bash
+docker run --rm \
+  -v /var/certbot/conf:/etc/letsencrypt \
+  -v /var/certbot/www:/var/www/certbot \
+  certbot/certbot certonly \
+  --webroot \
+  --webroot-path=/var/www/certbot \
+  --email itops@securitygroupcr.com \
+  --agree-tos \
+  --no-eff-email \
+  -d securitygroupcr.com \
+  -d www.securitygroupcr.com
+```
+
+### 3. Update nginx configuration for HTTPS:
+```bash
+# Create SSL-enabled nginx config
+cat > nginx/conf.d/nginx.conf << 'EOF'
+upstream web_app {
+    server backend:8000;
+}
+
+server {
+    listen 80;
+    server_name securitygroupcr.com www.securitygroupcr.com;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name securitygroupcr.com www.securitygroupcr.com;
+
+    ssl_certificate /etc/letsencrypt/live/securitygroupcr.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/securitygroupcr.com/privkey.pem;
+
+    ssl_session_cache shared:le_nginx_SSL:10m;
+    ssl_session_timeout 1440m;
+    ssl_session_tickets off;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers off;
+
+    ssl_ciphers "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384";
+
+    client_max_body_size 4G;
+    keepalive_timeout 5;
+
+    access_log /var/log/nginx/access.log;
+    error_log /var/log/nginx/error.log;
+
+    location /static/ {
+        alias /app/staticfiles/;
+        expires 30d;
+        add_header Cache-Control "public, max-age=2592000";
+    }
+
+    location / {
+        proxy_pass http://web_app;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header Host $host;
+        proxy_redirect off;
+        proxy_read_timeout 300s;
+        proxy_connect_timeout 300s;
+    }
+}
+EOF
+```
+
+### 4. Restart nginx to apply SSL configuration:
+```bash
+docker compose restart nginx
+```
+
+### 5. Test HTTPS access:
+```bash
+# Test HTTPS access
+curl -I https://securitygroupcr.com
+# Should return HTTP/1.1 200 OK
+
+# Test HTTP redirect to HTTPS
+curl -I http://securitygroupcr.com
+# Should return HTTP/1.1 301 Moved Permanently
+```
+
+## Step 7: SSL Certificate Renewal
 
 ### 1. Create a renewal script:
 ```bash
 cat > /root/renew-ssl.sh << 'EOF'
 #!/bin/bash
-docker compose exec certbot certbot renew --quiet
-docker compose exec nginx nginx -s reload
+docker run --rm \
+  -v /var/certbot/conf:/etc/letsencrypt \
+  -v /var/certbot/www:/var/www/certbot \
+  certbot/certbot renew --quiet
+docker compose restart nginx
 EOF
 
 chmod +x /root/renew-ssl.sh
@@ -228,21 +321,19 @@ crontab -e
 0 12 * * * /root/renew-ssl.sh
 ```
 
-## Step 7: Monitoring and Maintenance
+## Step 8: Security and Firewall
 
-### 1. Check application health:
+### 1. Configure UFW firewall:
 ```bash
-# Check if site is accessible
-curl -I https://securitygroupcr.com
-
-# Check container status
-docker compose ps
-
-# Check logs
-docker compose logs -f backend
+ufw allow ssh
+ufw allow 80/tcp
+ufw allow 443/tcp
+ufw --force enable
 ```
 
-### 2. Update application:
+## Step 9: Application Updates
+
+### 1. Update application:
 ```bash
 # Pull latest changes
 git pull origin main
@@ -256,121 +347,63 @@ docker compose up -d
 docker compose exec backend python manage.py migrate
 ```
 
-## Step 8: Security and Firewall
-
-### 1. Configure UFW firewall:
-```bash
-ufw allow ssh
-ufw allow 80/tcp
-ufw allow 443/tcp
-ufw --force enable
-```
-
-### 2. Regular security updates:
-```bash
-# Add to crontab
-crontab -e
-# Add this line for weekly updates
-0 2 * * 0 apt update && apt upgrade -y
-```
-
 ## Troubleshooting
 
 ### Common Issues:
 
-1. **Certificate issues:**
-   - Check that your domain points to the correct IP
-   - Ensure port 80 is accessible during certificate creation
-   - Check certbot logs: `docker compose logs certbot`
+1. **Volume mapping issues with nginx:**
+   - If certbot challenge files aren't served, restart the entire stack:
+   ```bash
+   docker compose down
+   docker compose up -d
+   ```
 
 2. **Database connection issues:**
-   - Verify database credentials in .env/production.env
+   - Verify database credentials in env_config/production.env
    - Check Digital Ocean database firewall settings
    - Ensure droplet IP is whitelisted in database settings
 
-3. **Static files not loading:**
-   - Run collectstatic: `docker compose exec backend python manage.py collectstatic --no-input`
-   - Check nginx logs: `docker compose logs nginx`
+3. **Migration issues:**
+   - Create migrations for each app individually before running migrate
+   - Check database permissions if migrations fail
 
-4. **Application not starting:**
-   - Check backend logs: `docker compose logs backend`
-   - Verify environment variables in env_config/production.env
-   - Check database connectivity
+4. **SSL certificate issues:**
+   - Ensure the challenge path works before running certbot
+   - Test with: `curl http://securitygroupcr.com/.well-known/acme-challenge/testfile`
 
 ### Useful Commands:
 
 ```bash
-# Restart all services
-docker compose restart
+# Check container status
+docker compose ps
+
+# View logs
+docker compose logs -f
 
 # Restart specific service
 docker compose restart backend
 
-# View real-time logs
-docker compose logs -f
-
 # Execute command in container
 docker compose exec backend python manage.py shell
 
-# Check disk space
-df -h
+# Check nginx configuration
+docker compose exec nginx nginx -t
 
-# Check memory usage
-free -h
-
-# Check running processes
-htop
+# Check if files exist in container
+docker compose exec nginx ls -la /var/www/certbot/.well-known/acme-challenge/
 ```
-
-## Backup Strategy
-
-### 1. Database backups:
-```bash
-# Create backup script
-cat > /root/backup-db.sh << 'EOF'
-#!/bin/bash
-DATE=$(date +%Y%m%d_%H%M%S)
-BACKUP_DIR="/root/backups"
-mkdir -p $BACKUP_DIR
-
-# Database backup (adjust connection details)
-pg_dump -h your_db_host -U your_db_user -d your_db_name > $BACKUP_DIR/db_backup_$DATE.sql
-
-# Keep only last 7 backups
-find $BACKUP_DIR -name "db_backup_*.sql" -mtime +7 -delete
-EOF
-
-chmod +x /root/backup-db.sh
-```
-
-### 2. Add to crontab:
-```bash
-crontab -e
-# Add daily backup at 3 AM
-0 3 * * * /root/backup-db.sh
-```
-
-## Performance Optimization
-
-### 1. Increase worker count for production:
-Edit `entrypoint.sh` and change:
-```bash
-gunicorn --env DJANGO_SETTINGS_MODULE=core.settings.production core.wsgi:application --bind 0.0.0.0:8000 --workers 3
-```
-
-### 2. Add Redis for caching (optional):
-Uncomment the cache configuration in `core/settings/production.py` and add Redis to docker-compose.yml if needed.
 
 ## Final Checklist
 
 - [ ] Domain points to droplet IP
-- [ ] SSL certificate installed and working
-- [ ] Database connected and migrations applied
+- [ ] Database permissions granted
+- [ ] SSL certificates installed and working
+- [ ] Database migrations applied
+- [ ] Survey data loaded
 - [ ] Static files collected and served
-- [ ] Email functionality tested
+- [ ] Email functionality configured
 - [ ] Firewall configured
-- [ ] Backup strategy in place
 - [ ] Certificate renewal automated
 - [ ] Application accessible via HTTPS
 - [ ] Admin user created
-- [ ] Logging working properly
+- [ ] HTTP redirects to HTTPS properly
