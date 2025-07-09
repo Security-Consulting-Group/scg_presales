@@ -44,14 +44,12 @@ DATABASES = {
     }
 }
 
-# Email settings for production - Microsoft 365
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = os.getenv('EMAIL_HOST', default='')
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
+# Email settings for production - Microsoft 365 via Graph API
+EMAIL_BACKEND = 'django_o365mail.EmailBackend'
+O365_MAIL_CLIENT_ID = os.environ.get('O365_MAIL_CLIENT_ID')
+O365_MAIL_CLIENT_SECRET = os.environ.get('O365_MAIL_CLIENT_SECRET')
+O365_MAIL_TENANT_ID = os.environ.get('O365_MAIL_TENANT_ID')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@securitygroupcr.com')
 
 # Security settings
 SECURE_BROWSER_XSS_FILTER = True
