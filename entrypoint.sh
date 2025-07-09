@@ -13,7 +13,8 @@ python manage.py makemigrations
 echo 'Running database migrations...'
 for i in 1 2 3 4 5; do
     echo "Migration attempt $i..."
-    if python manage.py migrate; then
+    # First migrate core app (contains User model)
+    if python manage.py migrate core && python manage.py migrate; then
         echo "Migrations completed successfully"
         break
     else
