@@ -51,14 +51,14 @@ mkdir -p /var/certbot/www
 
 ### 1. Clone your repository:
 ```bash
-git clone https://github.com/your-username/scg_presales.git
+git clone <your-repository-url>
 cd scg_presales
 ```
 
 ### 2. Create the production environment file:
 ```bash
-mkdir -p .env
-nano .env/production.env
+mkdir -p env_config
+nano env_config/production.env
 ```
 
 ### 3. Configure your production environment variables:
@@ -194,18 +194,18 @@ docker compose logs
 
 ### 1. Run database migrations:
 ```bash
-docker compose exec backend python manage.py makemigrations --settings=core.settings.production
-docker compose exec backend python manage.py migrate --settings=core.settings.production
+docker compose exec backend python manage.py makemigrations
+docker compose exec backend python manage.py migrate
 ```
 
 ### 2. Create a superuser:
 ```bash
-docker compose exec backend python manage.py createsuperuser --settings=core.settings.production
+docker compose exec backend python manage.py createsuperuser
 ```
 
 ### 3. Collect static files:
 ```bash
-docker compose exec backend python manage.py collectstatic --no-input --settings=core.settings.production
+docker compose exec backend python manage.py collectstatic --no-input
 ```
 
 ## Step 6: SSL Certificate Renewal
@@ -253,7 +253,7 @@ docker compose build
 docker compose up -d
 
 # Run migrations if needed
-docker compose exec backend python manage.py migrate --settings=core.settings.production
+docker compose exec backend python manage.py migrate
 ```
 
 ## Step 8: Security and Firewall
@@ -289,12 +289,12 @@ crontab -e
    - Ensure droplet IP is whitelisted in database settings
 
 3. **Static files not loading:**
-   - Run collectstatic: `docker compose exec backend python manage.py collectstatic --no-input --settings=core.settings.production`
+   - Run collectstatic: `docker compose exec backend python manage.py collectstatic --no-input`
    - Check nginx logs: `docker compose logs nginx`
 
 4. **Application not starting:**
    - Check backend logs: `docker compose logs backend`
-   - Verify environment variables in .env/production.env
+   - Verify environment variables in env_config/production.env
    - Check database connectivity
 
 ### Useful Commands:
@@ -310,7 +310,7 @@ docker compose restart backend
 docker compose logs -f
 
 # Execute command in container
-docker compose exec backend python manage.py shell --settings=core.settings.production
+docker compose exec backend python manage.py shell
 
 # Check disk space
 df -h
