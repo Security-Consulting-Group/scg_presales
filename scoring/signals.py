@@ -45,16 +45,21 @@ def calculate_score_on_submission_completion(sender, instance, created, **kwargs
                     
                     logger.info(f"Actualizado last_contact_at para {instance.prospect.name}")
                     
-                    # Send survey completion email
-                    try:
-                        email_sent = SurveyEmailService.send_survey_completion_email(score_result)
-                        if email_sent:
-                            logger.info(f"Email de completion enviado a {instance.prospect.email}")
-                        else:
-                            logger.warning(f"No se pudo enviar email a {instance.prospect.email}")
-                    except Exception as e:
-                        logger.error(f"Error enviando email de completion: {str(e)}")
-                        # Don't raise exception - email failure shouldn't break the scoring process
+                    # Send email AFTER transaction commits to ensure all data is saved
+                    def send_completion_email():
+                        try:
+                            # Get fresh ScoreResult from database after transaction commit
+                            fresh_score_result = ScoreResult.objects.get(id=score_result.id)
+                            email_sent = SurveyEmailService.send_survey_completion_email(fresh_score_result)
+                            if email_sent:
+                                logger.info(f"Email de completion enviado a {instance.prospect.email}")
+                            else:
+                                logger.warning(f"No se pudo enviar email a {instance.prospect.email}")
+                        except Exception as e:
+                            logger.error(f"Error enviando email de completion: {str(e)}")
+                    
+                    # Schedule email to be sent after transaction commits
+                    transaction.on_commit(send_completion_email)
                 
         except Exception as e:
             logger.error(f"Error calculando score para submission {instance.id}: {str(e)}")
