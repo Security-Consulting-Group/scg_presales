@@ -49,9 +49,6 @@ class SecurityReportGenerator:
             base_url=base_url
         )
         
-        # Create CSS for better PDF rendering
-        font_config = weasyprint.fonts.FontConfiguration()
-        
         # Define CSS string for better page handling
         css_string = """
         @page {
@@ -101,10 +98,10 @@ class SecurityReportGenerator:
         }
         """
         
-        css = weasyprint.CSS(string=css_string, font_config=font_config)
+        css = weasyprint.CSS(string=css_string)
         
         # Generate PDF with CSS configuration
-        pdf_doc = html_doc.write_pdf(stylesheets=[css], font_config=font_config)
+        pdf_doc = html_doc.write_pdf(stylesheets=[css])
         pdf_buffer.write(pdf_doc)
         pdf_buffer.seek(0)
         
