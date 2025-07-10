@@ -102,6 +102,12 @@ class SecurityReportGenerator:
         section_solution_image_url = self._get_absolute_static_url('img/reports/section_solution.png')
         final_cover_image_url = self._get_absolute_static_url('img/reports/final_cover.png')
         
+        # Get absolute file paths for fonts
+        geomanist_regular = self._get_absolute_static_url('fonts/Geomanist-Regular.otf')
+        geomanist_bold = self._get_absolute_static_url('fonts/Geomanist-Bold.otf')
+        geomanist_light = self._get_absolute_static_url('fonts/Geomanist-Light.otf')
+        geomanist_medium = self._get_absolute_static_url('fonts/Geomanist-Medium.otf')
+        
 
         
         return {
@@ -126,6 +132,12 @@ class SecurityReportGenerator:
             'section_risk_image_url': section_risk_image_url,
             'section_solution_image_url': section_solution_image_url,
             'final_cover_image_url': final_cover_image_url,
+            
+            # Font URLs
+            'geomanist_regular': geomanist_regular,
+            'geomanist_bold': geomanist_bold,
+            'geomanist_light': geomanist_light,
+            'geomanist_medium': geomanist_medium,
             
             # Contenido dinámico
             'risk_content': content_data.get_risk_level_content(self.score_result.risk_level),
