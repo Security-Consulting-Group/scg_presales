@@ -36,7 +36,7 @@
         /* Page setup for print */
         @page {
             size: letter;
-            margin: 0;
+            margin: 0.5in; /* Add consistent margins */
         }
 
         body {
@@ -49,8 +49,8 @@
 
         /* ==================== COVER PAGE STYLES ==================== */
         .cover-page {
-            height: 11in; /* Use fixed height instead of 100vh */
-            width: 8.5in; /* Use fixed width instead of 100vw */
+            height: 10in; /* Reduced to account for margins */
+            width: 7.5in; /* Reduced to account for margins */
             position: relative;
             overflow: hidden;
             page-break-after: always;
@@ -159,12 +159,34 @@
         /* ==================== REGULAR PAGE STYLES ==================== */
         .page {
             page-break-before: always;
-            padding: 40px;
-            min-height: 10in; /* Use fixed height instead of calc */
+            padding: 20px; /* Reduced padding since we have page margins */
+            min-height: 9in; /* Reduced to account for page margins */
         }
 
         .page:first-child {
             page-break-before: auto;
+        }
+
+        /* Force page breaks for specific sections */
+        .page-with-sidebar {
+            page-break-before: always;
+            min-height: 9in;
+            width: 100%;
+        }
+
+        /* Prevent page breaks within content sections */
+        .content-section {
+            page-break-inside: avoid;
+        }
+
+        /* Keep vulnerability items together */
+        .vulnerability-item {
+            page-break-inside: avoid;
+            background: var(--light-gray);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--critical);
         }
 
         /* Typography - Increased sizes for better readability */
@@ -615,7 +637,8 @@
     <div class="page-with-sidebar">
         <div class="page m-30-sb">
             <div class="content-area">
-                <h1 style="color:var(--primary); font-size:24px; margin-bottom:15px;">Estadísticas Mundiales Alarmantes</h1>
+                <div class="content-section">
+                    <h1 style="color:var(--primary); font-size:24px; margin-bottom:15px;">Estadísticas Mundiales Alarmantes</h1>
                 
                 <p style="font-size: 12px; margin-bottom: 12px;">El panorama de ciberseguridad mundial ha alcanzado niveles críticos sin precedentes. <strong>Cada 39 segundos</strong>, una empresa en algún lugar del mundo se convierte en víctima de un ciberataque, lo que significa que mientras usted lee este párrafo, al menos dos organizaciones están siendo comprometidas.</p>
                 
@@ -647,7 +670,7 @@
                 <p style="font-size: 12px; margin-bottom: 15px;">• <strong>47%</strong> de empresas con menos de 50 empleados no tienen presupuesto de ciberseguridad</p>
                 
                 <p style="font-size: 12px; margin-bottom: 12px;">La realidad es devastadora: el <strong>60%</strong> de las pequeñas empresas que sufren un ciberataque cierran permanentemente dentro de los siguientes 6 meses. Esta vulnerabilidad se debe principalmente a que más de la mitad no cuenta con medidas de protección básicas implementadas.</p>
-
+                </div>
             </div>
         </div>
         <div class="sidebar-area" style="background-image: url('{{ sidebar_image_5 }}');"></div>
@@ -657,7 +680,8 @@
     <div class="page-with-sidebar">
         <div class="content-area">
             <div class="page m-30-sb">
-                <h1 style="color:var(--primary); font-size:24px; margin-bottom:15px;">Costa Rica: En el Epicentro de la Tormenta</h1>
+                <div class="content-section">
+                    <h1 style="color:var(--primary); font-size:24px; margin-bottom:15px;">Costa Rica: En el Epicentro de la Tormenta</h1>
                 
                 <p style="font-size: 12px; margin-bottom: 12px;">Costa Rica no ha escapado de esta crisis global; por el contrario, se ha convertido en un <strong>objetivo prioritario</strong> para los ciberdelincuentes internacionales. La combinación de crecimiento digital acelerado, infraestructura crítica vulnerable y baja preparación empresarial ha creado un escenario perfecto para los atacantes. Los números revelan una situación crítica que afecta tanto al sector público como al privado, con consecuencias que van más allá de lo puramente económico.</p>
                 
@@ -684,7 +708,7 @@
                 <p style="font-size: 12px; margin-bottom: 15px;">• Latinoamérica experimentó el <strong>mayor aumento de ciberataques: 53%</strong> interanual en Q2 2024</p>
                 
                 <p style="font-size: 12px; margin-bottom: 12px;">Simultáneamente, el mundo enfrenta una escasez crítica de profesionales en ciberseguridad. Existe un déficit global de <strong>4 millones de profesionales</strong> en 2024, y el 54% de empresas admiten que sus departamentos de TI carecen de experiencia para manejar ciberataques complejos. Esta realidad convierte la contratación de servicios especializados externos en una necesidad de supervivencia empresarial.</p>
-
+                </div>
             </div>
         </div>
         <div class="sidebar-area" style="background-image: url('{{ sidebar_image_5 }}');"></div>

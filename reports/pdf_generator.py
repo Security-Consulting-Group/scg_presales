@@ -43,13 +43,68 @@ class SecurityReportGenerator:
         # Configure WeasyPrint with base URL for static files
         base_url = self._get_base_url()
         
-        # Generate PDF
+        # Enhanced WeasyPrint configuration for production
         html_doc = weasyprint.HTML(
             string=html_content,
             base_url=base_url
         )
         
-        pdf_doc = html_doc.write_pdf()
+        # Create CSS for better PDF rendering
+        font_config = weasyprint.fonts.FontConfiguration()
+        
+        # Define CSS string for better page handling
+        css_string = """
+        @page {
+            size: letter;
+            margin: 0.75in;
+            orphans: 3;
+            widows: 3;
+        }
+        
+        .page-with-sidebar {
+            page-break-before: always;
+            page-break-inside: avoid;
+        }
+        
+        .content-section {
+            page-break-inside: avoid;
+        }
+        
+        h1, h2, h3 {
+            page-break-after: avoid;
+            orphans: 3;
+            widows: 3;
+        }
+        
+        .vulnerability-item {
+            page-break-inside: avoid;
+            margin-bottom: 15px;
+        }
+        
+        .stat-item {
+            page-break-inside: avoid;
+        }
+        
+        /* Better content flow */
+        p {
+            orphans: 2;
+            widows: 2;
+        }
+        
+        ul, ol {
+            page-break-inside: avoid;
+        }
+        
+        /* Sidebar layout improvements */
+        .main-sidebar-layout {
+            page-break-inside: avoid;
+        }
+        """
+        
+        css = weasyprint.CSS(string=css_string, font_config=font_config)
+        
+        # Generate PDF with CSS configuration
+        pdf_doc = html_doc.write_pdf(stylesheets=[css], font_config=font_config)
         pdf_buffer.write(pdf_doc)
         pdf_buffer.seek(0)
         
