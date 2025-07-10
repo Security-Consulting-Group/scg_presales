@@ -108,7 +108,7 @@
         .cta-button {
             display: inline-block;
             background: linear-gradient(135deg, #002d74 0%, #3a8dde 100%);
-            color: white;
+            color: white !important;
             text-decoration: none;
             padding: 15px 30px;
             border-radius: 6px;
@@ -175,13 +175,6 @@
                 <p><strong>¡Felicitaciones por completar su evaluación de ciberseguridad!</strong></p>
                 
                 <p>Agradecemos el tiempo que ha invertido en completar nuestro Diagnóstico Ejecutivo de Ciberseguridad. Esta evaluación nos permite entender mejor la postura actual de seguridad de su empresa y proporcionarle recomendaciones específicas para fortalecer sus defensas digitales.</p>
-            </div>
-
-            <!-- Score Card -->
-            <div class="score-card">
-                <h3>Sus Resultados</h3>
-                <div class="score-display">{{ score_percentage }}%</div>
-                <div class="risk-level risk-{{ risk_level_class }}">{{ risk_level_display }}</div>
             </div>
 
             <!-- Next Steps -->

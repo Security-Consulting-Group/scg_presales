@@ -150,44 +150,6 @@
 <div class="row">
     <!-- Left Column: Score Analysis -->
     <div class="col-lg-8">
-        <!-- Package Recommendations -->
-        <div class="admin-card mb-4">
-            <div class="admin-card-header">
-                <h3 class="admin-card-title">
-                    <i class="fas fa-star me-2"></i>Recomendaciones de Paquetes
-                </h3>
-                <div class="card-header-actions">
-                    <small class="text-muted">Incluido en reporte PDF</small>
-                </div>
-            </div>
-            <div class="admin-card-body">
-                <div class="package-recommendations">
-                    <div class="primary-package-card">
-                        <div class="package-badge primary">
-                            <i class="fas fa-star"></i>
-                            PRIMARIO
-                        </div>
-                        <h4 class="package-name">{{ score_result.primary_package }}</h4>
-                        {% if package_recommendation %}
-                        <p class="package-description">
-                            Recomendado para nivel de riesgo <strong>{{ score_result.get_risk_level_display }}</strong>
-                        </p>
-                        {% endif %}
-                    </div>
-                    
-                    {% if score_result.secondary_package %}
-                    <div class="secondary-package-card">
-                        <div class="package-badge secondary">
-                            <i class="fas fa-plus"></i>
-                            SECUNDARIO
-                        </div>
-                        <h5 class="package-name">{{ score_result.secondary_package }}</h5>
-                        <p class="package-description">Paquete complementario sugerido</p>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
         
         <!-- Section Scores Breakdown -->
         <div class="admin-card mb-4">
@@ -424,63 +386,6 @@
                 </div>
             </div>
         </div>
-        
-        <!-- Survey Statistics -->
-        {% if same_survey_stats %}
-        <div class="admin-card mb-4">
-            <div class="admin-card-header">
-                <h5 class="admin-card-title">
-                    <i class="fas fa-chart-bar me-2"></i>Estadísticas del Survey
-                </h5>
-            </div>
-            <div class="admin-card-body">
-                <div class="survey-stats">
-                    <div class="stat-comparison">
-                        <div class="stat-item">
-                            <label>Promedio General:</label>
-                            <span class="stat-value">{{ same_survey_stats.avg_score|floatformat:1 }}%</span>
-                        </div>
-                        <div class="stat-item">
-                            <label>Score Mínimo:</label>
-                            <span class="stat-value">{{ same_survey_stats.min_score }}%</span>
-                        </div>
-                        <div class="stat-item">
-                            <label>Score Máximo:</label>
-                            <span class="stat-value">{{ same_survey_stats.max_score }}%</span>
-                        </div>
-                        <div class="stat-item">
-                            <label>Total Submissions:</label>
-                            <span class="stat-value">{{ same_survey_stats.total_count }}</span>
-                        </div>
-                        {% if score_percentile %}
-                        <div class="stat-item">
-                            <label>Percentil:</label>
-                            <span class="stat-value text-primary">{{ score_percentile }}</span>
-                        </div>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- Score Position Visualization -->
-                    <div class="score-position mt-3">
-                        <label>Posición en el Survey:</label>
-                        <div class="position-bar">
-                            <div class="position-scale">
-                                <span class="position-min">{{ same_survey_stats.min_score }}%</span>
-                                <span class="position-max">{{ same_survey_stats.max_score }}%</span>
-                            </div>
-                            <div class="position-track">
-                                <div class="position-marker" 
-                                    data-position="{{ score_marker_position }}">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-        
         <!-- Risk Configuration -->
         {% if risk_config %}
         <div class="admin-card mb-4">
