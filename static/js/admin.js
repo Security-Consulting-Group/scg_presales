@@ -8,16 +8,12 @@ class SCGAdmin {
     }
 
     init() {
-        console.log('🎯 Inicializando SCG Admin Panel...');
-        
         // Initialize components
         this.initSidebar();
         this.initTables();
         this.initForms();
         this.initAjaxActions();
         this.initTooltips();
-        
-        console.log('✅ Admin Panel inicializado correctamente!');
     }
 
     // ====================================
@@ -257,8 +253,7 @@ class SCGAdmin {
             } else {
                 this.showNotification(data.message || 'Error procesando la acción', 'error');
             }
-        } catch (error) {
-            console.error('Error:', error);
+        } catch {
             this.showNotification('Error de conexión', 'error');
         } finally {
             // Restore button state
@@ -305,8 +300,7 @@ class SCGAdmin {
             } else {
                 this.showNotification(data.message || 'Error procesando la acción', 'error');
             }
-        } catch (error) {
-            console.error('Error:', error);
+        } catch {
             this.showNotification('Error de conexión', 'error');
         } finally {
             // Restore button state
@@ -444,8 +438,6 @@ window.SCGAdmin = {
 
 // Handle form errors
 window.addEventListener('error', function(e) {
-    console.error('JavaScript Error:', e.error);
-    
     // Restore any loading buttons
     const loadingBtns = document.querySelectorAll('button[data-original-text]');
     loadingBtns.forEach(btn => {

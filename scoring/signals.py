@@ -26,7 +26,7 @@ def calculate_score_on_submission_completion(sender, instance, created, **kwargs
     """
     # Only calculate if submission is completed and active
     if instance.is_completed and instance.status == 'ACTIVE':
-        logger.info(f"🎯 Calculando score para submission completada: {instance.id}")
+        logger.info(f"Calculando score para submission completada: {instance.id}")
         
         try:
             with transaction.atomic():
@@ -34,7 +34,7 @@ def calculate_score_on_submission_completion(sender, instance, created, **kwargs
                 score_result = ScoreResult.calculate_for_submission(instance)
                 
                 logger.info(
-                    f"✅ Score calculado exitosamente: {score_result.score_percentage}% "
+                    f"Score calculado exitosamente: {score_result.score_percentage}% "
                     f"({score_result.risk_level}) para {instance.prospect.name}"
                 )
                 
@@ -43,26 +43,27 @@ def calculate_score_on_submission_completion(sender, instance, created, **kwargs
                     instance.prospect.last_contact_at = instance.completed_at
                     instance.prospect.save(update_fields=['last_contact_at'])
                     
-                    logger.info(f"📅 Actualizado last_contact_at para {instance.prospect.name}")
+                    logger.info(f"Actualizado last_contact_at para {instance.prospect.name}")
                     
                     # Send survey completion email
                     try:
                         email_sent = SurveyEmailService.send_survey_completion_email(score_result)
                         if email_sent:
-                            logger.info(f"📧 Email de completion enviado a {instance.prospect.email}")
+                            logger.info(f"Email de completion enviado a {instance.prospect.email}")
                         else:
-                            logger.warning(f"⚠️ No se pudo enviar email a {instance.prospect.email}")
+                            logger.warning(f"No se pudo enviar email a {instance.prospect.email}")
                     except Exception as e:
-                        logger.error(f"❌ Error enviando email de completion: {str(e)}")
+                        logger.error(f"Error enviando email de completion: {str(e)}")
                         # Don't raise exception - email failure shouldn't break the scoring process
                 
         except Exception as e:
-            logger.error(f"❌ Error calculando score para submission {instance.id}: {str(e)}")
+            logger.error(f"Error calculando score para submission {instance.id}: {str(e)}")
             # Don't raise the exception to avoid breaking the submission save
             # but log it for debugging
     
     elif created:
-        logger.debug(f"📝 Nueva submission creada pero no completada: {instance.id}")
+        # Nueva submission creada pero no completada
+        pass
 
 
 @receiver(post_save, sender=Response)
@@ -77,7 +78,7 @@ def recalculate_score_on_response_change(sender, instance, created, **kwargs):
     
     # Only recalculate if submission is completed and active
     if submission.is_completed and submission.status == 'ACTIVE':
-        logger.info(f"🔄 Recalculando score por cambio en response: {instance.id}")
+        logger.info(f"Recalculando score por cambio en response: {instance.id}")
         
         try:
             with transaction.atomic():
@@ -85,13 +86,13 @@ def recalculate_score_on_response_change(sender, instance, created, **kwargs):
                 score_result = ScoreResult.calculate_for_submission(submission)
                 
                 logger.info(
-                    f"✅ Score recalculado: {score_result.score_percentage}% "
+                    f"Score recalculado: {score_result.score_percentage}% "
                     f"({score_result.risk_level}) para {submission.prospect.name}"
                 )
                 
         except Exception as e:
             logger.error(
-                f"❌ Error recalculando score para submission {submission.id} "
+                f"Error recalculando score para submission {submission.id} "
                 f"tras cambio en response {instance.id}: {str(e)}"
             )
 
@@ -109,23 +110,23 @@ def recalculate_score_on_response_deletion(sender, instance, **kwargs):
         
         # Only recalculate if submission is completed and active
         if submission.is_completed and submission.status == 'ACTIVE':
-            logger.info(f"🗑️ Recalculando score por eliminación de response: {instance.id}")
+            logger.info(f"Recalculando score por eliminación de response: {instance.id}")
             
             with transaction.atomic():
                 # Recalculate the score
                 score_result = ScoreResult.calculate_for_submission(submission)
                 
                 logger.info(
-                    f"✅ Score recalculado tras eliminación: {score_result.score_percentage}% "
+                    f"Score recalculado tras eliminación: {score_result.score_percentage}% "
                     f"({score_result.risk_level}) para {submission.prospect.name}"
                 )
                 
     except SurveySubmission.DoesNotExist:
         # Submission was deleted, nothing to recalculate
-        logger.debug(f"📝 Response {instance.id} eliminada pero submission ya no existe")
+        pass
     except Exception as e:
         logger.error(
-            f"❌ Error recalculando score tras eliminación de response {instance.id}: {str(e)}"
+            f"Error recalculando score tras eliminación de response {instance.id}: {str(e)}"
         )
 
 
@@ -143,28 +144,28 @@ def handle_submission_status_change(sender, instance, created, **kwargs):
         
         # Status changed from ACTIVE to something else
         if original_status == 'ACTIVE' and current_status != 'ACTIVE':
-            logger.info(f"🔒 Submission {instance.id} cambió de ACTIVE a {current_status}")
+            logger.info(f"Submission {instance.id} cambió de ACTIVE a {current_status}")
             
             # Mark existing score as inactive (don't delete, keep for history)
             try:
                 score_result = ScoreResult.objects.get(submission=instance)
                 # Could add an 'is_active' field to ScoreResult in the future
-                logger.info(f"📊 Score mantenido para historial: {score_result.score_percentage}%")
+                logger.info(f"Score mantenido para historial: {score_result.score_percentage}%")
             except ScoreResult.DoesNotExist:
                 pass
         
         # Status changed back to ACTIVE
         elif original_status != 'ACTIVE' and current_status == 'ACTIVE':
-            logger.info(f"🔓 Submission {instance.id} reactivada a ACTIVE desde {original_status}")
+            logger.info(f"Submission {instance.id} reactivada a ACTIVE desde {original_status}")
             
             # Recalculate if completed
             if instance.is_completed:
                 try:
                     with transaction.atomic():
                         score_result = ScoreResult.calculate_for_submission(instance)
-                        logger.info(f"✅ Score recalculado al reactivar: {score_result.score_percentage}%")
+                        logger.info(f"Score recalculado al reactivar: {score_result.score_percentage}%")
                 except Exception as e:
-                    logger.error(f"❌ Error recalculando score al reactivar: {str(e)}")
+                    logger.error(f"Error recalculando score al reactivar: {str(e)}")
 
 
 # Store original status to detect changes
@@ -191,7 +192,7 @@ def recalculate_scores_for_survey(survey, force=False):
     This is not a signal but a utility function that can be called from
     management commands or admin actions.
     """
-    logger.info(f"🔄 Iniciando recálculo masivo para survey: {survey.title}")
+    logger.info(f"Iniciando recálculo masivo para survey: {survey.title}")
     
     submissions = survey.submissions.filter(
         status='ACTIVE',
@@ -209,21 +210,18 @@ def recalculate_scores_for_survey(survey, force=False):
                     score_result = ScoreResult.calculate_for_submission(submission)
                     success_count += 1
                     
-                    logger.debug(
-                        f"✅ Recalculado: {submission.prospect.name} -> "
-                        f"{score_result.score_percentage}% ({score_result.risk_level})"
-                    )
             else:
-                logger.debug(f"⏭️ Saltado (ya existe): {submission.prospect.name}")
+                # Saltado (ya existe)
+                pass
                 
         except Exception as e:
             error_count += 1
             logger.error(
-                f"❌ Error recalculando {submission.id} ({submission.prospect.name}): {str(e)}"
+                f"Error recalculando {submission.id} ({submission.prospect.name}): {str(e)}"
             )
     
     logger.info(
-        f"🎯 Recálculo masivo completado para {survey.title}: "
+        f"Recálculo masivo completado para {survey.title}: "
         f"{success_count} exitosos, {error_count} errores"
     )
     

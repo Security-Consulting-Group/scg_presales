@@ -18,7 +18,6 @@ class RiskConfigPage {
     }
 
     setupRiskConfigPage() {
-        console.log('⚙️ Risk config page initialized');
     }
 
     loadRiskConfigData() {
@@ -26,8 +25,7 @@ class RiskConfigPage {
         if (dataElement) {
             try {
                 window.riskConfigData = JSON.parse(dataElement.getAttribute('data-risk-config'));
-            } catch (error) {
-                console.error('Error parsing risk config data:', error);
+            } catch {
             }
         }
     }
@@ -217,7 +215,7 @@ class RiskConfigPage {
                 } else {
                     errors++;
                 }
-            } catch (error) {
+            } catch {
                 errors++;
             }
         }
@@ -293,7 +291,6 @@ window.createMultipleConfigs = function() {
 
 window.recalculateAllScores = function() {
     if (!window.riskConfigData) {
-        console.error('Risk config data not loaded');
         return;
     }
     

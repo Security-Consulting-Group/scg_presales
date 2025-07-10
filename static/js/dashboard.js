@@ -16,8 +16,6 @@ class Dashboard {
     }
 
     setupDashboard() {
-        console.log('📊 Dashboard cargado');
-        
         // Dashboard-specific initialization can go here
         this.initializeWidgets();
         this.setupInteractiveElements();
@@ -44,7 +42,6 @@ class Dashboard {
     handleStatCardClick(event) {
         const card = event.currentTarget;
         const label = card.querySelector('.stat-card-label')?.textContent;
-        console.log('📈 Stat card clicked:', label);
         
         // Add visual feedback
         card.style.transform = 'scale(0.98)';
@@ -56,7 +53,6 @@ class Dashboard {
     handleQuickActionClick(event) {
         const btn = event.currentTarget;
         const action = btn.textContent.trim();
-        console.log('⚡ Quick action clicked:', action);
     }
 
     setupAutoRefresh() {
@@ -68,18 +64,16 @@ class Dashboard {
 
     refreshStats() {
         // Only refresh stats, not the whole page
-        console.log('🔄 Auto-refresh stats (placeholder)');
         
         // Future implementation: AJAX call to refresh dashboard stats
         // fetch('/admin-panel/dashboard/stats/')
         //     .then(response => response.json())
         //     .then(data => this.updateStats(data))
-        //     .catch(error => console.error('Error refreshing stats:', error));
+        //     .catch(error => {/* Handle error */});
     }
 
     updateStats(data) {
         // Update stat cards with new data
-        console.log('📊 Updating dashboard stats:', data);
     }
 
     destroy() {

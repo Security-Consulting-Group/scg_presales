@@ -351,6 +351,7 @@ class SectionUpdateView(LoginRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['survey'] = self.object.survey
+        context['next_order'] = self.object.survey.sections.count() + 1
         return context
 
 
@@ -643,8 +644,10 @@ class OptionBulkSaveView(LoginRequiredMixin, View):
                 option_text = option_data.get('text', '').strip()
                 option_order = int(option_data.get('order', 1))
                 option_points = int(option_data.get('points', 0))
+                option_is_exclusive = option_data.get('is_exclusive', False)
                 option_id = option_data.get('id')
                 is_existing = option_data.get('isExisting', False)
+                
                 
                 if not option_text:
                     continue  # Skip empty options
@@ -656,6 +659,7 @@ class OptionBulkSaveView(LoginRequiredMixin, View):
                         option.option_text = option_text
                         option.order = option_order
                         option.points = option_points
+                        option.is_exclusive = option_is_exclusive
                         option.save()
                         updated_count += 1
                     except QuestionOption.DoesNotExist:
@@ -665,6 +669,7 @@ class OptionBulkSaveView(LoginRequiredMixin, View):
                             option_text=option_text,
                             order=option_order,
                             points=option_points,
+                            is_exclusive=option_is_exclusive,
                             is_active=True
                         )
                         created_count += 1
@@ -675,6 +680,7 @@ class OptionBulkSaveView(LoginRequiredMixin, View):
                         option_text=option_text,
                         order=option_order,
                         points=option_points,
+                        is_exclusive=option_is_exclusive,
                         is_active=True
                     )
                     created_count += 1

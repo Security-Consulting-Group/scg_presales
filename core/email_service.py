@@ -157,14 +157,14 @@ class SurveyEmailService:
     def _log_email_to_console(email, context):
         """Log email details to console for development"""
         print("\n" + "="*80)
-        print("📧 DEVELOPMENT EMAIL - Survey Completion Notification")
+        print("DEVELOPMENT EMAIL - Survey Completion Notification")
         print("="*80)
-        print(f"📩 To: {', '.join(email.to)}")
-        print(f"📝 Subject: {email.subject}")
-        print(f"👤 Prospect: {context['prospect_name']} ({context['prospect_email']})")
-        print(f"🏢 Company: {context['company_name']}")
-        print(f"📊 Score: {context['score_percentage']}% ({context['risk_level_display']})")
-        print(f"📅 Completion: {context['completion_date']}")
+        print(f"To: {', '.join(email.to)}")
+        print(f"Subject: {email.subject}")
+        print(f"Prospect: {context['prospect_name']} ({context['prospect_email']})")
+        print(f"Company: {context['company_name']}")
+        print(f"Score: {context['score_percentage']}% ({context['risk_level_display']})")
+        print(f"Completion: {context['completion_date']}")
         print("-"*80)
         print("HTML CONTENT PREVIEW:")
         print("-"*80)
@@ -172,8 +172,8 @@ class SurveyEmailService:
         html_preview = email.alternatives[0][0][:500] + "..." if len(email.alternatives[0][0]) > 500 else email.alternatives[0][0]
         print(html_preview)
         print("-"*80)
-        print("📎 PDF Attachment: Not generated in development mode")
-        print("🚀 In production, this email would be sent with PDF attached")
+        print("PDF Attachment: Not generated in development mode")
+        print("In production, this email would be sent with PDF attached")
         print("="*80 + "\n")
 
 

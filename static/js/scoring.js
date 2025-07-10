@@ -16,8 +16,6 @@ class ScgScoring {
     }
 
     setupScoringSystem() {
-        console.log('📊 Scoring system initialized');
-        
         // Initialize tooltips
         if (typeof bootstrap !== 'undefined') {
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -85,7 +83,6 @@ class ScgScoring {
     async recalculateScores(surveyId, force = false) {
         try {
             const action = force ? 'recalculate_all' : 'recalculate_single';
-            console.log(`🔄 ${action} scores for survey:`, surveyId);
             
             // Show loading notification
             window.scgAdmin.showNotification('Recalculando scores...', 'info');
@@ -96,22 +93,18 @@ class ScgScoring {
                 window.scgAdmin.showNotification('Funcionalidad de recálculo en desarrollo', 'info');
             }, 1000);
             
-        } catch (error) {
-            console.error('Error recalculating scores:', error);
+        } catch {
             window.scgAdmin.showNotification('Error al recalcular scores', 'error');
         }
     }
 
     // Export scores functionality
     exportScores(filters = {}) {
-        console.log('📥 Exporting scores with filters:', filters);
         window.scgAdmin.showNotification('Función de exportación en desarrollo', 'info');
     }
 
     // PDF generation tracking
     trackPDFGeneration(action, scoreResultId) {
-        console.log(`📄 PDF ${action} initiated for ScoreResult ${scoreResultId}`);
-        
         if (action === 'download') {
             setTimeout(() => {
                 this.showPDFNotification('success', 'Reporte PDF descargado exitosamente');
@@ -154,7 +147,6 @@ class RiskConfigManager {
     }
 
     setupRiskConfigSystem() {
-        console.log('⚙️ Risk config management initialized');
     }
 
     setupPreviewUpdates() {
@@ -267,8 +259,7 @@ class RiskConfigManager {
         try {
             // This would be implemented when the backend endpoint is ready
             window.scgAdmin.showNotification('Función de creación rápida en desarrollo', 'info');
-        } catch (error) {
-            console.error('Error creating quick config:', error);
+        } catch {
             window.scgAdmin.showNotification('Error al crear configuración', 'error');
         }
     }

@@ -142,7 +142,6 @@ class ProspectForm {
 
     // Additional actions for existing prospects
     scheduleFollowUp(prospectId) {
-        console.log('Schedule follow up for prospect:', prospectId);
         if (window.scgAdmin && window.scgAdmin.showNotification) {
             window.scgAdmin.showNotification('Función en desarrollo', 'info');
         } else {
@@ -151,7 +150,6 @@ class ProspectForm {
     }
 
     exportProspectData(prospectId) {
-        console.log('Export data for prospect:', prospectId);
         if (window.scgAdmin && window.scgAdmin.showNotification) {
             window.scgAdmin.showNotification('Exportación iniciada', 'success');
         } else {
@@ -160,7 +158,6 @@ class ProspectForm {
     }
 
     mergeProspect(prospectId) {
-        console.log('Merge prospect:', prospectId);
         if (window.scgAdmin && window.scgAdmin.showNotification) {
             window.scgAdmin.showNotification('Función en desarrollo', 'info');
         } else {
@@ -170,7 +167,6 @@ class ProspectForm {
 
     archiveProspect(prospectId) {
         if (confirm('¿Está seguro de que desea archivar este prospect? Esta acción se puede revertir pero el prospect no aparecerá en las listas principales.')) {
-            console.log('Archive prospect:', prospectId);
             if (window.scgAdmin && window.scgAdmin.showNotification) {
                 window.scgAdmin.showNotification('Función en desarrollo', 'info');
             } else {

@@ -58,8 +58,6 @@ function handleFormSubmission(event) {
     const submitBtn = form.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
     
-    console.log('🚀 Enviando formulario via AJAX...');
-    
     // Show loading state with animation
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
     submitBtn.disabled = true;
@@ -76,14 +74,12 @@ function handleFormSubmission(event) {
         },
     })
     .then(response => {
-        console.log('📡 Response status:', response.status);
         if (!response.ok) {
             return response.json().then(data => Promise.reject(data));
         }
         return response.json();
     })
     .then(data => {
-        console.log('✅ Success:', data);
         if (data.success) {
             showSuccessMessage(data.message);
             form.reset();
@@ -92,7 +88,6 @@ function handleFormSubmission(event) {
         }
     })
     .catch(error => {
-        console.error('❌ Error:', error);
         const message = error.message || 'Error procesando su solicitud. Por favor intente nuevamente.';
         showErrorMessage(message);
     })
@@ -314,8 +309,6 @@ function initBootstrapFAQ() {
 
 // Event Listeners - CONSOLIDADO Y LIMPIO
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🎯 Inicializando Security Consulting Group...');
-    
     // Initialize essential components
     initCountUpAnimation();
     initFloatingCardsParallax();
@@ -330,14 +323,7 @@ document.addEventListener('DOMContentLoaded', function() {
         contactForm.removeEventListener('submit', handleFormSubmission);
         contactForm.addEventListener('submit', handleFormSubmission);
         
-        console.log('📧 Formulario configurado para AJAX');
-        console.log('🎯 Action:', contactForm.getAttribute('action'));
-        console.log('🔐 CSRF disponible:', !!getCSRFToken());
-    } else {
-        console.warn('⚠️ Formulario de contacto no encontrado');
     }
-    
-    console.log('✅ SCG inicializado correctamente!');
 });
 
 // Scroll event listeners
@@ -351,7 +337,6 @@ document.addEventListener('DOMContentLoaded', function() {
     images.forEach(img => {
         img.addEventListener('error', function() {
             this.style.display = 'none';
-            console.warn('Failed to load image:', this.src);
         });
     });
 });

@@ -18,7 +18,7 @@ class QuestionManager {
     }
 
     setupQuestionManager() {
-        console.log('📝 Question manager initialized');
+        // Question manager initialized
         
         this.optionsList = document.getElementById('optionsList');
         this.optionTemplate = document.getElementById('optionTemplate');
@@ -243,6 +243,7 @@ class QuestionManager {
                 text: row.querySelector('.option-text').value.trim(),
                 order: parseInt(row.querySelector('.option-order').value) || 1,
                 points: parseInt(row.querySelector('.option-points').value) || 0,
+                is_exclusive: row.querySelector('.option-exclusive').checked,
                 isExisting: row.dataset.isExisting === 'true'
             }));
             
@@ -268,7 +269,6 @@ class QuestionManager {
             }
             
         } catch (error) {
-            console.error('Error saving options:', error);
             window.scgAdmin.showNotification('Error de conexión', 'error');
         } finally {
             // Restore button

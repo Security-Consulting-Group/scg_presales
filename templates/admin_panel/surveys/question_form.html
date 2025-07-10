@@ -372,13 +372,20 @@
                                 <input type="number" class="form-control form-control-sm option-order" 
                                        value="{{ option.order }}" min="1" title="Orden">
                             </div>
-                            <div class="col-md-7">
+                            <div class="col-md-6">
                                 <input type="text" class="form-control option-text" 
                                        value="{{ option.option_text }}" placeholder="Texto de la opción" required>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-1">
                                 <input type="number" class="form-control option-points" 
                                        value="{{ option.points }}" title="Puntos">
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input option-exclusive" 
+                                           {% if option.is_exclusive %}checked{% endif %} title="Exclusiva">
+                                    <label class="form-check-label small">Exclusiva</label>
+                                </div>
                             </div>
                             <div class="col-md-2">
                                 <div class="d-flex gap-1">
@@ -428,7 +435,8 @@
                         <i class="fas fa-info-circle me-1"></i>
                         <strong>Consejos:</strong> 
                         • Puedes reordenar arrastrando las opciones • Los puntos pueden ser negativos para penalizar • 
-                        Usa "Reordenar" para ajustar automáticamente el orden
+                        Usa "Reordenar" para ajustar automáticamente el orden • 
+                        <strong>Exclusiva:</strong> Si se marca, seleccionar esta opción deseleccionará todas las demás (útil para "No aplica" o "Ninguna")
                     </small>
                 </div>
             </div>
@@ -442,13 +450,19 @@
                         <input type="number" class="form-control form-control-sm option-order" 
                                value="1" min="1" title="Orden">
                     </div>
-                    <div class="col-md-7">
+                    <div class="col-md-6">
                         <input type="text" class="form-control option-text" 
                                placeholder="Texto de la opción" required>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-1">
                         <input type="number" class="form-control option-points" 
                                value="0" title="Puntos">
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input option-exclusive" title="Exclusiva">
+                            <label class="form-check-label small">Exclusiva</label>
+                        </div>
                     </div>
                     <div class="col-md-2">
                         <div class="d-flex gap-1">

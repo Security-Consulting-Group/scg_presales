@@ -9,8 +9,6 @@ class SCGProspects {
     }
 
     init() {
-        console.log('🎯 Inicializando SCG Prospects...');
-        
         // Initialize components
         this.initViewToggle();
         this.initFilters();
@@ -18,8 +16,6 @@ class SCGProspects {
         this.initTableInteractions();
         this.initDetailTabs();
         this.initFormValidation();
-        
-        console.log('✅ Prospects inicializado correctamente!');
     }
 
     // ====================================
@@ -211,7 +207,6 @@ class SCGProspects {
         tabTriggers.forEach(trigger => {
             trigger.addEventListener('shown.bs.tab', (event) => {
                 const targetTab = event.target.getAttribute('data-bs-target');
-                console.log(`Switched to tab: ${targetTab}`);
                 
                 // Lazy load content if needed
                 this.loadTabContent(targetTab);
@@ -224,13 +219,10 @@ class SCGProspects {
         // Can be expanded to load data via AJAX when switching tabs
         switch(tabId) {
             case '#inquiries':
-                console.log('Loading inquiries data...');
                 break;
             case '#surveys':
-                console.log('Loading surveys data...');
                 break;
             case '#notes':
-                console.log('Loading notes data...');
                 break;
             default:
                 break;
@@ -401,8 +393,7 @@ class SCGProspects {
                 button.innerHTML = originalContent;
                 button.disabled = false;
             }
-        } catch (error) {
-            console.error('Error:', error);
+        } catch {
             window.scgAdmin.showNotification('Error de conexión', 'error');
             // Restore button
             button.innerHTML = originalContent;
@@ -551,16 +542,12 @@ window.SCGProspects = {
 
 // Error handling
 window.addEventListener('error', function(e) {
-    console.error('JavaScript Error in Prospects:', e.error);
 });
 
 function changeProspectStatus(prospectId) {
-    console.log("Iniciando changeProspectStatus para prospectId:", prospectId);
-    
     // Verificar si el elemento modal existe
     const modalElement = document.getElementById('changeStatusModal');
     if (!modalElement) {
-        console.error("Error: No se encontró el elemento modal con ID 'changeStatusModal'");
         window.scgAdmin.showNotification('Error al abrir el modal: Elemento no encontrado', 'error');
         return;
     }
@@ -672,12 +659,10 @@ function changeProspectStatus(prospectId) {
                     throw new Error(data.message || 'Error al cambiar estado');
                 }
             } catch (error) {
-                console.error('Error cambiando estado:', error);
                 window.scgAdmin.showNotification(error.message || 'Error al cambiar estado', 'error');
             }
         });
-    } catch (error) {
-        console.error("Error al inicializar o mostrar el modal:", error);
+    } catch {
         window.scgAdmin.showNotification('Error al abrir el modal', 'error');
     }
 }
@@ -740,8 +725,7 @@ function disableSurveySubmission(submissionId) {
                 surveyItem.classList.add('disabled');
             }
             
-        } catch (error) {
-            console.error('Error deshabilitando survey:', error);
+        } catch {
             window.scgAdmin.showNotification('Error al deshabilitar el survey', 'error');
         }
     });
@@ -792,8 +776,7 @@ function inviteToSurvey(prospectId) {
             // Mostrar notificación
             window.scgAdmin.showNotification('Invitación enviada correctamente', 'success');
             
-        } catch (error) {
-            console.error('Error enviando invitación:', error);
+        } catch {
             window.scgAdmin.showNotification('Error al enviar la invitación', 'error');
         }
     });
@@ -846,8 +829,7 @@ function addInteractionNote(prospectId) {
             
             // En una implementación real, aquí actualizaríamos la UI para mostrar la nueva nota
             
-        } catch (error) {
-            console.error('Error agregando nota:', error);
+        } catch {
             window.scgAdmin.showNotification('Error al agregar la nota', 'error');
         }
     });
@@ -898,8 +880,7 @@ function scheduleFollowUp(prospectId) {
             
             // En una implementación real, aquí actualizaríamos la UI
             
-        } catch (error) {
-            console.error('Error programando seguimiento:', error);
+        } catch {
             window.scgAdmin.showNotification('Error al programar el seguimiento', 'error');
         }
     });
@@ -943,8 +924,7 @@ function exportProspectData(prospectId) {
             // Mostrar notificación
             window.scgAdmin.showNotification('Exportación iniciada. Se descargará en breve.', 'success');
             
-        } catch (error) {
-            console.error('Error exportando datos:', error);
+        } catch {
             window.scgAdmin.showNotification('Error al exportar los datos', 'error');
         }
     });

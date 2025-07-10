@@ -25,9 +25,6 @@ class SurveyPage {
                 once: true,
                 offset: 50
             });
-            console.log('✨ AOS animations initialized');
-        } else {
-            console.warn('⚠️ AOS library not found');
         }
     }
 
@@ -41,8 +38,6 @@ class SurveyPage {
             const urlParams = new URLSearchParams(window.location.search);
             this.surveyCode = urlParams.get('code') || 'unknown';
         }
-        
-        console.log('Survey loaded:', this.surveyCode);
     }
 
     setupSurveyPage() {
@@ -56,7 +51,6 @@ class SurveyPage {
         // Add progress indicators if needed
         const questionGroups = document.querySelectorAll('.question-group');
         if (questionGroups.length > 1) {
-            console.log(`📋 Survey has ${questionGroups.length} question groups`);
         }
     }
 
@@ -73,7 +67,6 @@ class SurveyPage {
         // Add any additional form interaction enhancements
         const surveyForm = document.getElementById('surveyForm');
         if (surveyForm) {
-            console.log('📝 Survey form found and ready');
         }
     }
 

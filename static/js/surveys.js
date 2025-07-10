@@ -18,7 +18,7 @@ class SurveyManager {
     }
 
     setupSurveyManager() {
-        console.log('📋 Survey manager initialized');
+        // Survey manager initialized
     }
 
     setupFormValidation() {
@@ -120,7 +120,6 @@ class SurveyManager {
                 const actionUrl = e.target.dataset.actionUrl;
                 const confirmMsg = e.target.dataset.confirm;
                 if (confirm(confirmMsg)) {
-                    console.log('🗑️ Eliminando sección via:', actionUrl);
                     // TODO: Implement actual deletion
                 }
             }
@@ -129,7 +128,6 @@ class SurveyManager {
                 const actionUrl = e.target.dataset.actionUrl;
                 const confirmMsg = e.target.dataset.confirm;
                 if (confirm(confirmMsg)) {
-                    console.log('🗑️ Eliminando pregunta via:', actionUrl);
                     // TODO: Implement actual deletion
                 }
             }
@@ -140,7 +138,7 @@ class SurveyManager {
         const dataElement = document.querySelector('[data-survey-code]');
         if (dataElement) {
             const surveyCode = dataElement.getAttribute('data-survey-code');
-            console.log('📋 Survey Detail loaded:', surveyCode);
+            // Survey detail loaded
         }
 
         // Auto-suggest order for section forms
@@ -157,8 +155,7 @@ class SurveyManager {
     copyToClipboard(text) {
         navigator.clipboard.writeText(text).then(function() {
             window.scgAdmin.showNotification('URL copiada al portapapeles', 'success');
-        }).catch(function(err) {
-            console.error('Error copiando al portapapeles:', err);
+        }).catch(function() {
             window.scgAdmin.showNotification('Error copiando al portapapeles', 'error');
         });
     }
