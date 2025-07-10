@@ -49,59 +49,8 @@ class SecurityReportGenerator:
             base_url=base_url
         )
         
-        # Define CSS string for better page handling
-        css_string = """
-        @page {
-            size: letter;
-            margin: 0.75in;
-            orphans: 3;
-            widows: 3;
-        }
-        
-        .page-with-sidebar {
-            page-break-before: always;
-            page-break-inside: avoid;
-        }
-        
-        .content-section {
-            page-break-inside: avoid;
-        }
-        
-        h1, h2, h3 {
-            page-break-after: avoid;
-            orphans: 3;
-            widows: 3;
-        }
-        
-        .vulnerability-item {
-            page-break-inside: avoid;
-            margin-bottom: 15px;
-        }
-        
-        .stat-item {
-            page-break-inside: avoid;
-        }
-        
-        /* Better content flow */
-        p {
-            orphans: 2;
-            widows: 2;
-        }
-        
-        ul, ol {
-            page-break-inside: avoid;
-        }
-        
-        /* Sidebar layout improvements */
-        .main-sidebar-layout {
-            page-break-inside: avoid;
-        }
-        """
-        
-        css = weasyprint.CSS(string=css_string)
-        
-        # Generate PDF with CSS configuration
-        pdf_doc = html_doc.write_pdf(stylesheets=[css])
+        # Generate PDF without additional CSS - use only template CSS
+        pdf_doc = html_doc.write_pdf()
         pdf_buffer.write(pdf_doc)
         pdf_buffer.seek(0)
         
