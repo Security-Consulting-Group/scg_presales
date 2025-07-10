@@ -7,6 +7,35 @@
     <title>{{ fecha_actual }} - Reporte de Evaluación de Ciberseguridad</title>
 
     <style>
+        /* Geomanist Font Face Declarations */
+        @font-face {
+            font-family: 'Geomanist';
+            src: url('{% static "fonts/Geomanist-Regular.otf" %}') format('opentype');
+            font-weight: 400;
+            font-style: normal;
+        }
+        
+        @font-face {
+            font-family: 'Geomanist';
+            src: url('{% static "fonts/Geomanist-Bold.otf" %}') format('opentype');
+            font-weight: 700;
+            font-style: normal;
+        }
+        
+        @font-face {
+            font-family: 'Geomanist';
+            src: url('{% static "fonts/Geomanist-Light.otf" %}') format('opentype');
+            font-weight: 300;
+            font-style: normal;
+        }
+        
+        @font-face {
+            font-family: 'Geomanist';
+            src: url('{% static "fonts/Geomanist-Medium.otf" %}') format('opentype');
+            font-weight: 500;
+            font-style: normal;
+        }
+        
         /* CSS Variables for colors */
         :root {
             --primary: #002d74;
@@ -42,7 +71,7 @@
         /* Cover page with no margins */
 
         body {
-            font-family: 'Helvetica', sans-serif;
+            font-family: 'Geomanist', 'Helvetica', 'DejaVu Sans', sans-serif;
             margin: 0;
             padding: 0;
             line-height: 1.2;
